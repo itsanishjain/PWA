@@ -3,10 +3,40 @@
 @tailwind utilities;
 
 body {
-	@apply min-h-screen select-none bg-zinc-50 text-zinc-900 antialiased p-safe dark:bg-zinc-900 dark:text-zinc-50;
+	@apply min-h-screen select-none bg-zinc-50 text-zinc-900 antialiased p-safe;
 
 	/* PWA enhancements */
 	-webkit-overflow-scrolling: touch;
 	-webkit-tap-highlight-color: transparent;
 	-webkit-touch-callout: none;
+}
+
+.gradient-text {
+	background-clip: text;
+	color: transparent;
+	background-image: linear-gradient(
+		to right,
+		#5a82b9,
+		#75d9fe,
+		#efd9d9,
+		#fdbd90,
+		#fd97a1,
+		#c9a2f9
+	);
+}
+
+.gradient-background {
+	background-image: linear-gradient(
+		to right,
+		#5a82b9,
+		#75d9fe,
+		#efd9d9,
+		#fdbd90,
+		#fd97a1,
+		#c9a2f9
+	);
+}
+
+.tagline-text {
+	font-size: 28pt;
 }
