@@ -3,13 +3,16 @@ import Section from '@/components/section'
 import Image from 'next/image'
 import poolImage from '@/public/images/pool.png'
 import { useRouter } from 'next/router'
+import { usePrivy } from '@privy-io/react-auth'
 
 const Welcome = () => {
 	const router = useRouter()
 
+	const { login } = usePrivy()
 	const handleClick = () => {
 		// Replace '/your-link' with the actual path you want to navigate to
-		router.push('/wallet-selection')
+		// router.push('/wallet-selection')
+		login()
 	}
 
 	return (
