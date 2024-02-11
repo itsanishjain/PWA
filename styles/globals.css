@@ -37,6 +37,10 @@ body {
 	);
 }
 
+.blue-gradient {
+	background-image: linear-gradient(to right, #5e7fec, #ffffff);
+}
+
 .tagline-text {
 	font-size: 28pt;
 }

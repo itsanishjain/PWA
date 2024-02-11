@@ -2,6 +2,8 @@ import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'next-themes'
 import '@/styles/globals.css'
 import { PrivyProvider } from '@privy-io/react-auth'
+import { base, baseGoerli, mainnet, goerli } from 'viem/chains'
+import { localChain } from 'constants/constant'
 
 export default function App({ Component, pageProps }: AppProps) {
 	return (
@@ -16,6 +18,11 @@ export default function App({ Component, pageProps }: AppProps) {
 					logo: '/images/pool.png',
 					showWalletLoginFirst: false,
 				},
+				embeddedWallets: {
+					createOnLogin: 'users-without-wallets',
+				},
+				defaultChain: localChain,
+				supportedChains: [base, baseGoerli, mainnet, goerli, localChain],
 			}}
 		>
 			<ThemeProvider
