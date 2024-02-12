@@ -78,7 +78,6 @@ const Home = () => {
 							>
 								Share Pool
 							</button>
-							<button onClick={handleSignOut}>Sign Out</button>
 						</div>
 					</div>
 				</div>

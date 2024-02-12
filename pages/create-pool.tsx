@@ -17,8 +17,10 @@ import {
 	localnetContractAddress,
 } from 'constants/constant'
 
-import { ethers } from 'ethers'
+import { Interface, ethers } from 'ethers'
 import Appbar from '@/components/appbar'
+
+import poolContract from '@/Smart-Contracts/out/Pool.sol/Pool.json'
 
 const CreatePool = () => {
 	const router = useRouter()
@@ -27,9 +29,6 @@ const CreatePool = () => {
 
 	const { wallets } = useWallets()
 
-	// Replace this with the message you'd like your user to sign
-	// Replace this with the text you'd like on your signature modal,
-	// if you do not have `noPromptsOnSignature` enabled
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
@@ -37,11 +36,12 @@ const CreatePool = () => {
 	}
 
 	const handleCreatePool = async () => {
-		const abiCoder = new ethers.AbiCoder()
-		let dataString = abiCoder.encode(
-			['address', 'string'],
-			[tokenAddressInputValue, poolNameInputValue],
-		)
+		const iface = new Interface(poolContract.abi)
+		const dataString = iface.encodeFunctionData('initiatePool', [
+			tokenAddressInputValue,
+			poolNameInputValue,
+		])
+
 		const uiConfig = {
 			title: 'Create Pool',
 			description: 'This will allow you to create a pool',

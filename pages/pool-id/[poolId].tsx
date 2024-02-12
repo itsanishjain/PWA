@@ -29,7 +29,7 @@ import { config } from '@/constants/config'
 
 import poolContract from '@/Smart-Contracts/out/Pool.sol/Pool.json'
 
-const CreatedPools = () => {
+const PoolPage = () => {
 	const router = useRouter()
 
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
@@ -38,13 +38,13 @@ const CreatedPools = () => {
 	const { wallets } = useWallets()
 	let walletAddress = ''
 
-	const [poolsData, setPoolsData] = useState([])
+	const [poolInfo, setPoolInfo] = useState([])
 
 	// Replace this with the message you'd like your user to sign
 	// Replace this with the text you'd like on your signature modal,
 	// if you do not have `noPromptsOnSignature` enabled
 
-	const getCreatedPoolsData = async () => {
+	const getPoolData = async () => {
 		const abi = new Interface(poolContract.abi)
 		const provider = new ethers.JsonRpcProvider()
 		const contract = new ethers.Contract(
@@ -52,15 +52,10 @@ const CreatedPools = () => {
 			poolContract.abi,
 			provider,
 		)
-		const poolIds = await contract.getPoolsCreated(walletAddress)
-		for (const poolId of poolIds) {
-			let newPoolData = await contract.getPoolInfo(poolId)
-			// newPoolData.push(poolId)
-			let amendNewPoolData = [...newPoolData, poolId]
-			console.log(`result: ${amendNewPoolData}`)
-			setPoolsData((prevData) => [...prevData, amendNewPoolData])
-		}
-		// const result = await contract.getPoolIdByName('Hi')
+		const poolId = router.query.poolId
+		const retrievedPoolInfo = await contract.getPoolInfo(poolId)
+
+		setPoolInfo(retrievedPoolInfo)
 	}
 
 	useEffect(() => {
@@ -68,52 +63,52 @@ const CreatedPools = () => {
 		if (ready && authenticated) {
 			walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
-			getCreatedPoolsData()
-		}
-
-		if (ready && !authenticated) {
-			// Replace this code with however you'd like to handle an unauthenticated user
-			// As an example, you might redirect them to a sign-in page
-			router.push('/')
+			getPoolData()
 		}
 	}, [ready, authenticated])
 
-	const handleClick = (poolId) => {
-		router.push(`/pool-id/${poolId}`)
+	const handleJoinPool = () => {
+		// poolId
 	}
 
+	const handleSharePool = () => {}
 	return (
 		<Page>
 			<Appbar />
 
 			<Section>
 				<div className='flex flex-col pt-16 h-full w-full items-center'>
-					{poolsData.map((item, index) => (
-						<div
-							key={index}
-							className=' rounded  w-full h-44 shadow-sm'
-							onClick={() => {
-								handleClick(item[10])
-							}}
-						>
-							<div className=' w-full h-full p-4'>
-								<div>{item[0]}</div>
-								<div>{item[1]}</div>
-								<div>{item[2]}</div>
-								<div>{item[3]}</div>
-								<div>{item[4]}</div>
-								<div>{item[5]}</div>
-								<div>{item[6]}</div>
-								<div>{item[7]}</div>
-								<div>{item[8]}</div>
-								<div>{item[9]}</div>
-							</div>
+					<div className=' rounded  w-full shadow-sm p-4'>
+						<div className=' w-full'>
+							<div>{poolInfo[0]}</div>
+							<div>{poolInfo[1]}</div>
+							<div>{poolInfo[2]}</div>
+							<div>{poolInfo[3]}</div>
+							<div>{poolInfo[4]}</div>
+							<div>{poolInfo[5]}</div>
+							<div>{poolInfo[6]}</div>
 						</div>
-					))}
+						<div className='flex flex-col items-end w-full mt-8'>
+							<button
+								className='bg-green-400 rounded-md px-4 py-2'
+								onClick={() => handleJoinPool}
+							>
+								Join Pool
+							</button>
+						</div>
+						<div className='flex flex-col items-end w-full mt-4'>
+							<button
+								className='bg-pink-500 rounded-md px-4 py-2'
+								onClick={() => handleSharePool}
+							>
+								Share Pool
+							</button>
+						</div>
+					</div>
 				</div>
 			</Section>
 		</Page>
 	)
 }
 
-export default CreatedPools
+export default PoolPage
