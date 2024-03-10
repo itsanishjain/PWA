@@ -45,6 +45,7 @@ const CreatedPools = () => {
 	// if you do not have `noPromptsOnSignature` enabled
 
 	const getCreatedPoolsData = async () => {
+		console.log('getCreatedPoolsData')
 		const abi = new Interface(poolContract.abi)
 		const provider = new ethers.JsonRpcProvider()
 		const contract = new ethers.Contract(
@@ -53,14 +54,30 @@ const CreatedPools = () => {
 			provider,
 		)
 		const poolIds = await contract.getPoolsCreated(walletAddress)
+		console.log('poolIds', poolIds)
 		for (const poolId of poolIds) {
 			let newPoolData = await contract.getPoolInfo(poolId)
 			// newPoolData.push(poolId)
 			let amendNewPoolData = [...newPoolData, poolId]
 			console.log(`result: ${amendNewPoolData}`)
-			setPoolsData((prevData) => [...prevData, amendNewPoolData])
+			setPoolsData((prevData) =>
+				removeDuplicateRows([...prevData, amendNewPoolData]),
+			)
 		}
+
 		// const result = await contract.getPoolIdByName('Hi')
+	}
+	function removeDuplicateRows(array) {
+		return array.filter((row, index) => {
+			// Check if the current row is the first occurrence of the row in the array
+			return (
+				index ===
+				array.findIndex((otherRow) => {
+					// Convert both rows to strings for easy comparison
+					return JSON.stringify(otherRow) === JSON.stringify(row)
+				})
+			)
+		})
 	}
 
 	useEffect(() => {
@@ -80,6 +97,9 @@ const CreatedPools = () => {
 
 	const handleClick = (poolId) => {
 		router.push(`/pool-id/${poolId}`)
+	}
+	;(BigInt.prototype as any).toJSON = function () {
+		return this.toString()
 	}
 
 	return (
