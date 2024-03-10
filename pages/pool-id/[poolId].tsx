@@ -28,8 +28,11 @@ import {
 import { config } from '@/constants/config'
 
 import poolContract from '@/Smart-Contracts/out/Pool.sol/Pool.json'
+import { createClient } from '@/utils/supabase/client'
 
 const PoolPage = () => {
+	const supabaseClient = createClient()
+
 	const router = useRouter()
 
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
@@ -67,8 +70,44 @@ const PoolPage = () => {
 		}
 	}, [ready, authenticated])
 
-	const handleJoinPool = () => {
-		// poolId
+	const handleJoinPool = async () => {
+		console.log('handleJoinPool')
+		console.log(`wallet address: ${user!.wallet!.address}`)
+
+		const poolId = router.query.poolId
+		let signedMessage
+		try {
+			signedMessage = await signMessage(`Join Pool: ${poolId}`)
+		} catch {
+			console.log('User did not sign transaction')
+		}
+		const formData = {
+			poolId,
+			signedMessage,
+			walletAddress: user!.wallet!.address,
+		}
+		try {
+			const response = await fetch('/api/join_pool', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(formData),
+			})
+
+			if (response.ok) {
+				console.log('Join success')
+				const msg = await response.json()
+				console.log(msg)
+				// Handle success
+			} else {
+				console.error('Error sending data')
+				// Handle error
+			}
+		} catch (error) {
+			console.error('Error:', error)
+			// Handle error
+		}
 	}
 
 	const handleSharePool = () => {}
@@ -91,7 +130,7 @@ const PoolPage = () => {
 						<div className='flex flex-col items-end w-full mt-8'>
 							<button
 								className='bg-green-400 rounded-md px-4 py-2'
-								onClick={() => handleJoinPool}
+								onClick={handleJoinPool}
 							>
 								Join Pool
 							</button>
