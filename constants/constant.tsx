@@ -1,5 +1,7 @@
 import { Network } from '@/models/types'
 import { defineChain } from 'viem'
+import { mainnet, baseSepolia, base } from 'viem/chains'
+import { ethers } from 'ethers'
 
 export const localChain = defineChain({
 	id: 31337, // Replace this with your chain's ID
@@ -21,46 +23,48 @@ export const localChain = defineChain({
 	},
 })
 
-export const testChain = defineChain({
-	id: 84532, // Replace this with your chain's ID
-	name: 'Base Sepolia',
-	network: 'base-sepolia',
-	nativeCurrency: {
-		decimals: 18, // Replace this with the number of decimals for your chain's native token
-		name: 'Ethereum',
-		symbol: 'ETH',
-	},
-	rpcUrls: {
-		default: {
-			http: ['https://sepolia.base.org'],
-			// webSocket: ['wss://my-custom-chain-websocket-rpc'],
-		},
-	},
-	blockExplorers: {
-		default: { name: 'Explorer', url: 'https://sepolia-explorer.base.org/' },
-	},
-})
+export const testChain = baseSepolia
+export const mainChain = base
+// export const testChain = defineChain({
+// 	id: 84532, // Replace this with your chain's ID
+// 	name: 'Base Sepolia',
+// 	network: 'base-sepolia',
+// 	nativeCurrency: {
+// 		decimals: 18, // Replace this with the number of decimals for your chain's native token
+// 		name: 'Ethereum',
+// 		symbol: 'ETH',
+// 	},
+// 	rpcUrls: {
+// 		default: {
+// 			http: ['https://sepolia.base.org'],
+// 			// webSocket: ['wss://my-custom-chain-websocket-rpc'],
+// 		},
+// 	},
+// 	blockExplorers: {
+// 		default: { name: 'Explorer', url: 'https://sepolia-explorer.base.org/' },
+// 	},
+// })
 
-export const mainChain = defineChain({
-	id: 8453, // Replace this with your chain's ID
-	name: 'Base Mainnet',
-	network: 'base-mainnet',
-	nativeCurrency: {
-		decimals: 18, // Replace this with the number of decimals for your chain's native token
-		name: 'Ethereum',
-		symbol: 'ETH',
-	},
-	rpcUrls: {
-		default: {
-			http: ['https://mainnet.base.org'],
-			webSocket: ['wss://my-custom-chain-websocket-rpc'],
-		},
-	},
-	blockExplorers: {
-		default: { name: 'Explorer', url: 'https://basescan.org' },
-	},
-})
-export const network: Network = Network.Testnet
+// export const mainChain = defineChain({
+// 	id: 8453, // Replace this with your chain's ID
+// 	name: 'Base Mainnet',
+// 	network: 'base-mainnet',
+// 	nativeCurrency: {
+// 		decimals: 18, // Replace this with the number of decimals for your chain's native token
+// 		name: 'Ethereum',
+// 		symbol: 'ETH',
+// 	},
+// 	rpcUrls: {
+// 		default: {
+// 			http: ['https://mainnet.base.org'],
+// 			webSocket: ['wss://my-custom-chain-websocket-rpc'],
+// 		},
+// 	},
+// 	blockExplorers: {
+// 		default: { name: 'Explorer', url: 'https://basescan.org' },
+// 	},
+// })
+export const network: Network = Network.Localnet
 
 export const localnetTokenAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
 export const localnetContractAddress =
@@ -93,3 +97,16 @@ export const chain =
 		: network.toString() === Network.Testnet
 		? testChain
 		: mainChain
+
+const networkish: ethers.Networkish = {
+	name: chain.name,
+	chainId: chain.id,
+	//layerOneConnection?: Provider,
+	// ensAddress?: string,
+	// ensNetwork?: number
+}
+
+export const provider = new ethers.JsonRpcProvider(
+	chain.rpcUrls.default.http.toString(),
+	networkish,
+)

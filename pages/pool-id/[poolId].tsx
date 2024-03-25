@@ -24,7 +24,7 @@ import { readContract, readContracts } from '@wagmi/core'
 import { foundry, hardhat, mainnet, sepolia } from 'viem/chains'
 import { Interface, ethers } from 'ethers'
 
-import { contractAddress } from 'constants/constant'
+import { contractAddress, provider } from 'constants/constant'
 import { config } from '@/constants/config'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
@@ -68,8 +68,6 @@ const PoolPage = () => {
 		}
 	}
 	const getPoolData = async () => {
-		const abi = new Interface(poolContract.abi)
-		const provider = new ethers.JsonRpcProvider()
 		const contract = new ethers.Contract(
 			contractAddress,
 			poolContract.abi,
@@ -90,7 +88,7 @@ const PoolPage = () => {
 			readPoolStatus()
 		}
 		setPageUrl(window?.location.href)
-	}, [ready, authenticated, user])
+	}, [ready, authenticated])
 
 	const handleJoinPool = async () => {
 		console.log('handleJoinPool')

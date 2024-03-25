@@ -15,12 +15,14 @@ import {
 	useWallets,
 } from '@privy-io/react-auth'
 
-import { useReadContract, createConfig, http } from 'wagmi'
-import { readContract, readContracts } from '@wagmi/core'
+// import { readContract, readContracts } from '@wagmi/core'
 import { foundry, hardhat, mainnet, sepolia } from 'viem/chains'
+import { createPublicClient, http } from 'viem'
+// import { wagmiContractConfig } from '@/SC-Output/out/P'
+
 import { Interface, ethers } from 'ethers'
 
-import { contractAddress } from 'constants/constant'
+import { contractAddress, chain, provider } from 'constants/constant'
 import { config } from '@/constants/config'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
@@ -43,12 +45,13 @@ const CreatedPools = () => {
 	const getCreatedPoolsData = async (address: string) => {
 		console.log('getCreatedPoolsData')
 		const abi = new Interface(poolContract.abi)
-		const provider = new ethers.JsonRpcProvider()
+
 		const contract = new ethers.Contract(
 			contractAddress,
 			poolContract.abi,
 			provider,
 		)
+
 		try {
 			const poolIds = await contract.getPoolsCreated(address)
 			console.log('poolIds', poolIds)
@@ -64,9 +67,8 @@ const CreatedPools = () => {
 		} catch (error) {
 			console.log(error)
 		}
-
-		// const result = await contract.getPoolIdByName('Hi')
 	}
+
 	function removeDuplicateRows(array: any) {
 		return array.filter((row: any, index: number) => {
 			// Check if the current row is the first occurrence of the row in the array
@@ -93,7 +95,7 @@ const CreatedPools = () => {
 			// As an example, you might redirect them to a sign-in page
 			router.push('/')
 		}
-	}, [ready, authenticated, user])
+	}, [ready, authenticated, user, router])
 
 	const handleClick = (poolId: number) => {
 		router.push(`/pool-id/${poolId}`)

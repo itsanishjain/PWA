@@ -13,7 +13,7 @@ export default function Document() {
 				<meta
 					name='theme-color'
 					content='#18181b'
-					media='(prefers-color-scheme: dark)'
+					media='(prefers-color-scheme: light)'
 				/>
 				<meta name='theme-color' content='#f4f4f5' />
 				<link rel='apple-touch-icon' href='/images/icon-maskable-512.png' />
