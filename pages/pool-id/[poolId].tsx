@@ -40,12 +40,13 @@ const PoolPage = () => {
 		usePrivy()
 
 	const { wallets } = useWallets()
-	let walletAddress = ''
 
 	const [poolInfo, setPoolInfo] = useState([])
 	const [userPoolStatus, setUserPoolStatus] = useState()
 
 	const [copied, setCopied] = useState(false)
+
+	const [pageUrl, setPageUrl] = useState('')
 
 	async function readPoolStatus() {
 		const poolId = router.query.poolId
@@ -82,12 +83,13 @@ const PoolPage = () => {
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
-			walletAddress = user!.wallet!.address
+			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
 			getPoolData()
 			readPoolStatus()
 		}
-	}, [ready, authenticated])
+		setPageUrl(window?.location.href)
+	}, [ready, authenticated, user])
 
 	const handleJoinPool = async () => {
 		console.log('handleJoinPool')
@@ -139,7 +141,7 @@ const PoolPage = () => {
 		console.log('copyToClipboard')
 
 		try {
-			await navigator.clipboard.writeText(window.location.href)
+			await navigator.clipboard.writeText(pageUrl)
 			setCopied(true)
 		} catch (error) {
 			console.error('Failed to copy:', error)
@@ -199,7 +201,7 @@ const PoolPage = () => {
 								<QRCode
 									size={256}
 									style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
-									value={window?.location.href}
+									value={pageUrl}
 									viewBox={`0 0 256 256`}
 								/>
 							</div>

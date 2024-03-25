@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 
 const DropdownChecklist = () => {
 	const [isOpen, setIsOpen] = useState(false)
-	const [selectedItems, setSelectedItems] = useState([])
+	const [selectedItems, setSelectedItems] = useState<any[]>([])
 	const items = [
 		'Item 1',
 		'Item 2',
@@ -20,7 +20,7 @@ const DropdownChecklist = () => {
 		setIsOpen(!isOpen)
 	}
 
-	const toggleItem = (item) => {
+	const toggleItem = (item: any) => {
 		if (selectedItems.includes(item)) {
 			setSelectedItems(
 				selectedItems.filter((selectedItem) => selectedItem !== item),
@@ -63,7 +63,7 @@ const DropdownChecklist = () => {
 						aria-orientation='vertical'
 						aria-labelledby='options-menu'
 					>
-						{items.map((item) => (
+						{items.map((item: any) => (
 							<div
 								key={item}
 								onClick={() => toggleItem(item)}

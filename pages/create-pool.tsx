@@ -71,7 +71,7 @@ const CreatePool = () => {
 			console.log(`Wallet Length: ${wallets.length}`)
 			console.log(`Wallet Address: ${wallets[0].address}`)
 		}
-	}, [])
+	}, [wallets])
 
 	const [tokenAddressInputValue, setTokenAddressInputValue] =
 		useState(tokenAddress)
