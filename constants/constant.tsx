@@ -75,21 +75,21 @@ export const mainnetContractAddress =
 	'0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
 
 export const tokenAddress =
-	network == Network.Localnet
+	network.toString() === Network.Localnet
 		? localnetTokenAddress
-		: network == Network.Testnet
+		: network.toString() === Network.Testnet
 		? testnetTokenAddress
 		: mainnetTokenAddress
 export const contractAddress =
-	network == Network.Localnet
+	network.toString() === Network.Localnet
 		? localnetContractAddress
-		: network == Network.Testnet
+		: network.toString() === Network.Testnet
 		? testnetContractAddress
 		: mainnetContractAddress
 
 export const chain =
-	network == Network.Localnet
+	network.toString() === Network.Localnet
 		? localChain
-		: network == Network.Testnet
+		: network.toString() === Network.Testnet
 		? testChain
 		: mainChain
