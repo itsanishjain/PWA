@@ -96,7 +96,7 @@ const CreatePool = () => {
 							<div className='w-full'>
 								<label>Pool Name</label>
 								<input
-									className='shadow appearance-none border rounded w-full row py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+									className='shadow bg-white appearance-none border rounded w-full row py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
 									id='poolName'
 									type='text'
 									placeholder='Pool Name'
@@ -109,7 +109,7 @@ const CreatePool = () => {
 							<div className='w-full'>
 								<label>Token Address</label>
 								<input
-									className='shadow appearance-none border rounded w-full flex row py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+									className='shadow bg-white appearance-none border rounded w-full flex row py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
 									id='tokenAddress'
 									type='text'
 									placeholder='Token Address'
