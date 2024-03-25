@@ -27,7 +27,8 @@ import { Interface, ethers } from 'ethers'
 import { contractAddress } from 'constants/constant'
 import { config } from '@/constants/config'
 
-import poolContract from '@/Smart-Contracts/out/Pool.sol/Pool.json'
+import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
+
 import { createClient } from '@/utils/supabase/client'
 import DropdownChecklist from '@/components/dropdown-checklist'
 

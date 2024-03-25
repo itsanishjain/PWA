@@ -16,7 +16,7 @@ import { chain, tokenAddress, contractAddress } from 'constants/constant'
 import { Interface, ethers } from 'ethers'
 import Appbar from '@/components/appbar'
 
-import poolContract from '@/Smart-Contracts/out/Pool.sol/Pool.json'
+import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 
 const CreatePool = () => {
 	const router = useRouter()
