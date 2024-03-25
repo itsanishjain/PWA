@@ -62,6 +62,17 @@ export default async function handler(
 
 		if (selectError) {
 			console.error('Error fetching existing data:', selectError)
+			// Insert a new row
+			const { data: insertedData, error: insertError } = await supabase
+				.from('pool_table')
+				.insert([supabaseRow])
+
+			if (insertError) {
+				console.error('Error inserting data:', insertError)
+			} else {
+				console.log('Data inserted successfully:', insertedData)
+			}
+
 			return
 		}
 
@@ -79,17 +90,6 @@ export default async function handler(
 				console.error('Error updating data:', updateError)
 			} else {
 				console.log('Data updated successfully:', updatedData)
-			}
-		} else {
-			// Insert a new row
-			const { data: insertedData, error: insertError } = await supabase
-				.from('pool_table')
-				.insert([supabaseRow])
-
-			if (insertError) {
-				console.error('Error inserting data:', insertError)
-			} else {
-				console.log('Data inserted successfully:', insertedData)
 			}
 		}
 	}

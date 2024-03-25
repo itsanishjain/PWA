@@ -20,11 +20,7 @@ import { readContract, readContracts } from '@wagmi/core'
 import { foundry, hardhat, mainnet, sepolia } from 'viem/chains'
 import { Interface, ethers } from 'ethers'
 
-import {
-	localChain,
-	localnetTokenAddress,
-	localnetContractAddress,
-} from 'constants/constant'
+import { contractAddress } from 'constants/constant'
 import { config } from '@/constants/config'
 
 import poolContract from '@/Smart-Contracts/out/Pool.sol/Pool.json'
@@ -49,20 +45,24 @@ const CreatedPools = () => {
 		const abi = new Interface(poolContract.abi)
 		const provider = new ethers.JsonRpcProvider()
 		const contract = new ethers.Contract(
-			localnetContractAddress,
+			contractAddress,
 			poolContract.abi,
 			provider,
 		)
-		const poolIds = await contract.getPoolsCreated(walletAddress)
-		console.log('poolIds', poolIds)
-		for (const poolId of poolIds) {
-			let newPoolData = await contract.getPoolInfo(poolId)
-			// newPoolData.push(poolId)
-			let amendNewPoolData = [...newPoolData, poolId]
-			console.log(`result: ${amendNewPoolData}`)
-			setPoolsData((prevData) =>
-				removeDuplicateRows([...prevData, amendNewPoolData]),
-			)
+		try {
+			const poolIds = await contract.getPoolsCreated(walletAddress)
+			console.log('poolIds', poolIds)
+			for (const poolId of poolIds) {
+				let newPoolData = await contract.getPoolInfo(poolId)
+				// newPoolData.push(poolId)
+				let amendNewPoolData = [...newPoolData, poolId]
+				console.log(`result: ${amendNewPoolData}`)
+				setPoolsData((prevData) =>
+					removeDuplicateRows([...prevData, amendNewPoolData]),
+				)
+			}
+		} catch (error) {
+			console.log(error)
 		}
 
 		// const result = await contract.getPoolIdByName('Hi')

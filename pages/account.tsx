@@ -14,7 +14,9 @@ import React, { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import Appbar from '@/components/appbar'
 
-const Home = () => {
+import { FundWalletConfig } from '@privy-io/react-auth'
+
+const Account = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
@@ -34,14 +36,17 @@ const Home = () => {
 	const handleCreatePool = async () => {
 		router.push('/create-pool')
 	}
-	const handleJoinPool = () => {}
-	const handleSharePool = () => {}
-	const handleExplorePools = () => {
+	const handleJoinPool = () => {
 		router.push('created-pools')
 	}
-
+	const handleSharePool = () => {}
 	const handleSignOut = () => {
 		logout()
+	}
+
+	const handleFundAccount = async () => {
+		const wallet = wallets[0]
+		await wallet.fund({ config: {}, provider: 'moonpay' })
 	}
 
 	useEffect(() => {
@@ -65,11 +70,11 @@ const Home = () => {
 						<div className='flex justify-between items-center h-full w-full mt-28 '>
 							<button
 								className='rounded-full gradient-background px-4 py-4'
-								onClick={handleCreatePool}
+								onClick={handleFundAccount}
 							>
-								Create Pool
+								Fund Account
 							</button>
-							<button
+							{/* <button
 								className='rounded-full gradient-background px-4 py-4'
 								onClick={handleJoinPool}
 							>
@@ -77,10 +82,10 @@ const Home = () => {
 							</button>
 							<button
 								className='rounded-full gradient-background px-4 py-4'
-								onClick={handleExplorePools}
+								onClick={handleSharePool}
 							>
-								Explore Pools
-							</button>
+								Share Pool
+							</button> */}
 						</div>
 					</div>
 				</div>
@@ -89,4 +94,4 @@ const Home = () => {
 	)
 }
 
-export default Home
+export default Account

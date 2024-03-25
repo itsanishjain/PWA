@@ -11,11 +11,7 @@ import {
 } from '@privy-io/react-auth'
 
 import React, { useState, useEffect } from 'react'
-import {
-	localChain,
-	localnetTokenAddress,
-	localnetContractAddress,
-} from 'constants/constant'
+import { chain, tokenAddress, contractAddress } from 'constants/constant'
 
 import { Interface, ethers } from 'ethers'
 import Appbar from '@/components/appbar'
@@ -50,8 +46,8 @@ const CreatePool = () => {
 		// const signature = await signMessage(message, uiConfig)
 
 		const unsignedTx: UnsignedTransactionRequest = {
-			to: localnetContractAddress,
-			chainId: localChain.id,
+			to: contractAddress,
+			chainId: chain.id,
 			data: dataString,
 		}
 
@@ -78,7 +74,7 @@ const CreatePool = () => {
 	}, [])
 
 	const [tokenAddressInputValue, setTokenAddressInputValue] =
-		useState(localnetTokenAddress)
+		useState(tokenAddress)
 	const [poolNameInputValue, setPoolNameInputValue] = useState('')
 
 	return (

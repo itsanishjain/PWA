@@ -18,6 +18,10 @@ const Appbar = () => {
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
 
+	const handleAccountClick = (e: any) => {
+		router.push('/account')
+	}
+
 	return (
 		<div className='fixed top-0 left-0 z-20 w-full bg-zinc-900 pt-safe'>
 			<header className='border-b bg-zinc-100 px-safe '>
@@ -44,7 +48,10 @@ const Appbar = () => {
 								))}
 							</div> */}
 						</div>
-
+						<div>
+							{' '}
+							<button onClick={handleAccountClick}>Account</button>
+						</div>
 						<div>
 							{' '}
 							<button onClick={logout}>Sign Out</button>
