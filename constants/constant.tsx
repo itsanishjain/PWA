@@ -64,15 +64,17 @@ export const mainChain = base
 // 		default: { name: 'Explorer', url: 'https://basescan.org' },
 // 	},
 // })
-export const network: Network = Network.Localnet
+export const network: Network = Network.Testnet
 
 export const localnetTokenAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
 export const localnetContractAddress =
 	'0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
 
-export const testnetTokenAddress = '0xba220992d6afcF350Ccda17d9546473bA2F996c5'
+export const testnetTokenAddress = '0x4FFB3dE4C805D10B60cAaF225EC3667507a9061f'
 export const testnetContractAddress =
-	'0xb8F0D2061D73dc2F11988194Ff28be01Be49eBb9'
+	'0x9C2eFC1BdCAaC75c7f77F924fD573be4a2F6c024'
+export const testnetDropletClaimContractAddress =
+	'0x7f0668B813a960AAd9E56C4870131dB6314819eB'
 
 export const mainnetTokenAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
 export const mainnetContractAddress =

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import poolImage from '@/public/images/pool.png'
 import { useRouter } from 'next/router'
 import {
+	TransactionReceipt,
 	UnsignedTransactionRequest,
 	usePrivy,
 	useWallets,
@@ -16,37 +17,51 @@ import Appbar from '@/components/appbar'
 
 import { FundWalletConfig } from '@privy-io/react-auth'
 
-const Account = () => {
+const Transfer = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
 
 	const { wallets } = useWallets()
-
-	// Replace this with the message you'd like your user to sign
-	const message = 'Hello world'
-	// Replace this with the text you'd like on your signature modal,
-	// if you do not have `noPromptsOnSignature` enabled
+	const [transferAmount, setTransferAmount] = useState('')
+	const [recepientAddress, setRecepientAddress] = useState('')
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
 		router.push('/')
 	}
 
-	const handleCreatePool = async () => {
-		router.push('/create-pool')
+	const handleTransfer = async () => {
+		const wallet = wallets[0]
+		const unsignedTx = {
+			to: recepientAddress,
+			value: ethers.parseEther(transferAmount),
+		}
+
+		const uiConfig = {
+			title: 'Send Transaction',
+			description: `You are sending ${transferAmount} to ${recepientAddress}`,
+			buttonText: 'Send',
+		}
+		try {
+			const txReceipt: TransactionReceipt = await sendTransaction(
+				unsignedTx,
+				uiConfig,
+			)
+		} catch (e) {
+			console.log(e)
+		}
 	}
-	const handleJoinPool = () => {
-		router.push('created-pools')
-	}
-	const handleSharePool = () => {}
-	const handleSignOut = () => {
-		logout()
+	const handleTransferInputChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		setTransferAmount(e.target.value)
 	}
 
-	const handleFundAccount = async () => {
-		const wallet = wallets[0]
-		await wallet.fund({ config: {}, provider: 'moonpay' })
+	const handleRecipientInputChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		setRecepientAddress(e.target.value)
 	}
 
 	useEffect(() => {
@@ -66,32 +81,27 @@ const Account = () => {
 						<div className='flex row items-center w-full'>
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
-
+						<div className='flex flex-col space-y-8 items-center w-full mt-12 '>
+							<input
+								value={transferAmount}
+								onChange={handleTransferInputChange}
+								className='w-full outline-2 px-2 py-2'
+								placeholder='transfer amount'
+							/>
+							<input
+								value={recepientAddress}
+								onChange={handleRecipientInputChange}
+								className='w-full outline-2 px-2 py-2'
+								placeholder='Recipient Address'
+							/>
+						</div>
 						<div className='flex justify-between items-center h-full w-full mt-28 '>
 							<button
 								className='rounded-full gradient-background px-4 py-4'
-								onClick={handleFundAccount}
+								onClick={handleTransfer}
 							>
-								Fund Account
+								Send
 							</button>
-							<button
-								className='rounded-full gradient-background px-4 py-4'
-								onClick={() => router.push('/account/transfer')}
-							>
-								Transfer
-							</button>
-							{/* <button
-								className='rounded-full gradient-background px-4 py-4'
-								onClick={handleJoinPool}
-							>
-								Join Pool
-							</button>
-							<button
-								className='rounded-full gradient-background px-4 py-4'
-								onClick={handleSharePool}
-							>
-								Share Pool
-							</button> */}
 						</div>
 					</div>
 				</div>
@@ -100,4 +110,4 @@ const Account = () => {
 	)
 }
 
-export default Account
+export default Transfer
