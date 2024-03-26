@@ -15,6 +15,7 @@ import { ethers } from 'ethers'
 import Appbar from '@/components/appbar'
 
 import { FundWalletConfig } from '@privy-io/react-auth'
+import { provider } from '@/constants/constant'
 
 const Account = () => {
 	const router = useRouter()
@@ -23,25 +24,17 @@ const Account = () => {
 
 	const { wallets } = useWallets()
 
-	// Replace this with the message you'd like your user to sign
-	const message = 'Hello world'
-	// Replace this with the text you'd like on your signature modal,
-	// if you do not have `noPromptsOnSignature` enabled
+	const [balance, setBalance] = useState(BigInt(0))
+
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
 		router.push('/')
 	}
 
-	const handleCreatePool = async () => {
-		router.push('/create-pool')
-	}
-	const handleJoinPool = () => {
-		router.push('created-pools')
-	}
-	const handleSharePool = () => {}
-	const handleSignOut = () => {
-		logout()
+	const getWalletBalance = async () => {
+		const walletBalance = await provider.getBalance(wallets[0]?.address)
+		setBalance(walletBalance)
 	}
 
 	const handleFundAccount = async () => {
@@ -54,6 +47,7 @@ const Account = () => {
 		if (wallets.length > 0) {
 			console.log(`Wallet Length: ${wallets.length}`)
 			console.log(`Wallet Address: ${wallets[0].address}`)
+			getWalletBalance()
 		}
 	}, [wallets])
 
@@ -67,6 +61,14 @@ const Account = () => {
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
 
+						<div className='flex row items-center w-full mt-8'>
+							<h3 className='text-md'>Wallet Balance:</h3>
+						</div>
+						<div className='flex flex-row items-center w-full'>
+							<h3 className='text-xl font-semibold text-center align w-full'>
+								{ethers.formatEther(balance)} Eth
+							</h3>
+						</div>
 						<div className='flex justify-between items-center h-full w-full mt-28 '>
 							<button
 								className='rounded-full gradient-background px-4 py-4'
