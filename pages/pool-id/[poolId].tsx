@@ -98,7 +98,7 @@ const PoolPage = () => {
 		let signedMessage
 		try {
 			signedMessage = await signMessage(`Join Pool: ${poolId}`)
-		} catch {
+		} catch (e: any) {
 			console.log('User did not sign transaction')
 		}
 		const formData = {

@@ -50,11 +50,14 @@ const CreatePool = () => {
 			chainId: chain.id,
 			data: dataString,
 		}
-
-		const txReceipt: TransactionReceipt = await sendTransaction(
-			unsignedTx,
-			uiConfig,
-		)
+		try {
+			const txReceipt: TransactionReceipt = await sendTransaction(
+				unsignedTx,
+				uiConfig,
+			)
+		} catch (e: any) {
+			console.log(e.message)
+		}
 
 		setPoolNameInputValue('')
 		router.push('/created-pools')
