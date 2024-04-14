@@ -29,11 +29,11 @@ import { config } from '@/constants/config'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 
-import { createClient } from '@/utils/supabase/client'
+import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import DropdownChecklist from '@/components/dropdown-checklist'
 
 const PoolPage = () => {
-	const supabaseClient = createClient()
+	const supabaseClient = createSupabaseBrowserClient()
 
 	const router = useRouter()
 
@@ -136,6 +136,10 @@ const PoolPage = () => {
 		copyToClipboard()
 	}
 
+	const handleDeposit = () => {
+		console.log('handleDeposit')
+	}
+
 	const copyToClipboard = async () => {
 		console.log('copyToClipboard')
 
@@ -186,6 +190,14 @@ const PoolPage = () => {
 								onClick={handleSharePool}
 							>
 								Share Pool
+							</button>
+						</div>
+						<div className='flex flex-col items-end w-full mt-4'>
+							<button
+								className='bg-pink-500 rounded-md px-4 py-2 text-white'
+								onClick={handleDeposit}
+							>
+								Deposit
 							</button>
 						</div>
 						<div>

@@ -112,3 +112,6 @@ export const provider = new ethers.JsonRpcProvider(
 	chain.rpcUrls.default.http.toString(),
 	networkish,
 )
+
+export const jwtExpiryDurationInDays = 7
+export const jwtDuration = 60 * 60 * 24 * jwtExpiryDurationInDays // Given in seconds

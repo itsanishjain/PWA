@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { NextResponse } from 'next/server'
-import { hashMessage, recoverAddress } from 'ethers'
+import { hashMessage, recoverAddress, verifyMessage } from 'ethers'
 import { createBrowserClient } from '@supabase/ssr'
 // import { createClient } from '@/utils/supabase/client'
 

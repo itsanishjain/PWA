@@ -4,17 +4,48 @@ import Image from 'next/image'
 import poolImage from '@/public/images/pool.png'
 import { useRouter } from 'next/router'
 import { usePrivy } from '@privy-io/react-auth'
+import { chain } from '@/constants/constant'
+import React, { useState, useEffect } from 'react'
+import { fetchNonce, fetchToken } from '@/lib/api/clientAPI'
+
+import { getTokenCookie, setTokenCookie } from '@/utils/cookie'
 
 const Index = () => {
 	const router = useRouter()
-	const { ready, authenticated, user } = usePrivy()
+	const { ready, authenticated, user, signMessage, login } = usePrivy()
 
-	const { login } = usePrivy()
 	const handleClick = () => {
 		// Replace '/your-link' with the actual path you want to navigate to
 		// router.push('/wallet-selection')
 		login()
 	}
+
+	const handleBackendLogin = async () => {
+		console.log('handleBackendLogin')
+		let result = await fetchNonce({ address: user?.wallet?.address! })
+		console.log('nonce', result)
+
+		const message = 'Sign message'
+
+		let signedMessage = ''
+		try {
+			signedMessage = await signMessage(message)
+		} catch (e: any) {
+			console.log('User did not sign transaction')
+		}
+
+		let tokenResult = await fetchToken({
+			address: user?.wallet?.address!,
+			message,
+			signedMessage,
+			nonce: result.nonce,
+		})
+		console.log('tokenResult', tokenResult)
+		setTokenCookie(tokenResult.token)
+		console.log('cookie', getTokenCookie())
+	}
+
+	const showBackend = ready && authenticated
 
 	if (!ready) {
 		// Do nothing while the PrivyProvider initializes with updated user state
@@ -28,7 +59,8 @@ const Index = () => {
 
 	if (ready && authenticated) {
 		// Replace this code with however you'd like to handle an authenticated user
-		router.push('/home')
+		// router.push('/home')
+		// console.log('ready and authenticated')
 	}
 
 	return (
@@ -60,6 +92,16 @@ const Index = () => {
 								Connect wallet
 							</button>
 						</div>
+						{showBackend && (
+							<div className='flex justify-center items-center h-full w-full mt-28'>
+								<button
+									className='rounded-full gradient-background px-28 py-3'
+									onClick={handleBackendLogin}
+								>
+									backend
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 			</Section>
@@ -68,3 +110,6 @@ const Index = () => {
 }
 
 export default Index
+function setToken(tokenCookie: string) {
+	throw new Error('Function not implemented.')
+}
