@@ -117,9 +117,11 @@ export default async function handler(
 			address: address, // this will be read by RLS policy
 			sub: userId,
 			aud: 'authenticated',
+			role: 'authenticated',
+			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
 		},
 		process.env.SUPABASE_JWT!,
-		{ expiresIn: jwtDuration },
+		// { expiresIn: jwtDuration },
 	)
 	console.log('Sending Token')
 	res.status(200).json({ token })

@@ -8,11 +8,14 @@ import { chain } from '@/constants/constant'
 import React, { useState, useEffect } from 'react'
 import { fetchNonce, fetchToken, writeTest } from '@/lib/api/clientAPI'
 
-import { getTokenCookie, setTokenCookie } from '@/hooks/cookie'
+import { useCookie } from '@/hooks/cookie'
+import jwt from 'jsonwebtoken'
+import Appbar from '@/components/appbar'
 
-const Index = () => {
+const Authenticate = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, login } = usePrivy()
+	const { currentJwt, saveJwt, isJwtValid } = useCookie()
 
 	const handleClick = () => {
 		// Replace '/your-link' with the actual path you want to navigate to
@@ -25,13 +28,15 @@ const Index = () => {
 		let result = await fetchNonce({ address: user?.wallet?.address! })
 		console.log('nonce', result)
 
-		const message = 'Sign message'
+		const message =
+			'This is a simple verification process that will not incur any fees.'
 
 		let signedMessage = ''
 		try {
 			signedMessage = await signMessage(message)
 		} catch (e: any) {
 			console.log('User did not sign transaction')
+			return
 		}
 
 		let tokenResult = await fetchToken({
@@ -41,20 +46,20 @@ const Index = () => {
 			nonce: result.nonce,
 		})
 		console.log('tokenResult', tokenResult)
-		setTokenCookie(tokenResult.token)
-		console.log('cookie', getTokenCookie())
-		testWrite()
+		saveJwt(tokenResult.token)
+		console.log('current Jwt', currentJwt)
+		// testWrite()
 	}
 
 	const testWrite = async () => {
 		console.log('handleTestWrite')
 		let result = await writeTest({
 			address: user?.wallet?.address!,
-			jwt: getTokenCookie(),
+			jwt: currentJwt,
 		})
 	}
 
-	const showBackend = ready && authenticated
+	// let showAuthenticateBackendButton = false
 
 	if (!ready) {
 		// Do nothing while the PrivyProvider initializes with updated user state
@@ -64,16 +69,19 @@ const Index = () => {
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
+		router.push('/')
 	}
 
-	if (ready && authenticated) {
+	if (ready && authenticated && isJwtValid) {
 		// Replace this code with however you'd like to handle an authenticated user
-		router.push('/authenticate')
-		// console.log('ready and authenticated')
+		console.log('ready and authenticated')
+		router.push('/home')
 	}
 
 	return (
 		<Page>
+			<Appbar />
+
 			<Section>
 				<div className='flex justify-center h-full w-full items-center'>
 					<div className='flex flex-col w-96 h-96'>
@@ -81,36 +89,26 @@ const Index = () => {
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
 						<h2 className='text-xl font-bold text-zinc-800 tagline-text text-center align-top w-full mt-28'>
-							Pooling made simple.
+							Almost there ...
 						</h2>
-						<h2
-							className={` font-semibold text-center align-top w-full tagline-text`}
+						<p
+							className={`text-base  text-center align-top w-full tagline-text mt-4`}
 						>
-							<span
-								className={`font-semibold gradient-text text-center align-top w-full`}
-							>
-								For everyone.
+							<span className={`text-base text-center align-top w-full`}>
+								We just need to verify your wallet.
 							</span>
-						</h2>
+						</p>
 
-						<div className='flex justify-center items-center h-full w-full mt-28'>
-							<button
-								className='rounded-full gradient-background px-28 py-3'
-								onClick={handleClick}
-							>
-								Connect wallet
-							</button>
-						</div>
-						{/* {showBackend && (
-							<div className='flex justify-center items-center h-full w-full mt-28'>
+						{!isJwtValid && (
+							<div className='flex justify-center items-center h-full w-full mt-4'>
 								<button
 									className='rounded-full gradient-background px-28 py-3'
 									onClick={handleBackendLogin}
 								>
-									backend
+									Verify
 								</button>
 							</div>
-						)} */}
+						)}
 					</div>
 				</div>
 			</Section>
@@ -118,7 +116,4 @@ const Index = () => {
 	)
 }
 
-export default Index
-function setToken(tokenCookie: string) {
-	throw new Error('Function not implemented.')
-}
+export default Authenticate

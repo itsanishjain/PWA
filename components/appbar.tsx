@@ -5,6 +5,11 @@ import {
 	usePrivy,
 	useWallets,
 } from '@privy-io/react-auth'
+import {
+	getTokenCookie,
+	setTokenCookie,
+	removeTokenCookie,
+} from '@/hooks/cookie'
 
 const links = [
 	{ label: 'Login', href: '/login' },
@@ -20,6 +25,11 @@ const Appbar = () => {
 
 	const handleAccountClick = (e: any) => {
 		router.push('/account')
+	}
+
+	const handleSignOut = () => {
+		logout()
+		removeTokenCookie()
 	}
 
 	return (
@@ -54,7 +64,7 @@ const Appbar = () => {
 						</div>
 						<div>
 							{' '}
-							<button onClick={logout}>Sign Out</button>
+							<button onClick={handleSignOut}>Sign Out</button>
 						</div>
 					</nav>
 				</div>
