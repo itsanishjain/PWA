@@ -14,7 +14,12 @@ import React, { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import Appbar from '@/components/appbar'
 
-const ParticipantHome = () => {
+import { Inter } from 'next/font/google'
+import styles from './styles/admin.module.css'
+
+const inter = Inter({ subsets: ['latin'] })
+
+const Admin = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
@@ -22,7 +27,7 @@ const ParticipantHome = () => {
 	const { wallets } = useWallets()
 
 	// Replace this with the message you'd like your user to sign
-	const message = 'Hello world'
+
 	// Replace this with the text you'd like on your signature modal,
 	// if you do not have `noPromptsOnSignature` enabled
 	if (ready && !authenticated) {
@@ -34,14 +39,10 @@ const ParticipantHome = () => {
 	const handleCreatePool = async () => {
 		router.push('/create-pool')
 	}
-	const handleJoinPool = () => {}
-	const handleSharePool = () => {}
-	const handleExplorePools = () => {
-		router.push('created-pools')
-	}
 
-	const handleSignOut = () => {
-		logout()
+	const [selectedTab, setSelectedTab] = useState(0)
+	const selectTab = (tabIndex: number) => {
+		setSelectedTab(tabIndex)
 	}
 
 	useEffect(() => {
@@ -55,31 +56,41 @@ const ParticipantHome = () => {
 	return (
 		<Page>
 			<Appbar />
+
 			<Section>
-				<div className='flex justify-center h-full w-full items-center'>
-					<div className='flex flex-col w-96 h-96'>
-						<div className='flex row items-center w-full'>
-							<Image className='mx-auto' src={poolImage} alt='pool image' />
+				<div className='flex justify-center h-full w-full mt-20 items-center'>
+					<div className='flex flex-col w-96 h-full'>
+						<div
+							className={`flex flex-row h-12 rounded-full ${styles.buttonTabBackground}`}
+						>
+							<button
+								onClick={() => selectTab(1)}
+								className={`flex flex-1 font-semibold rounded-full bg-black text-white justify-center items-center ${
+									selectedTab === 0
+										? styles.selectedTabButton
+										: styles.unselectedTabButton
+								} ${inter.className}`}
+							>
+								Upcoming
+							</button>
+							<button
+								onClick={() => selectTab(1)}
+								className={`flex flex-1 font-semibold rounded-full bg-black text-white justify-center items-center ${
+									selectedTab === 1
+										? styles.unselectedTabButton
+										: styles.unselectedTabButton
+								} ${inter.className}`}
+							>
+								Past
+							</button>
 						</div>
 
-						<div className='flex justify-between items-center h-full w-full mt-28 '>
+						<div className='fixed bottom-6 left-1/2 transform -translate-x-1/2 w-96'>
 							<button
-								className='rounded-full gradient-background px-4 py-4'
+								className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline ${inter.className}`}
 								onClick={handleCreatePool}
 							>
-								Create Pool
-							</button>
-							<button
-								className='rounded-full gradient-background px-4 py-4'
-								onClick={handleJoinPool}
-							>
-								Join Pool
-							</button>
-							<button
-								className='rounded-full gradient-background px-4 py-4'
-								onClick={handleExplorePools}
-							>
-								Explore Pools
+								+ Create a Pool
 							</button>
 						</div>
 					</div>
@@ -89,4 +100,4 @@ const ParticipantHome = () => {
 	)
 }
 
-export default ParticipantHome
+export default Admin

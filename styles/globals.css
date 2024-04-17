@@ -44,3 +44,7 @@ body {
 .tagline-text {
 	font-size: 28pt;
 }
+
+.gray-background {
+	background: #f6f6f6;
+}
