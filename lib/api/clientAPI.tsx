@@ -134,3 +134,48 @@ export const uploadProfileImage = async (
 
 	console.log('usersDisplay updated successfully')
 }
+
+export const updateUserDisplayData = async (
+	displayName: string,
+	company: string,
+	bio: string,
+	jwt: string,
+) => {
+	// Upload image to Supabase storage
+	const supabaseClient = createClient(
+		process.env.NEXT_PUBLIC_SUPABASE_URL!,
+		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+		{
+			global: {
+				headers: {
+					Authorization: `Bearer ${jwt}`,
+				},
+			},
+		},
+	)
+
+	const jwtObj = decode(jwt)
+	console.log('jwtObj', jwtObj)
+
+	// Update user profile with image URL
+
+	const { data: userData, error: userError } = await supabaseClient
+		.from('usersDisplay')
+		.upsert(
+			{
+				display_name: displayName,
+				company: company,
+				bio: bio,
+				id: jwtObj!.sub,
+			},
+			{
+				onConflict: 'id',
+			},
+		)
+
+	if (userError) {
+		console.error('Error updating user data:', userError.message)
+	}
+
+	console.log('usersDisplay Information updated successfully')
+}

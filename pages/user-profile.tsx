@@ -9,7 +9,7 @@ import {
 	useWallets,
 } from '@privy-io/react-auth'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, ChangeEvent } from 'react'
 
 import { ethers } from 'ethers'
 import Appbar from '@/components/appbar'
@@ -18,7 +18,7 @@ import { FundWalletConfig } from '@privy-io/react-auth'
 import { provider } from '@/constants/constant'
 import { Inter } from 'next/font/google'
 import styles from './styles/user-profile.module.css'
-import { uploadProfileImage } from '@/lib/api/clientAPI'
+import { updateUserDisplayData, uploadProfileImage } from '@/lib/api/clientAPI'
 import { useCookie } from '@/hooks/cookie'
 import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
@@ -32,12 +32,24 @@ const UserProfile = () => {
 
 	const { wallets } = useWallets()
 
-	const [balance, setBalance] = useState(BigInt(0))
-
 	const [fileBlob, setFileBlob] = useState<any>(null)
 	const [profileImageUrl, setProfileImageUrl] = useState<string>('')
 
 	const { currentJwt } = useCookie()
+
+	const [displayName, setDisplayName] = useState<string>('')
+	const [company, setCompany] = useState<string>('')
+	const [bio, setBio] = useState<string>('')
+
+	const handleDisplayNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+		setDisplayName(e.target.value)
+	}
+	const handleCompanyChange = (e: ChangeEvent<HTMLInputElement>) => {
+		setCompany(e.target.value)
+	}
+	const handleBioChange = (e: ChangeEvent<HTMLInputElement>) => {
+		setBio(e.target.value)
+	}
 
 	const handleImageChange = (e: any) => {
 		const selectedFile = e.target.files?.[0]
@@ -55,28 +67,17 @@ const UserProfile = () => {
 		}
 	}
 
-	const handleUploadImage = async (e: any) => {
-		if (fileBlob == null) {
-			console.log('file is null')
-			return
+	const handleSaveButtonClicked = async (e: any) => {
+		if (fileBlob != null) {
+			await uploadProfileImage(fileBlob!, wallets[0].address, currentJwt!)
 		}
-		uploadProfileImage(fileBlob!, wallets[0].address, currentJwt!)
+		await updateUserDisplayData(displayName, company, bio, currentJwt!)
 	}
 
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
 		router.push('/')
-	}
-
-	const getWalletBalance = async () => {
-		const walletBalance = await provider.getBalance(wallets[0]?.address)
-		setBalance(walletBalance)
-	}
-
-	const handleFundAccount = async () => {
-		const wallet = wallets[0]
-		await wallet.fund({ config: {}, provider: 'moonpay' })
 	}
 
 	const supabase = createClient(
@@ -92,19 +93,15 @@ const UserProfile = () => {
 			.select('*')
 			.filter('id', 'eq', jwtObj.sub)
 			.single()
+		setDisplayName(userDisplayData.display_name)
+		setBio(userDisplayData.bio)
+		setCompany(userDisplayData.company)
 		const { data: storageData } = supabase.storage
 			.from('profile')
 			.getPublicUrl(userDisplayData.avatar_url)
 		setProfileImageUrl(storageData.publicUrl)
 	}
 	useEffect(() => {
-		// Update the document title using the browser API
-		if (wallets.length > 0) {
-			console.log(`Wallet Length: ${wallets.length}`)
-			console.log(`Wallet Address: ${wallets[0].address}`)
-			getWalletBalance()
-		}
-
 		loadProfilePicture()
 	}, [wallets, currentJwt])
 
@@ -127,14 +124,7 @@ const UserProfile = () => {
 								style={{ display: '' }}
 							/>
 						</div>
-						<div>
-							<button
-								className='bg-blue-700 text-white py-4 px-8 mt-4'
-								onClick={handleUploadImage}
-							>
-								Save
-							</button>
-						</div>
+
 						<div className='flex w-full justify-center'>
 							<img
 								className='rounded-full m-8'
@@ -145,6 +135,35 @@ const UserProfile = () => {
 						</div>
 
 						<div className={`border-t-4 ${styles.divider}`}></div>
+						<input
+							type='text'
+							value={displayName}
+							onChange={handleDisplayNameChange}
+							placeholder='Display Name'
+							className='rounded-full outline-1 outline my-2 px-4'
+						/>
+						<input
+							type='text'
+							value={bio}
+							onChange={handleBioChange}
+							placeholder='Company'
+							className='rounded-full outline-1 outline my-2 px-4'
+						/>
+						<input
+							type='text'
+							value={company}
+							onChange={handleCompanyChange}
+							placeholder='Write something enticing about yourself'
+							className='rounded-full outline-1 outline my-2 px-4'
+						/>
+						<div className='flex justify-center'>
+							<button
+								className='bg-blue-700 rounded-full text-white py-4 px-8 mt-4'
+								onClick={handleSaveButtonClicked}
+							>
+								Save
+							</button>
+						</div>
 					</div>
 				</div>
 			</Section>
