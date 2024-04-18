@@ -33,7 +33,7 @@ const UserProfile = () => {
 	const [balance, setBalance] = useState(BigInt(0))
 
 	const [image, setImage] = useState(null)
-	const [fileBlob, setFileBlob] = useState(null)
+	const [fileBlob, setFileBlob] = useState<any>(null)
 
 	const { currentJwt } = useCookie()
 
