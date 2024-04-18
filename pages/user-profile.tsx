@@ -20,6 +20,8 @@ import { Inter } from 'next/font/google'
 import styles from './styles/user-profile.module.css'
 import { uploadProfileImage } from '@/lib/api/clientAPI'
 import { useCookie } from '@/hooks/cookie'
+import { createClient } from '@supabase/supabase-js'
+import { JwtPayload, decode } from 'jsonwebtoken'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,13 +34,12 @@ const UserProfile = () => {
 
 	const [balance, setBalance] = useState(BigInt(0))
 
-	const [image, setImage] = useState(null)
 	const [fileBlob, setFileBlob] = useState<any>(null)
+	const [profileImageUrl, setProfileImageUrl] = useState<string>('')
 
 	const { currentJwt } = useCookie()
 
 	const handleImageChange = (e: any) => {
-		setImage(e.target.files?.[0])
 		const selectedFile = e.target.files?.[0]
 		if (selectedFile) {
 			const reader = new FileReader()
@@ -61,7 +62,7 @@ const UserProfile = () => {
 		}
 		uploadProfileImage(fileBlob!, wallets[0].address, currentJwt!)
 	}
-	const handleSaveButton = (e: any) => {}
+
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
@@ -78,6 +79,24 @@ const UserProfile = () => {
 		await wallet.fund({ config: {}, provider: 'moonpay' })
 	}
 
+	const supabase = createClient(
+		process.env.NEXT_PUBLIC_SUPABASE_URL!,
+		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+	)
+
+	const loadProfilePicture = async () => {
+		const jwtObj: any = decode(currentJwt ?? '')
+
+		const { data: userDisplayData, error } = await supabase
+			.from('usersDisplay')
+			.select('*')
+			.filter('id', 'eq', jwtObj.sub)
+			.single()
+		const { data: storageData } = supabase.storage
+			.from('profile')
+			.getPublicUrl(userDisplayData.avatar_url)
+		setProfileImageUrl(storageData.publicUrl)
+	}
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (wallets.length > 0) {
@@ -85,7 +104,9 @@ const UserProfile = () => {
 			console.log(`Wallet Address: ${wallets[0].address}`)
 			getWalletBalance()
 		}
-	}, [wallets])
+
+		loadProfilePicture()
+	}, [wallets, currentJwt])
 
 	return (
 		<Page>
@@ -114,6 +135,15 @@ const UserProfile = () => {
 								Save
 							</button>
 						</div>
+						<div className='flex w-full justify-center'>
+							<img
+								className='rounded-full m-8'
+								src={profileImageUrl}
+								width={200}
+								height={200}
+							/>
+						</div>
+
 						<div className={`border-t-4 ${styles.divider}`}></div>
 					</div>
 				</div>
