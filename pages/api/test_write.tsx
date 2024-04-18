@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { NextResponse } from 'next/server'
 import { hashMessage, recoverAddress, verifyMessage } from 'ethers'
-import { SupabaseClient, createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 
 export default async function handler(
