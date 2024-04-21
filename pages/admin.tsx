@@ -16,6 +16,9 @@ import Appbar from '@/components/appbar'
 
 import { Inter } from 'next/font/google'
 import styles from './styles/admin.module.css'
+import PoolRow from '@/components/poolRow'
+import UpcomingPoolTab from '@/components/UpcomingPoolTab'
+import PastPoolTab from '@/components/PastPoolTab'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -58,13 +61,13 @@ const Admin = () => {
 			<Appbar />
 
 			<Section>
-				<div className='flex justify-center h-full w-full mt-20 items-center'>
-					<div className='flex flex-col w-96 h-full'>
+				<div className='flex justify-center min-h-screen w-full mt-20'>
+					<div className='flex flex-col w-96 min-h-full'>
 						<div
 							className={`flex flex-row h-12 rounded-full ${styles.buttonTabBackground}`}
 						>
 							<button
-								onClick={() => selectTab(1)}
+								onClick={() => selectTab(0)}
 								className={`flex flex-1 font-semibold rounded-full bg-black text-white justify-center items-center ${
 									selectedTab === 0
 										? styles.selectedTabButton
@@ -77,13 +80,14 @@ const Admin = () => {
 								onClick={() => selectTab(1)}
 								className={`flex flex-1 font-semibold rounded-full bg-black text-white justify-center items-center ${
 									selectedTab === 1
-										? styles.unselectedTabButton
+										? styles.selectedTabButton
 										: styles.unselectedTabButton
 								} ${inter.className}`}
 							>
 								Past
 							</button>
 						</div>
+						{selectedTab === 0 ? <UpcomingPoolTab /> : <PastPoolTab />}
 
 						<div className='fixed bottom-6 left-1/2 transform -translate-x-1/2 w-96'>
 							<button
