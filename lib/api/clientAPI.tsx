@@ -87,7 +87,8 @@ export async function writeTest(address: writeTestObject) {
 }
 
 export const uploadProfileImage = async (
-	file: any,
+	fileBlob: any,
+	selectedFile: any,
 	address: string,
 	jwt: string,
 ) => {
@@ -106,10 +107,15 @@ export const uploadProfileImage = async (
 
 	const jwtObj = decode(jwt)
 	console.log('jwtObj', jwtObj)
+	console.log('file name', fileBlob.name)
+	console.log('selectedFile', selectedFile)
 
 	const { data, error } = await supabaseClient.storage
 		.from('profile')
-		.upload(`/public/${Date.now()}-test.png`, file)
+		.upload(
+			`/public/${jwtObj!.sub}/${Date.now()}-${selectedFile.name}`,
+			fileBlob,
+		)
 
 	if (error) {
 		console.error('Error uploading image:', error.message)

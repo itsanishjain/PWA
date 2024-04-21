@@ -22,6 +22,7 @@ import { updateUserDisplayData, uploadProfileImage } from '@/lib/api/clientAPI'
 import { useCookie } from '@/hooks/cookie'
 import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
+import camera from '@/public/images/camera.png'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -33,7 +34,9 @@ const UserProfile = () => {
 	const { wallets } = useWallets()
 
 	const [fileBlob, setFileBlob] = useState<any>(null)
+	const [selectedFile, setSelectedFile] = useState<any>(null)
 	const [profileImageUrl, setProfileImageUrl] = useState<string>('')
+	const [isImageReady, setIsImageReady] = useState<boolean>(true)
 
 	const { currentJwt } = useCookie()
 
@@ -44,32 +47,50 @@ const UserProfile = () => {
 	const handleDisplayNameChange = (e: ChangeEvent<HTMLInputElement>) => {
 		setDisplayName(e.target.value)
 	}
-	const handleCompanyChange = (e: ChangeEvent<HTMLInputElement>) => {
+	const handleCompanyChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
 		setCompany(e.target.value)
 	}
-	const handleBioChange = (e: ChangeEvent<HTMLInputElement>) => {
+	const handleBioChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
 		setBio(e.target.value)
 	}
 
 	const handleImageChange = (e: any) => {
-		const selectedFile = e.target.files?.[0]
-		if (selectedFile) {
+		setIsImageReady(false)
+		if (e.target.files?.length === 0) {
+			// User cancelled selection
+			setIsImageReady(true)
+			console.log('User cancelled image selection')
+		}
+		const file = e.target.files?.[0]
+		setSelectedFile(file)
+		if (file) {
 			const reader = new FileReader()
 			reader.onload = () => {
 				setFileBlob(reader.result)
 				console.log('File Loaded')
 				console.log('reader.result', reader.result)
+				setIsImageReady(true)
 			}
 			reader.onerror = (e) => {
 				console.error('Error reading file:', e)
+				setIsImageReady(true)
 			}
-			reader.readAsArrayBuffer(selectedFile)
+			reader.onabort = () => {
+				console.error('Aborted')
+				setIsImageReady(true)
+			}
+			reader.readAsArrayBuffer(file)
 		}
 	}
 
 	const handleSaveButtonClicked = async (e: any) => {
 		if (fileBlob != null) {
-			await uploadProfileImage(fileBlob!, wallets[0].address, currentJwt!)
+			await uploadProfileImage(
+				fileBlob!,
+				selectedFile,
+				wallets[0].address,
+				currentJwt!,
+			)
 		}
 		await updateUserDisplayData(displayName, company, bio, currentJwt!)
 	}
@@ -101,6 +122,11 @@ const UserProfile = () => {
 			.getPublicUrl(userDisplayData.avatar_url)
 		setProfileImageUrl(storageData.publicUrl)
 	}
+
+	const triggerFileInput = () => {
+		document.getElementById('fileInput')?.click()
+	}
+
 	useEffect(() => {
 		loadProfilePicture()
 	}, [wallets, currentJwt])
@@ -110,9 +136,9 @@ const UserProfile = () => {
 			<Appbar />
 			<Section>
 				<div
-					className={`flex justify-center h-full w-full mt-20 ${inter.className}`}
+					className={`flex justify-center w-full mt-20 min-h-screen ${inter.className}`}
 				>
-					<div className='flex flex-col w-96 h-96'>
+					<div className='flex flex-col w-96 pb-8'>
 						<h1 className='w-full text-center mt-12 font-bold text-2xl'>
 							User Profile
 						</h1>
@@ -120,49 +146,81 @@ const UserProfile = () => {
 							<input
 								type='file'
 								accept='image/*'
+								id='fileInput'
 								onChange={handleImageChange}
 								style={{ display: '' }}
+								className='hidden'
 							/>
 						</div>
 
 						<div className='flex w-full justify-center'>
-							<img
-								className='rounded-full m-8'
-								src={profileImageUrl}
-								width={200}
-								height={200}
-							/>
+							<button
+								onClick={triggerFileInput}
+								className='relative rounded-full m-8 w-40 aspect-square '
+							>
+								<img
+									className='rounded-full w-40 aspect-square center object-cover z-0'
+									src={profileImageUrl}
+								/>
+								<div
+									className={`w-full h-full rounded-full absolute top-0 left-0 ${styles.overlay} z-10 flex items-center justify-center`}
+								>
+									<img
+										src={camera.src}
+										className='object-center   object-contain'
+									/>
+								</div>
+							</button>
 						</div>
 
 						<div className={`border-t-4 ${styles.divider}`}></div>
-						<input
-							type='text'
-							value={displayName}
-							onChange={handleDisplayNameChange}
-							placeholder='Display Name'
-							className='rounded-full outline-1 outline my-2 px-4'
-						/>
-						<input
-							type='text'
-							value={bio}
-							onChange={handleBioChange}
-							placeholder='Company'
-							className='rounded-full outline-1 outline my-2 px-4'
-						/>
-						<input
-							type='text'
+						<div className='flex flex-row'>
+							<div className='h-10 flex flex-row items-center flex-1 font-semibold'>
+								Display name
+							</div>
+							<input
+								type='text'
+								value={displayName}
+								onChange={handleDisplayNameChange}
+								placeholder='Display Name'
+								className='rounded-lg my-2 px-4 flex flex-1'
+							/>
+						</div>
+						<div className={`border-t-4 ${styles.divider}`}></div>
+						<div className='flex flex-col'>
+							<div className='h-10  font-semibold'>
+								Bio
+								<span className='text-xs font-medium'>(optional)</span>
+							</div>
+							<textarea
+								value={bio}
+								onChange={handleBioChange}
+								placeholder='Write something enticing about yourself'
+								className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'
+							></textarea>
+						</div>
+
+						<div className={`border-t-4 ${styles.divider}`}></div>
+						<div className='h-10  font-semibold'>
+							Company
+							<span className='text-xs font-medium'>(optional)</span>
+						</div>
+
+						<textarea
 							value={company}
 							onChange={handleCompanyChange}
 							placeholder='Write something enticing about yourself'
-							className='rounded-full outline-1 outline my-2 px-4'
-						/>
-						<div className='flex justify-center'>
-							<button
-								className='bg-blue-700 rounded-full text-white py-4 px-8 mt-4'
-								onClick={handleSaveButtonClicked}
-							>
-								Save
-							</button>
+							className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'
+						></textarea>
+						<div className='flex justify-center mt-8'>
+							{isImageReady && (
+								<button
+									className='bg-black rounded-full text-white py-4 px-8 w-full mt-4'
+									onClick={handleSaveButtonClicked}
+								>
+									Save
+								</button>
+							)}
 						</div>
 					</div>
 				</div>
