@@ -62,6 +62,9 @@ const UserProfile = () => {
 			console.log('User cancelled image selection')
 		}
 		const file = e.target.files?.[0]
+		if (file) {
+			setProfileImageUrl(URL.createObjectURL(file))
+		}
 		setSelectedFile(file)
 		if (file) {
 			const reader = new FileReader()
