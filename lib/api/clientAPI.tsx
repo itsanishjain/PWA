@@ -185,3 +185,43 @@ export const updateUserDisplayData = async (
 
 	console.log('usersDisplay Information updated successfully')
 }
+
+export const fetchUpcomingPools = async () => {
+	// Upload image to Supabase storage
+	const supabaseClient = createClient(
+		process.env.NEXT_PUBLIC_SUPABASE_URL!,
+		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+	)
+	const currentTimestamp = new Date().toISOString()
+
+	const { data, error } = await supabaseClient
+		.from('pool')
+		.select('*')
+		.filter('event_timestamp', 'gte', currentTimestamp)
+
+	if (error) {
+		console.error('Error fetching pool data:', error.message)
+	} else {
+		return data
+	}
+}
+
+export const fetchPastPools = async () => {
+	// Upload image to Supabase storage
+	const supabaseClient = createClient(
+		process.env.NEXT_PUBLIC_SUPABASE_URL!,
+		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+	)
+	const currentTimestamp = new Date().toISOString()
+
+	const { data, error } = await supabaseClient
+		.from('pool')
+		.select('*')
+		.filter('event_timestamp', 'lt', currentTimestamp)
+
+	if (error) {
+		console.error('Error fetching pool data:', error.message)
+	} else {
+		return data
+	}
+}
