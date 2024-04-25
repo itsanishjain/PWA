@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import rightArrow from '@/public/images/right_arrow.svg'
-import PoolRow from './poolRow'
+import PoolRow from '../poolRow'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
-import { fetchUpcomingPools } from '@/lib/api/clientAPI'
+import { fetchPastPools } from '@/lib/api/clientAPI'
 import router from 'next/router'
 
 interface poolData {
@@ -27,11 +27,11 @@ const handlePoolRowClicked = (poolId: number) => {
 	router.push(`${currentRoute}/pool-id/${poolId}`)
 }
 
-const UpcomingPoolTab: React.FC = () => {
+const PastPoolTab: React.FC = () => {
 	const [poolsData, setPoolsData] = useState<poolData[] | undefined>([])
 
 	const fetchPoolsData = async () => {
-		const retrievedPoolsData = await fetchUpcomingPools()
+		const retrievedPoolsData = await fetchPastPools()
 		console.log('poolData', retrievedPoolsData)
 		setPoolsData(retrievedPoolsData)
 	}
@@ -60,4 +60,4 @@ const UpcomingPoolTab: React.FC = () => {
 	)
 }
 
-export default UpcomingPoolTab
+export default PastPoolTab

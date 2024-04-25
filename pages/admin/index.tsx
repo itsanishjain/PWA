@@ -17,8 +17,8 @@ import Appbar from '@/components/appbar'
 import { Inter } from 'next/font/google'
 import styles from './styles/admin.module.css'
 import PoolRow from '@/components/poolRow'
-import UpcomingPoolTab from '@/components/UpcomingPoolTab'
-import PastPoolTab from '@/components/PastPoolTab'
+import UpcomingPoolTab from '@/components/tabs/UpcomingPoolTab'
+import PastPoolTab from '@/components/tabs/PastPoolTab'
 
 const inter = Inter({ subsets: ['latin'] })
 
