@@ -47,7 +47,7 @@ const UpcomingPoolTab: React.FC = () => {
 					<PoolRow
 						key={pool.pool_id}
 						title={pool.pool_name}
-						poolImageUrl={pool.pool_image_url}
+						poolImagePath={pool.pool_image_url}
 						registered={0}
 						capacity={pool.soft_cap}
 						startTime={pool.event_timestamp}
