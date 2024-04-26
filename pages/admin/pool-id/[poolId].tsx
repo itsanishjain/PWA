@@ -37,6 +37,9 @@ import shareIcon from '@/public/images/share_icon.svg'
 import editIcon from '@/public/images/edit_icon.svg'
 import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
+import { Tables, Database } from '@/types/supabase'
+
+export type PoolRow = Database['public']['Tables']['pool']['Row']
 
 const PoolPage = () => {
 	const supabaseClient = createSupabaseBrowserClient()
@@ -49,7 +52,8 @@ const PoolPage = () => {
 	const { wallets } = useWallets()
 
 	const [poolInfo, setPoolInfo] = useState([])
-	const [userPoolStatus, setUserPoolStatus] = useState()
+	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
+	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 
 	const [copied, setCopied] = useState(false)
 
@@ -59,18 +63,30 @@ const PoolPage = () => {
 		const poolId = router.query.poolId
 
 		const { data, error } = await supabaseClient
-			.from('pool_table') // Replace 'your_table_name' with your actual table name
+			.from('pool') // Replace 'your_table_name' with your actual table name
 			.select()
 			.eq('pool_id', poolId)
 		// .eq('participant_address', walletAddress)
 
 		if (error) {
 			console.error('Error reading data:', error)
-		} else {
-			console.log('Pool data', JSON.stringify(data))
-			console.log('User Pool Status', data[0]?.status)
+			return
+		}
 
-			setUserPoolStatus(data[0]?.status)
+		console.log('Pool data', JSON.stringify(data))
+		if (data.length == 0) {
+			console.log('No Such Pool')
+			return
+		}
+		setPoolDbData(data[0])
+		if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
+			const { data: storageData } = supabaseClient.storage
+				.from('pool')
+				.getPublicUrl(data[0].pool_image_url)
+			setPoolImageUrl(storageData.publicUrl)
+			console.log('storageData', storageData)
+
+			console.log('poolImageUrl', storageData.publicUrl)
 		}
 	}
 	const getPoolData = async () => {
@@ -142,10 +158,6 @@ const PoolPage = () => {
 		copyToClipboard()
 	}
 
-	const handleDeposit = () => {
-		console.log('handleDeposit')
-	}
-
 	const copyToClipboard = async () => {
 		console.log('copyToClipboard')
 
@@ -171,7 +183,7 @@ const PoolPage = () => {
 						>
 							<div className='relative rounded-3xl overflow-hidden'>
 								<img
-									src={`${defaultPoolImage.src}`}
+									src={`${poolImageUrl ?? defaultPoolImage.src}`}
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
 								<div className='w-full h-full bg-black absolute bottom-0 backdrop-filter backdrop-blur-sm bg-opacity-60 flex flex-col items-center justify-center space-y-3 md:space-y-6 text-white'>
@@ -199,13 +211,13 @@ const PoolPage = () => {
 								</div>
 							</div>
 							<div className='flex flex-col space-y-6 md:space-y-12 '>
-								<div className='flex flex-col space-y-2 md:space-y-4'>
+								<div className='flex flex-col space-y-2 md:space-y-4 overflow-hidden'>
 									<h2 className='font-semibold text-lg md:text-4xl'>
-										The Original Pool Poker Party
+										{poolDbData?.pool_name}
 									</h2>
 									<p className='text-sm md:text-2xl'>Today @ 6:00 PM</p>
-									<p className='text-sm md:text-2xl font-semibold'>
-										Hosted by Pool, Pepe, Solana
+									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
+										Hosted by {poolDbData?.co_host_addresses}
 									</p>
 								</div>
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
@@ -240,17 +252,13 @@ const PoolPage = () => {
 						>
 							<h3 className='font-semibold text-sm md:text-2xl'>Description</h3>
 							<Divider />
-							<p className='md:text-2xl text-md'>
-								The most lit party of the year. Join us at Pools First Annual
-								Original Pool Party. Join all your friends at this unforgettable
-								night filled with laughter drinks and poolin!
-							</p>
+							<p className='md:text-2xl text-md'>{poolDbData?.description}</p>
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Buy-In</h3>
 							<Divider />
-							<p className='text-md md:text-2xl'>$35.00 USD</p>
+							<p className='text-md md:text-2xl'>${poolDbData?.price} USD</p>
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Terms</h3>
 							<Divider />
-							<p className='text-md md:text-2xl'>ww.lu.ma/pool-party-2024</p>
+							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
 						</div>
 						<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 							<button
