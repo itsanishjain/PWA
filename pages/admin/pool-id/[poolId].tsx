@@ -164,98 +164,102 @@ const PoolPage = () => {
 			<Appbar />
 
 			<Section>
-				<div className='flex flex-col pt-16 w-96 min-h-screen items-center pb-20 md:pb-24'>
-					<div
-						className={`flex flex-col rounded-3xl ${styles.cardBackground} w-full p-4 md:p-10 md:space-y-10 space-y-4`}
-					>
-						<div className='relative rounded-3xl overflow-hidden'>
-							<img
-								src={`${defaultPoolImage.src}`}
-								className='bg-black w-full h-full object-contain object-center'
-							></img>
-							<div className='w-full h-full bg-black absolute bottom-0 backdrop-filter backdrop-blur-sm bg-opacity-60 flex flex-col items-center justify-center space-y-3 md:space-y-6 text-white'>
-								<h4 className='text-xs md:text-2xl'>Starts in</h4>
-								<h3 className='text-4xl md:text-7xl font-semibold '>4 hours</h3>
-							</div>
-							<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
-								<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-									<img className='w-full h-full flex' src={qrCodeIcon.src} />
-								</button>
-								<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-									<img className='w-full h-full flex' src={shareIcon.src} />
-								</button>
-								<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-									<img className='w-full h-full flex' src={editIcon.src} />
-								</button>
-							</div>
-							<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
-								<div
-									className={`${styles.dotBackground} rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
-								></div>
-								<div className='md:text-2xl text-xs'>Upcoming</div>
-							</div>
-						</div>
-						<div className='flex flex-col space-y-6 md:space-y-12 '>
-							<div className='flex flex-col space-y-2 md:space-y-4'>
-								<h2 className='font-semibold text-lg md:text-4xl'>
-									The Original Pool Poker Party
-								</h2>
-								<p className='text-sm md:text-2xl'>Today @ 6:00 PM</p>
-								<p className='text-sm md:text-2xl font-semibold'>
-									Hosted by Pool, Pepe, Solana
-								</p>
-							</div>
-							<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
-								<div className='flex flex-rol justify-between'>
-									<p>
-										<span className='font-bold'>$825 </span>
-										USDC Prize Pool
-									</p>
-									<p>135% funded</p>
-								</div>
-								<div className='w-full h-full flex'>
-									<div
-										style={{ width: '100%' }}
-										className={`flex h-3 md:h-6 rounded-full ${styles.barBackground}`}
-									></div>
-								</div>
-							</div>
-							<div className='flex text-sm md:text-3xl justify-between'>
-								<span className='font-bold'>Participants </span>
-								<button className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'>
-									<span>View all</span>
-									<span>
-										<img src={`${rightArrow.src}`}></img>
-									</span>
-								</button>
-							</div>
-						</div>
-					</div>
-
-					<div
-						className={`flex flex-col rounded-3xl mt-2 md:mt-4 ${styles.cardBackground} w-full px-4 md:px-10 py-4 md:py-8 `}
-					>
-						<h3 className='font-semibold text-sm md:text-2xl'>Description</h3>
-						<Divider />
-						<p className='md:text-2xl text-md'>
-							The most lit party of the year. Join us at Pools First Annual
-							Original Pool Party. Join all your friends at this unforgettable
-							night filled with laughter drinks and poolin!
-						</p>
-						<h3 className='font-semibold text-sm md:text-2xl mt-8'>Buy-In</h3>
-						<Divider />
-						<p className='text-md md:text-2xl'>$35.00 USD</p>
-						<h3 className='font-semibold text-sm md:text-2xl mt-8'>Terms</h3>
-						<Divider />
-						<p className='text-md md:text-2xl'>ww.lu.ma/pool-party-2024</p>
-					</div>
-					<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 w-96 md:px-0 md:w-full'>
-						<button
-							className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-							onClick={handleStartPool}
+				<div className='flex flex-col w-full justify-center items-center'>
+					<div className='relative flex flex-col pt-16 w-full min-h-screen justify-center items-center pb-20 md:pb-24'>
+						<div
+							className={`flex flex-col rounded-3xl ${styles.cardBackground} w-full p-4 md:p-10 md:space-y-10 space-y-4`}
 						>
-							Start Pool
-						</button>
+							<div className='relative rounded-3xl overflow-hidden'>
+								<img
+									src={`${defaultPoolImage.src}`}
+									className='bg-black w-full h-full object-contain object-center'
+								></img>
+								<div className='w-full h-full bg-black absolute bottom-0 backdrop-filter backdrop-blur-sm bg-opacity-60 flex flex-col items-center justify-center space-y-3 md:space-y-6 text-white'>
+									<h4 className='text-xs md:text-2xl'>Starts in</h4>
+									<h3 className='text-4xl md:text-7xl font-semibold '>
+										4 hours
+									</h3>
+								</div>
+								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
+									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
+										<img className='w-full h-full flex' src={qrCodeIcon.src} />
+									</button>
+									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
+										<img className='w-full h-full flex' src={shareIcon.src} />
+									</button>
+									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
+										<img className='w-full h-full flex' src={editIcon.src} />
+									</button>
+								</div>
+								<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
+									<div
+										className={`${styles.dotBackground} rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
+									></div>
+									<div className='md:text-2xl text-xs'>Upcoming</div>
+								</div>
+							</div>
+							<div className='flex flex-col space-y-6 md:space-y-12 '>
+								<div className='flex flex-col space-y-2 md:space-y-4'>
+									<h2 className='font-semibold text-lg md:text-4xl'>
+										The Original Pool Poker Party
+									</h2>
+									<p className='text-sm md:text-2xl'>Today @ 6:00 PM</p>
+									<p className='text-sm md:text-2xl font-semibold'>
+										Hosted by Pool, Pepe, Solana
+									</p>
+								</div>
+								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
+									<div className='flex flex-rol justify-between'>
+										<p>
+											<span className='font-bold'>$825 </span>
+											USDC Prize Pool
+										</p>
+										<p>135% funded</p>
+									</div>
+									<div className='w-full h-full flex'>
+										<div
+											style={{ width: '100%' }}
+											className={`flex h-3 md:h-6 rounded-full ${styles.barBackground}`}
+										></div>
+									</div>
+								</div>
+								<div className='flex text-sm md:text-3xl justify-between'>
+									<span className='font-bold'>Participants </span>
+									<button className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'>
+										<span>View all</span>
+										<span>
+											<img src={`${rightArrow.src}`}></img>
+										</span>
+									</button>
+								</div>
+							</div>
+						</div>
+
+						<div
+							className={`flex flex-col rounded-3xl mt-2 md:mt-4 ${styles.cardBackground} w-full px-4 md:px-10 py-4 md:py-8 `}
+						>
+							<h3 className='font-semibold text-sm md:text-2xl'>Description</h3>
+							<Divider />
+							<p className='md:text-2xl text-md'>
+								The most lit party of the year. Join us at Pools First Annual
+								Original Pool Party. Join all your friends at this unforgettable
+								night filled with laughter drinks and poolin!
+							</p>
+							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Buy-In</h3>
+							<Divider />
+							<p className='text-md md:text-2xl'>$35.00 USD</p>
+							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Terms</h3>
+							<Divider />
+							<p className='text-md md:text-2xl'>ww.lu.ma/pool-party-2024</p>
+						</div>
+						<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+							<button
+								className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+								onClick={handleStartPool}
+							>
+								Start Pool
+							</button>
+						</div>
 					</div>
 				</div>
 			</Section>
