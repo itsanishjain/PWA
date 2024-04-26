@@ -38,6 +38,13 @@ import editIcon from '@/public/images/edit_icon.svg'
 import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
 import { Tables, Database } from '@/types/supabase'
+import {
+	formatCountdownTime,
+	formatEventDateTime,
+	formatTimeDiff,
+} from '@/lib/utils'
+import { PostgrestSingleResponse } from '@supabase/supabase-js'
+import CountdownTimer from '@/components/countdown'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 
@@ -58,11 +65,25 @@ const PoolPage = () => {
 	const [copied, setCopied] = useState(false)
 
 	const [pageUrl, setPageUrl] = useState('')
+	const [timeLeft, setTimeLeft] = useState<number>()
+
+	const calculateTimeLeft = (startTime: string) => {
+		const currentTimestamp: Date = new Date()
+		const startDateObject: Date = new Date(startTime)
+		const timeDiff = startDateObject.getTime() - currentTimestamp.getTime()
+		const { days, minutes, seconds } = formatTimeDiff(timeDiff)
+		console.log('days', days)
+		console.log('minutes', minutes)
+		console.log('seconds', seconds)
+		console.log('timeLeft', Math.floor(timeDiff / 1000))
+
+		setTimeLeft(timeDiff)
+	}
 
 	async function readPoolStatus() {
 		const poolId = router.query.poolId
 
-		const { data, error } = await supabaseClient
+		const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
 			.from('pool') // Replace 'your_table_name' with your actual table name
 			.select()
 			.eq('pool_id', poolId)
@@ -79,6 +100,9 @@ const PoolPage = () => {
 			return
 		}
 		setPoolDbData(data[0])
+		console.log('timestamp', data[0]?.event_timestamp)
+		calculateTimeLeft(data[0]?.event_timestamp)
+
 		if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
 			const { data: storageData } = supabaseClient.storage
 				.from('pool')
@@ -109,6 +133,7 @@ const PoolPage = () => {
 			getPoolData()
 			readPoolStatus()
 		}
+
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated])
 
@@ -169,6 +194,8 @@ const PoolPage = () => {
 		}
 	}
 
+	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
+
 	const handleStartPool = () => {}
 
 	return (
@@ -189,7 +216,9 @@ const PoolPage = () => {
 								<div className='w-full h-full bg-black absolute bottom-0 backdrop-filter backdrop-blur-sm bg-opacity-60 flex flex-col items-center justify-center space-y-3 md:space-y-6 text-white'>
 									<h4 className='text-xs md:text-2xl'>Starts in</h4>
 									<h3 className='text-4xl md:text-7xl font-semibold '>
-										4 hours
+										{timeLeft != undefined && (
+											<CountdownTimer initialTime={timeLeft} />
+										)}
 									</h3>
 								</div>
 								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
@@ -215,7 +244,7 @@ const PoolPage = () => {
 									<h2 className='font-semibold text-lg md:text-4xl'>
 										{poolDbData?.pool_name}
 									</h2>
-									<p className='text-sm md:text-2xl'>Today @ 6:00 PM</p>
+									<p className='text-sm md:text-2xl'>{eventDate}</p>
 									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
 										Hosted by {poolDbData?.co_host_addresses}
 									</p>
