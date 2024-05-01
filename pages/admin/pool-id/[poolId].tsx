@@ -44,6 +44,7 @@ import {
 } from '@/lib/utils'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
+import { fetchUserDisplayInfoFromServer } from '@/lib/api/clientAPI'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 
@@ -60,6 +61,10 @@ const PoolPage = () => {
 	const [poolInfo, setPoolInfo] = useState([])
 	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
+
+	const [poolBalance, setPoolBalance] = useState<number>(0)
+	const [poolParticipants, setPoolParticipants] = useState<number>(0)
+	const [cohostDbData, setCohostDbData] = useState<any>([])
 
 	const [copied, setCopied] = useState(false)
 
@@ -79,7 +84,7 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	async function readPoolInfo() {
+	async function fetchPoolInfoFromServer() {
 		const poolId = router.query.poolId
 
 		const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
@@ -111,17 +116,28 @@ const PoolPage = () => {
 
 			console.log('poolImageUrl', storageData.publicUrl)
 		}
+
+		const userDisplayData = await fetchUserDisplayInfoFromServer([
+			data[0]?.co_host_addresses,
+		])
+		setCohostDbData(userDisplayData)
 	}
-	const getPoolData = async () => {
+
+	const getPoolDataFromSC = async () => {
 		const contract = new ethers.Contract(
 			contractAddress,
 			poolContract.abi,
 			provider,
 		)
 		const poolId = router.query.poolId
-		const retrievedPoolInfo = await contract.getPoolInfo(poolId)
-		// console.log('Pool Info', JSON.stringify(retrievedPoolInfo))
-		setPoolInfo(retrievedPoolInfo)
+
+		const retrievedPoolBalance = await contract.getPoolBalance(poolId)
+		console.log('retrievedPoolBalance', retrievedPoolBalance)
+		setPoolBalance(Number(retrievedPoolBalance))
+
+		const retrievedPoolParticipants = await contract.getParticipants(poolId)
+		console.log('retrievedPoolBalance', retrievedPoolParticipants)
+		setPoolParticipants(Number(retrievedPoolParticipants))
 	}
 
 	useEffect(() => {
@@ -129,52 +145,15 @@ const PoolPage = () => {
 		if (ready && authenticated) {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
-			getPoolData()
-			readPoolInfo()
+			getPoolDataFromSC()
+			fetchPoolInfoFromServer()
 		}
 
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated])
 
-	const handleJoinPool = async () => {
-		console.log('handleJoinPool')
-		console.log(`wallet address: ${user!.wallet!.address}`)
-
-		const poolId = router.query.poolId
-		let signedMessage
-		try {
-			signedMessage = await signMessage(`Join Pool: ${poolId}`)
-		} catch (e: any) {
-			console.log('User did not sign transaction')
-		}
-		const formData = {
-			poolId,
-			signedMessage,
-			walletAddress: user!.wallet!.address,
-		}
-		try {
-			const response = await fetch('/api/join_pool', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(formData),
-			})
-
-			if (response.ok) {
-				console.log('Join success')
-				const msg = await response.json()
-				console.log(msg)
-				// Handle success
-				readPoolInfo()
-			} else {
-				console.error('Error sending data')
-				// Handle error
-			}
-		} catch (error) {
-			console.error('Error:', error)
-			// Handle error
-		}
+	const handleStartPool = () => {
+		console.log('handleStartPool')
 	}
 
 	const handleSharePool = () => {
@@ -195,7 +174,9 @@ const PoolPage = () => {
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
-	const handleStartPool = () => {}
+	const cohostNames: string = cohostDbData
+		.map((data: any) => data.display_name)
+		.join(',')
 
 	return (
 		<Page>
@@ -245,13 +226,13 @@ const PoolPage = () => {
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
 									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
-										Hosted by {poolDbData?.co_host_addresses}
+										Hosted by {cohostNames}
 									</p>
 								</div>
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
 									<div className='flex flex-rol justify-between'>
-										<p>
-											<span className='font-bold'>$825 </span>
+										<p className='max-w-sm '>
+											<span className='font-bold'>{poolBalance} </span>
 											USDC Prize Pool
 										</p>
 										<p>135% funded</p>
