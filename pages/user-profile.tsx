@@ -115,15 +115,15 @@ const UserProfile = () => {
 		const { data: userDisplayData, error } = await supabase
 			.from('usersDisplay')
 			.select('*')
-			.filter('id', 'eq', jwtObj.sub)
+			.filter('id', 'eq', jwtObj?.sub)
 			.single()
-		setDisplayName(userDisplayData.display_name)
-		setBio(userDisplayData.bio)
-		setCompany(userDisplayData.company)
+		setDisplayName(userDisplayData?.display_name)
+		setBio(userDisplayData?.bio)
+		setCompany(userDisplayData?.company)
 		const { data: storageData } = supabase.storage
 			.from('profile')
-			.getPublicUrl(userDisplayData.avatar_url)
-		setProfileImageUrl(storageData.publicUrl)
+			.getPublicUrl(userDisplayData?.avatar_url)
+		setProfileImageUrl(storageData?.publicUrl)
 	}
 
 	const triggerFileInput = () => {

@@ -89,13 +89,13 @@ const Authenticate = () => {
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
 						<h2 className='text-xl font-bold text-zinc-800 tagline-text text-center align-top w-full mt-28'>
-							Almost there ...
+							Terms
 						</h2>
 						<p
 							className={`text-base  text-center align-top w-full tagline-text mt-4`}
 						>
 							<span className={`text-base text-center align-top w-full`}>
-								We just need to verify your wallet.
+								By registering for events on Pool you are agreeing to the terms.
 							</span>
 						</p>
 
@@ -105,7 +105,7 @@ const Authenticate = () => {
 									className='rounded-full gradient-background px-28 py-3'
 									onClick={handleBackendLogin}
 								>
-									Verify
+									Accept
 								</button>
 							</div>
 						)}

@@ -28,7 +28,7 @@ const Appbar = () => {
 		usePrivy()
 
 	const handleAccountClick = (e: any) => {
-		router.push('/account')
+		router.push('/user-profile')
 	}
 
 	const handleSignOut = () => {
