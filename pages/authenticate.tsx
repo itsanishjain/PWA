@@ -3,7 +3,7 @@ import Section from '@/components/section'
 import Image from 'next/image'
 import poolImage from '@/public/images/pool.png'
 import { useRouter } from 'next/router'
-import { usePrivy } from '@privy-io/react-auth'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { chain } from '@/constants/constant'
 import React, { useState, useEffect } from 'react'
 import { fetchNonce, fetchToken, writeTest } from '@/lib/api/clientAPI'
@@ -16,6 +16,7 @@ const Authenticate = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, login } = usePrivy()
 	const { currentJwt, saveJwt, isJwtValid } = useCookie()
+	const { wallets } = useWallets()
 
 	const handleClick = () => {
 		// Replace '/your-link' with the actual path you want to navigate to
@@ -33,7 +34,13 @@ const Authenticate = () => {
 
 		let signedMessage = ''
 		try {
-			signedMessage = await signMessage(message)
+			const wallet = wallets[0] // Replace this with your desired wallet
+			const provider = await wallet.getEthereumProvider()
+			const address = wallet.address
+			signedMessage = await provider.request({
+				method: 'personal_sign',
+				params: [message, address],
+			})
 		} catch (e: any) {
 			console.log('User did not sign transaction')
 			return
@@ -69,13 +76,13 @@ const Authenticate = () => {
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
-		router.push('/')
+		router.push('/login')
 	}
 
 	if (ready && authenticated && isJwtValid) {
 		// Replace this code with however you'd like to handle an authenticated user
 		console.log('ready and authenticated')
-		router.push('/home')
+		router.push('/')
 	}
 
 	return (
@@ -89,13 +96,13 @@ const Authenticate = () => {
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
 						<h2 className='text-xl font-bold text-zinc-800 tagline-text text-center align-top w-full mt-28'>
-							Almost there ...
+							Terms
 						</h2>
 						<p
 							className={`text-base  text-center align-top w-full tagline-text mt-4`}
 						>
 							<span className={`text-base text-center align-top w-full`}>
-								We just need to verify your wallet.
+								By registering for events on Pool you are agreeing to the terms.
 							</span>
 						</p>
 
@@ -105,7 +112,7 @@ const Authenticate = () => {
 									className='rounded-full gradient-background px-28 py-3'
 									onClick={handleBackendLogin}
 								>
-									Verify
+									Accept
 								</button>
 							</div>
 						)}

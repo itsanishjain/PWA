@@ -29,7 +29,7 @@ const Account = () => {
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
-		router.push('/')
+		router.push('/login')
 	}
 
 	const getWalletBalance = async () => {

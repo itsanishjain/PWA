@@ -2,6 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 import Cookies from 'js-cookie'
 import { ErrorInfo } from 'react'
 import { decode } from 'jsonwebtoken'
+import { PostgrestSingleResponse } from '@supabase/supabase-js'
+import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { UserDisplayRow } from '@/pages/pool-id/[poolId]'
 
 export interface writeTestObject {
 	address: string
@@ -24,6 +27,8 @@ export interface FileObj {
 	type: string
 	data: Blob
 }
+
+const supabaseClient = createSupabaseBrowserClient()
 
 export async function fetchNonce(addressObject: addressObject) {
 	try {
@@ -146,6 +151,7 @@ export const updateUserDisplayData = async (
 	company: string,
 	bio: string,
 	jwt: string,
+	address: string,
 ) => {
 	// Upload image to Supabase storage
 	const supabaseClient = createClient(
@@ -173,6 +179,7 @@ export const updateUserDisplayData = async (
 				company: company,
 				bio: bio,
 				id: jwtObj!.sub,
+				address: address.toLowerCase(),
 			},
 			{
 				onConflict: 'id',
@@ -222,6 +229,22 @@ export const fetchPastPools = async () => {
 	if (error) {
 		console.error('Error fetching pool data:', error.message)
 	} else {
+		return data
+	}
+}
+
+export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
+	console.log('addressList', addressList)
+	const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
+		.from('usersDisplay')
+		.select()
+		.in('address', addressList)
+
+	if (error) {
+		console.error('Error reading data:', error)
+		return
+	} else {
+		console.log('fetchUserDisplayInfoFromServer data:', data)
 		return data
 	}
 }

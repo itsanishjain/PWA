@@ -95,13 +95,19 @@ const UserProfile = () => {
 				currentJwt!,
 			)
 		}
-		await updateUserDisplayData(displayName, company, bio, currentJwt!)
+		await updateUserDisplayData(
+			displayName,
+			company,
+			bio,
+			currentJwt!,
+			wallets[0].address,
+		)
 	}
 
 	if (ready && !authenticated) {
 		// Replace this code with however you'd like to handle an unauthenticated user
 		// As an example, you might redirect them to a sign-in page
-		router.push('/')
+		router.push('/login')
 	}
 
 	const supabase = createClient(
@@ -115,15 +121,15 @@ const UserProfile = () => {
 		const { data: userDisplayData, error } = await supabase
 			.from('usersDisplay')
 			.select('*')
-			.filter('id', 'eq', jwtObj.sub)
+			.filter('id', 'eq', jwtObj?.sub)
 			.single()
-		setDisplayName(userDisplayData.display_name)
-		setBio(userDisplayData.bio)
-		setCompany(userDisplayData.company)
+		setDisplayName(userDisplayData?.display_name)
+		setBio(userDisplayData?.bio)
+		setCompany(userDisplayData?.company)
 		const { data: storageData } = supabase.storage
 			.from('profile')
-			.getPublicUrl(userDisplayData.avatar_url)
-		setProfileImageUrl(storageData.publicUrl)
+			.getPublicUrl(userDisplayData?.avatar_url)
+		setProfileImageUrl(storageData?.publicUrl)
 	}
 
 	const triggerFileInput = () => {
