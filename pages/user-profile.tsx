@@ -142,7 +142,7 @@ const UserProfile = () => {
 
 	return (
 		<Page>
-			<Appbar />
+			<Appbar backRoute='/' />
 			<Section>
 				<div
 					className={`flex justify-center w-full mt-20 min-h-screen ${inter.className}`}

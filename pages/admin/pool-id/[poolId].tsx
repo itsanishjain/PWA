@@ -180,7 +180,7 @@ const PoolPage = () => {
 
 	return (
 		<Page>
-			<Appbar />
+			<Appbar backRoute='/admin' />
 
 			<Section>
 				<div className='flex flex-col w-full justify-center items-center'>
