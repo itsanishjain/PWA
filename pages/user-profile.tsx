@@ -19,7 +19,7 @@ import { provider } from '@/constants/constant'
 import { Inter } from 'next/font/google'
 import styles from './styles/user-profile.module.css'
 import { updateUserDisplayData, uploadProfileImage } from '@/lib/api/clientAPI'
-import { useCookie } from '@/hooks/cookie'
+import { removeTokenCookie, useCookie } from '@/hooks/cookie'
 import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
 import camera from '@/public/images/camera.png'
@@ -136,6 +136,11 @@ const UserProfile = () => {
 		document.getElementById('fileInput')?.click()
 	}
 
+	const handleSignOut = () => {
+		logout()
+		removeTokenCookie()
+	}
+
 	useEffect(() => {
 		loadProfilePicture()
 	}, [wallets, currentJwt])
@@ -230,6 +235,9 @@ const UserProfile = () => {
 									Save
 								</button>
 							)}
+						</div>
+						<div className='mt-8 flex justify-center'>
+							<button onClick={handleSignOut}>Sign Out</button>
 						</div>
 					</div>
 				</div>

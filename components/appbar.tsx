@@ -9,11 +9,16 @@ import {
 	getTokenCookie,
 	setTokenCookie,
 	removeTokenCookie,
+	useCookie,
 } from '@/hooks/cookie'
 
 import leftArrowImage from '@/public/images/left_arrow.svg'
 
 import { Comfortaa } from 'next/font/google'
+import { useEffect, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { JwtPayload, decode } from 'jsonwebtoken'
+import frogImage from '@/public/images/frog.png'
 
 const comfortaa = Comfortaa({ subsets: ['latin'] })
 
@@ -30,6 +35,8 @@ interface AppBarProps {
 
 const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 	const router = useRouter()
+	const { currentJwt } = useCookie()
+	const { wallets } = useWallets()
 
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
@@ -42,15 +49,41 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 		logout()
 		removeTokenCookie()
 	}
+	const [profileImageUrl, setProfileImageUrl] = useState<string>(
+		`${frogImage.src}`,
+	)
+
+	const supabase = createClient(
+		process.env.NEXT_PUBLIC_SUPABASE_URL!,
+		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+	)
+
+	const loadProfilePicture = async () => {
+		const jwtObj: any = decode(currentJwt ?? '')
+
+		const { data: userDisplayData, error } = await supabase
+			.from('usersDisplay')
+			.select('*')
+			.filter('id', 'eq', jwtObj?.sub)
+			.single()
+		const { data: storageData } = supabase.storage
+			.from('profile')
+			.getPublicUrl(userDisplayData?.avatar_url)
+		setProfileImageUrl(storageData?.publicUrl)
+	}
+
+	useEffect(() => {
+		loadProfilePicture()
+	}, [wallets, currentJwt])
 
 	return (
-		<div className='fixed top-0 left-0 z-20 w-full pt-safe'>
-			<header className=' px-safe '>
+		<header className='fixed top-0 left-0 z-20 w-full pt-safe bg-white'>
+			<nav className=' px-safe '>
 				<div className='mx-auto flex h-20 max-w-screen-md items-center justify-between px-6'>
 					<div className='flex-1 flex'>
 						{backRoute && (
 							<Link href={backRoute ?? ''}>
-								<img src={`${leftArrowImage.src}`} />
+								<img className='h-10 w-10' src={`${leftArrowImage.src}`} />
 							</Link>
 						)}
 					</div>
@@ -62,43 +95,29 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 						) : (
 							<Link href='/' className='text-center w-full'>
 								<h1
-									className={`text-center w-full h-full font-bold text-4xl ${comfortaa.className}`}
+									className={`text-center w-full h-full font-bold text-5xl ${comfortaa.className}`}
 								>
 									pool
 								</h1>
 							</Link>
 						)}
 					</div>
-					<nav className='flex items-center space-x-6 flex-1'>
-						<div className='hidden sm:block'>
-							{/* <div className='flex items-center space-x-6'>
-								{links.map(({ label, href }) => (
-									<Link
-										key={label}
-										href={href}
-										className={`text-sm ${
-											router.pathname === href
-												? 'text-indigo-500 '
-												: 'text-zinc-600 hover:text-zinc-900 '
-										}`}
-									>
-										{label}
-									</Link>
-								))}
-							</div> */}
-						</div>
+					<div className='flex justify-end space-x-6 flex-1'>
 						<div>
-							{' '}
-							<button onClick={handleAccountClick}>Account</button>
+							<button
+								className='flex flex-col items-center'
+								onClick={handleAccountClick}
+							>
+								<img
+									src={`${profileImageUrl}`}
+									className='rounded-full w-9 h-9 object-cover'
+								></img>
+							</button>
 						</div>
-						<div>
-							{' '}
-							<button onClick={handleSignOut}>Sign Out</button>
-						</div>
-					</nav>
+					</div>
 				</div>
-			</header>
-		</div>
+			</nav>
+		</header>
 	)
 }
 

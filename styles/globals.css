@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-	@apply min-h-screen select-none bg-zinc-50 text-zinc-900 antialiased p-safe;
+	@apply min-h-screen select-none bg-white text-zinc-900 antialiased p-safe;
 
 	/* PWA enhancements */
 	-webkit-overflow-scrolling: touch;
