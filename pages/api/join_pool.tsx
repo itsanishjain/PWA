@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { NextResponse } from 'next/server'
 import { hashMessage, recoverAddress, verifyMessage } from 'ethers'
-import { createBrowserClient } from '@supabase/ssr'
-// import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 
 type ResponseData = {
 	message: string
@@ -20,15 +19,15 @@ export default async function handler(
 ) {
 	// Parse the request body
 	const requestData = await req.body
-	const { poolId, signedMessage, walletAddress } = requestData
+	const { poolId, walletAddress } = requestData
 
-	const recoveredAddress = recoverAddress(
-		hashMessage(`Join Pool: ${poolId}`),
-		signedMessage,
-	)
-	const isSignedCorrectly = recoveredAddress == walletAddress
+	// const recoveredAddress = recoverAddress(
+	// 	hashMessage(`Join Pool: ${poolId}`),
+	// 	signedMessage,
+	// )
+
 	// Return a response
-	const supabase = createBrowserClient(
+	const supabase = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
 		process.env.SUPABASE_SERVICE_KEY!,
 	)
@@ -40,7 +39,7 @@ export default async function handler(
 	}
 	async function insertData() {
 		const { error } = await supabase
-			.from('pool_table') // Replace 'your_table_name' with your actual table name
+			.from('participantStatus') // Replace 'your_table_name' with your actual table name
 			.insert([supabaseRow])
 
 		if (error) {
@@ -52,7 +51,7 @@ export default async function handler(
 
 	async function upsertData() {
 		const { data: existingData, error: selectError } = await supabase
-			.from('pool_table')
+			.from('participantStatus')
 			.select('*')
 			.match({
 				pool_id: supabaseRow.pool_id,
@@ -64,7 +63,7 @@ export default async function handler(
 			console.error('Error fetching existing data:', selectError)
 			// Insert a new row
 			const { data: insertedData, error: insertError } = await supabase
-				.from('pool_table')
+				.from('participantStatus')
 				.insert([supabaseRow])
 
 			if (insertError) {
@@ -79,7 +78,7 @@ export default async function handler(
 		if (existingData) {
 			// Update the existing row
 			const { data: updatedData, error: updateError } = await supabase
-				.from('pool_table')
+				.from('participantStatus')
 				.update({ status: supabaseRow.status })
 				.match({
 					pool_id: supabaseRow.pool_id,
@@ -95,8 +94,5 @@ export default async function handler(
 	}
 
 	await upsertData()
-	res.status(200).json({
-		isSignedCorrectly,
-		message: `poolId ${poolId}, signedMessage ${signedMessage}, walletAddress ${walletAddress}`,
-	})
+	res.status(200)
 }

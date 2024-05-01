@@ -22,7 +22,12 @@ import { readContract, readContracts } from '@wagmi/core'
 import { foundry, hardhat, mainnet, sepolia } from 'viem/chains'
 import { Interface, ethers } from 'ethers'
 
-import { contractAddress, provider } from 'constants/constant'
+import {
+	chain,
+	tokenAddress,
+	contractAddress,
+	provider,
+} from 'constants/constant'
 import { config } from '@/constants/config'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
@@ -57,7 +62,7 @@ const PoolPage = () => {
 
 	const { wallets } = useWallets()
 
-	const [poolInfo, setPoolInfo] = useState([])
+	const [poolBalance, setPoolBalance] = useState<number>(0)
 	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 
@@ -79,7 +84,7 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	async function readPoolStatus() {
+	async function fetchPoolInfoFromServer() {
 		const poolId = router.query.poolId
 
 		const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
@@ -112,16 +117,17 @@ const PoolPage = () => {
 			console.log('poolImageUrl', storageData.publicUrl)
 		}
 	}
-	const getPoolData = async () => {
+	const getPoolDataFromSC = async () => {
 		const contract = new ethers.Contract(
 			contractAddress,
 			poolContract.abi,
 			provider,
 		)
 		const poolId = router.query.poolId
-		const retrievedPoolInfo = await contract.getPoolInfo(poolId)
-		// console.log('Pool Info', JSON.stringify(retrievedPoolInfo))
-		setPoolInfo(retrievedPoolInfo)
+		const retrievedPoolBalance = await contract.getPoolBalance(poolId)
+		console.log('retrievedPoolBalance', retrievedPoolBalance)
+
+		setPoolBalance(Number(retrievedPoolBalance))
 	}
 
 	useEffect(() => {
@@ -129,27 +135,21 @@ const PoolPage = () => {
 		if (ready && authenticated) {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
-			getPoolData()
-			readPoolStatus()
+			getPoolDataFromSC()
+			fetchPoolInfoFromServer()
 		}
 
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated])
 
-	const handleJoinPool = async () => {
+	const handleRegisterServer = async () => {
 		console.log('handleJoinPool')
 		console.log(`wallet address: ${user!.wallet!.address}`)
 
 		const poolId = router.query.poolId
-		let signedMessage
-		try {
-			signedMessage = await signMessage(`Join Pool: ${poolId}`)
-		} catch (e: any) {
-			console.log('User did not sign transaction')
-		}
+
 		const formData = {
 			poolId,
-			signedMessage,
 			walletAddress: user!.wallet!.address,
 		}
 		try {
@@ -166,7 +166,7 @@ const PoolPage = () => {
 				const msg = await response.json()
 				console.log(msg)
 				// Handle success
-				readPoolStatus()
+				fetchPoolInfoFromServer()
 			} else {
 				console.error('Error sending data')
 				// Handle error
@@ -195,7 +195,38 @@ const PoolPage = () => {
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
-	const handleStartPool = () => {}
+	const handleRegister = async () => {
+		const poolId = router.query.poolId
+
+		const iface = new Interface(poolContract.abi)
+		const dataString = iface.encodeFunctionData('deposit', [
+			poolId,
+			poolDbData?.price,
+		])
+
+		const uiConfig = {
+			title: 'Register',
+			description: `You agree to pay the registration fee of ${poolDbData?.price} to join the pool`,
+			buttonText: 'Sign',
+		}
+
+		const unsignedTx: UnsignedTransactionRequest = {
+			to: contractAddress,
+			chainId: chain.id,
+			data: dataString,
+		}
+		try {
+			const txReceipt: TransactionReceipt = await sendTransaction(
+				unsignedTx,
+				uiConfig,
+			)
+		} catch (e: any) {
+			console.log(e.message)
+			return
+		}
+
+		handleRegisterServer()
+	}
 
 	return (
 		<Page>
@@ -220,17 +251,6 @@ const PoolPage = () => {
 										)}
 									</h3>
 								</div>
-								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
-									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-										<img className='w-full h-full flex' src={qrCodeIcon.src} />
-									</button>
-									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-										<img className='w-full h-full flex' src={shareIcon.src} />
-									</button>
-									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-										<img className='w-full h-full flex' src={editIcon.src} />
-									</button>
-								</div>
 								<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
 									<div
 										className={`dotBackground rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
@@ -251,7 +271,7 @@ const PoolPage = () => {
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
 									<div className='flex flex-rol justify-between'>
 										<p>
-											<span className='font-bold'>$825 </span>
+											<span className='font-bold'>{poolBalance} </span>
 											USDC Prize Pool
 										</p>
 										<p>135% funded</p>
@@ -291,9 +311,9 @@ const PoolPage = () => {
 						<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 							<button
 								className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-								onClick={handleStartPool}
+								onClick={handleRegister}
 							>
-								Start Pool
+								Register
 							</button>
 						</div>
 					</div>

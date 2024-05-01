@@ -53,7 +53,7 @@ const PoolPage = () => {
 		const poolId = router.query.poolId
 
 		const { data, error } = await supabaseClient
-			.from('pool_table') // Replace 'your_table_name' with your actual table name
+			.from('pool') // Replace 'your_table_name' with your actual table name
 			.select()
 			.eq('pool_id', poolId)
 		// .eq('participant_address', walletAddress)

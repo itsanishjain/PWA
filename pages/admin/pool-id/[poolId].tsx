@@ -79,7 +79,7 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	async function readPoolStatus() {
+	async function readPoolInfo() {
 		const poolId = router.query.poolId
 
 		const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
@@ -130,7 +130,7 @@ const PoolPage = () => {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
 			getPoolData()
-			readPoolStatus()
+			readPoolInfo()
 		}
 
 		setPageUrl(window?.location.href)
@@ -166,7 +166,7 @@ const PoolPage = () => {
 				const msg = await response.json()
 				console.log(msg)
 				// Handle success
-				readPoolStatus()
+				readPoolInfo()
 			} else {
 				console.error('Error sending data')
 				// Handle error
