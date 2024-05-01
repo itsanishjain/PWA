@@ -137,6 +137,7 @@ export type Database = {
       }
       usersDisplay: {
         Row: {
+          address: string
           avatar_url: string | null
           bio: string | null
           company: string | null
@@ -145,6 +146,7 @@ export type Database = {
           id: string
         }
         Insert: {
+          address: string
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
@@ -153,6 +155,7 @@ export type Database = {
           id?: string
         }
         Update: {
+          address?: string
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
