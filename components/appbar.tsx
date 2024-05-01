@@ -44,8 +44,8 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 	}
 
 	return (
-		<div className='fixed top-0 left-0 z-20 w-full bg-zinc-900 pt-safe'>
-			<header className='border-b bg-zinc-100 px-safe '>
+		<div className='fixed top-0 left-0 z-20 w-full pt-safe'>
+			<header className=' px-safe '>
 				<div className='mx-auto flex h-20 max-w-screen-md items-center justify-between px-6'>
 					<div className='flex-1 flex'>
 						{backRoute && (
