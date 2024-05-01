@@ -71,8 +71,14 @@ export const localnetContractAddress =
 	'0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
 
 export const testnetTokenAddress = '0x4FFB3dE4C805D10B60cAaF225EC3667507a9061f'
+// This is the testnet address for previous contract
+// export const testnetContractAddress =
+// 	'0x9C2eFC1BdCAaC75c7f77F924fD573be4a2F6c024'
+
+// This is the testnet address for current contract
 export const testnetContractAddress =
-	'0x9C2eFC1BdCAaC75c7f77F924fD573be4a2F6c024'
+	'0x6cc1e69a0b82fb497aee7335ccdc78c703ddb346'
+
 export const testnetDropletClaimContractAddress =
 	'0x7f0668B813a960AAd9E56C4870131dB6314819eB'
 

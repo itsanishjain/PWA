@@ -63,6 +63,8 @@ const PoolPage = () => {
 	const { wallets } = useWallets()
 
 	const [poolBalance, setPoolBalance] = useState<number>(0)
+	const [poolParticipants, setPoolParticipants] = useState<number>(0)
+
 	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 
@@ -124,10 +126,14 @@ const PoolPage = () => {
 			provider,
 		)
 		const poolId = router.query.poolId
+
 		const retrievedPoolBalance = await contract.getPoolBalance(poolId)
 		console.log('retrievedPoolBalance', retrievedPoolBalance)
-
 		setPoolBalance(Number(retrievedPoolBalance))
+
+		const retrievedPoolParticipants = await contract.getParticipants(poolId)
+		console.log('retrievedPoolBalance', retrievedPoolParticipants)
+		setPoolParticipants(Number(retrievedPoolParticipants))
 	}
 
 	useEffect(() => {
@@ -228,6 +234,10 @@ const PoolPage = () => {
 		handleRegisterServer()
 	}
 
+	const percentFunded = poolDbData?.price
+		? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
+		: poolParticipants / poolDbData?.soft_cap
+
 	return (
 		<Page>
 			<Appbar />
@@ -243,13 +253,10 @@ const PoolPage = () => {
 									src={`${poolImageUrl ?? defaultPoolImage.src}`}
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
-								<div className='w-full h-full bg-black absolute bottom-0 backdrop-filter backdrop-blur-sm bg-opacity-60 flex flex-col items-center justify-center space-y-3 md:space-y-6 text-white'>
-									<h4 className='text-xs md:text-2xl'>Starts in</h4>
-									<h3 className='text-4xl md:text-7xl font-semibold '>
-										{timeLeft != undefined && (
-											<CountdownTimer initialTime={timeLeft} />
-										)}
-									</h3>
+								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
+									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
+										<img className='w-full h-full flex' src={shareIcon.src} />
+									</button>
 								</div>
 								<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
 									<div
@@ -270,11 +277,11 @@ const PoolPage = () => {
 								</div>
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
 									<div className='flex flex-rol justify-between'>
-										<p>
+										<p className='max-w-sm '>
 											<span className='font-bold'>{poolBalance} </span>
 											USDC Prize Pool
 										</p>
-										<p>135% funded</p>
+										<p>{135}% funded</p>
 									</div>
 									<div className='w-full h-full flex'>
 										<div
