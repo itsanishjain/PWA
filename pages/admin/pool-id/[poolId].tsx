@@ -30,7 +30,6 @@ import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import DropdownChecklist from '@/components/dropdown-checklist'
 
-import styles from './styles/pool.module.css'
 import defaultPoolImage from '@/public/images/frog.png'
 import qrCodeIcon from '@/public/images/qr_code_icon.svg'
 import shareIcon from '@/public/images/share_icon.svg'
@@ -206,7 +205,7 @@ const PoolPage = () => {
 				<div className='flex flex-col w-full justify-center items-center'>
 					<div className='relative flex flex-col pt-16 w-full min-h-screen justify-center items-center pb-20 md:pb-24'>
 						<div
-							className={`flex flex-col rounded-3xl ${styles.cardBackground} w-full p-4 md:p-10 md:space-y-10 space-y-4`}
+							className={`flex flex-col rounded-3xl cardBackground w-full p-4 md:p-10 md:space-y-10 space-y-4`}
 						>
 							<div className='relative rounded-3xl overflow-hidden'>
 								<img
@@ -234,7 +233,7 @@ const PoolPage = () => {
 								</div>
 								<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
 									<div
-										className={`${styles.dotBackground} rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
+										className={`dotBackground rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
 									></div>
 									<div className='md:text-2xl text-xs'>Upcoming</div>
 								</div>
@@ -260,7 +259,7 @@ const PoolPage = () => {
 									<div className='w-full h-full flex'>
 										<div
 											style={{ width: '100%' }}
-											className={`flex h-3 md:h-6 rounded-full ${styles.barBackground}`}
+											className={`flex h-3 md:h-6 rounded-full barBackground`}
 										></div>
 									</div>
 								</div>
@@ -277,7 +276,7 @@ const PoolPage = () => {
 						</div>
 
 						<div
-							className={`flex flex-col rounded-3xl mt-2 md:mt-4 ${styles.cardBackground} w-full px-4 md:px-10 py-4 md:py-8 `}
+							className={`flex flex-col rounded-3xl mt-2 md:mt-4 cardBackground w-full px-4 md:px-10 py-4 md:py-8 `}
 						>
 							<h3 className='font-semibold text-sm md:text-2xl'>Description</h3>
 							<Divider />
