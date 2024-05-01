@@ -95,7 +95,13 @@ const UserProfile = () => {
 				currentJwt!,
 			)
 		}
-		await updateUserDisplayData(displayName, company, bio, currentJwt!)
+		await updateUserDisplayData(
+			displayName,
+			company,
+			bio,
+			currentJwt!,
+			wallets[0].address,
+		)
 	}
 
 	if (ready && !authenticated) {

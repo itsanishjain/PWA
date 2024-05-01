@@ -3,7 +3,7 @@ import Section from '@/components/section'
 import Image from 'next/image'
 import poolImage from '@/public/images/pool.png'
 import { useRouter } from 'next/router'
-import { usePrivy } from '@privy-io/react-auth'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { chain } from '@/constants/constant'
 import React, { useState, useEffect } from 'react'
 import { fetchNonce, fetchToken, writeTest } from '@/lib/api/clientAPI'
@@ -16,6 +16,7 @@ const Authenticate = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, login } = usePrivy()
 	const { currentJwt, saveJwt, isJwtValid } = useCookie()
+	const { wallets } = useWallets()
 
 	const handleClick = () => {
 		// Replace '/your-link' with the actual path you want to navigate to
@@ -33,7 +34,13 @@ const Authenticate = () => {
 
 		let signedMessage = ''
 		try {
-			signedMessage = await signMessage(message)
+			const wallet = wallets[0] // Replace this with your desired wallet
+			const provider = await wallet.getEthereumProvider()
+			const address = wallet.address
+			signedMessage = await provider.request({
+				method: 'personal_sign',
+				params: [message, address],
+			})
 		} catch (e: any) {
 			console.log('User did not sign transaction')
 			return

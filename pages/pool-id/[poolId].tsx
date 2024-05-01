@@ -49,8 +49,10 @@ import {
 } from '@/lib/utils'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
+import { fetchUserDisplayInfoFromServer } from '@/lib/api/clientAPI'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
+export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 
 const PoolPage = () => {
 	const supabaseClient = createSupabaseBrowserClient()
@@ -67,6 +69,7 @@ const PoolPage = () => {
 
 	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
+	const [cohostDbData, setCohostDbData] = useState<any>([])
 
 	const [copied, setCopied] = useState(false)
 
@@ -118,7 +121,13 @@ const PoolPage = () => {
 
 			console.log('poolImageUrl', storageData.publicUrl)
 		}
+
+		const userDisplayData = await fetchUserDisplayInfoFromServer([
+			data[0]?.co_host_addresses,
+		])
+		setCohostDbData(userDisplayData)
 	}
+
 	const getPoolDataFromSC = async () => {
 		const contract = new ethers.Contract(
 			contractAddress,
@@ -234,9 +243,13 @@ const PoolPage = () => {
 		handleRegisterServer()
 	}
 
-	const percentFunded = poolDbData?.price
-		? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
-		: poolParticipants / poolDbData?.soft_cap
+	// const percentFunded = poolDbData?.price
+	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
+	// 	: poolParticipants / poolDbData?.soft_cap
+
+	const cohostNames: string = cohostDbData
+		.map((data: any) => data.display_name)
+		.join(',')
 
 	return (
 		<Page>
@@ -275,7 +288,7 @@ const PoolPage = () => {
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
 									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
-										Hosted by {poolDbData?.co_host_addresses}
+										Hosted by {cohostNames}
 									</p>
 								</div>
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
