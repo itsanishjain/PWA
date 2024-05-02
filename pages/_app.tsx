@@ -2,7 +2,7 @@ import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'next-themes'
 import '@/styles/globals.css'
 import { PrivyProvider } from '@privy-io/react-auth'
-import { base, baseGoerli, mainnet, goerli } from 'viem/chains'
+import { base, baseGoerli, mainnet, goerli, baseSepolia } from 'viem/chains'
 import { chain } from 'constants/constant'
 import { PrivyWagmiConnector } from '@privy-io/wagmi-connector'
 import { foundry } from 'wagmi/chains'
@@ -46,9 +46,20 @@ export default function App({ Component, pageProps }: AppProps) {
 					},
 					embeddedWallets: {
 						createOnLogin: 'users-without-wallets',
+						priceDisplay: {
+							primary: 'native-token',
+							secondary: null,
+						},
 					},
 					defaultChain: chain,
-					supportedChains: [base, baseGoerli, mainnet, goerli, chain],
+					supportedChains: [
+						base,
+						baseSepolia,
+						baseGoerli,
+						mainnet,
+						goerli,
+						chain,
+					],
 					fiatOnRamp: { useSandbox: true },
 				}}
 			>

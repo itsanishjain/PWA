@@ -19,6 +19,9 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
 import frogImage from '@/public/images/frog.png'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
+import { fetchProfileUrlForAddress } from '@/lib/api/clientAPI'
+import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 
 const comfortaa = Comfortaa({ subsets: ['latin'] })
 
@@ -32,6 +35,8 @@ interface AppBarProps {
 	backRoute?: string // Required color property
 	pageTitle?: string // Optional size property
 }
+
+const supabaseClient = createSupabaseBrowserClient()
 
 const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 	const router = useRouter()
@@ -53,28 +58,15 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 		`${frogImage.src}`,
 	)
 
-	const supabase = createClient(
+	const supabaseClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 	)
 
-	const loadProfilePicture = async () => {
-		const jwtObj: any = decode(currentJwt ?? '')
-
-		const { data: userDisplayData, error } = await supabase
-			.from('usersDisplay')
-			.select('*')
-			.filter('id', 'eq', jwtObj?.sub)
-			.single()
-		const { data: storageData } = supabase.storage
-			.from('profile')
-			.getPublicUrl(userDisplayData?.avatar_url)
-		setProfileImageUrl(storageData?.publicUrl)
-	}
-
-	useEffect(() => {
-		loadProfilePicture()
-	}, [wallets, currentJwt])
+	const { data: profileData } = useQuery({
+		queryKey: ['loadProfileImage', wallets?.[0]?.address],
+		queryFn: fetchProfileUrlForAddress,
+	})
 
 	return (
 		<header className='fixed top-0 left-0 z-20 w-full pt-safe bg-white'>
@@ -109,7 +101,7 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 								onClick={handleAccountClick}
 							>
 								<img
-									src={`${profileImageUrl}`}
+									src={`${profileData?.profileImageUrl ?? frogImage.src}`}
 									className='rounded-full w-9 h-9 object-cover'
 								></img>
 							</button>

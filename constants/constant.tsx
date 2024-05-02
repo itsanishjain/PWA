@@ -77,7 +77,7 @@ export const testnetTokenAddress = '0x4FFB3dE4C805D10B60cAaF225EC3667507a9061f'
 
 // This is the testnet address for current contract
 export const testnetContractAddress =
-	'0x6cc1e69a0b82fb497aee7335ccdc78c703ddb346'
+	'0xaBb8781123902eC0A94c9F4865e3c2738c224FDE'
 
 export const testnetDropletClaimContractAddress =
 	'0x7f0668B813a960AAd9E56C4870131dB6314819eB'
