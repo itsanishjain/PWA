@@ -1,7 +1,7 @@
 import Page from '@/components/page'
 import Section from '@/components/section'
 import Image from 'next/image'
-import poolImage from '@/public/images/pool.png'
+import frogImage from '@/public/images/frog.png'
 import { useRouter } from 'next/router'
 import {
 	UnsignedTransactionRequest,
@@ -18,11 +18,16 @@ import { FundWalletConfig } from '@privy-io/react-auth'
 import { provider } from '@/constants/constant'
 import { Inter } from 'next/font/google'
 import styles from './styles/user-profile.module.css'
-import { updateUserDisplayData, uploadProfileImage } from '@/lib/api/clientAPI'
+import {
+	fetchProfileUrlForAddress,
+	updateUserDisplayData,
+	uploadProfileImage,
+} from '@/lib/api/clientAPI'
 import { removeTokenCookie, useCookie } from '@/hooks/cookie'
 import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
 import camera from '@/public/images/camera.png'
+import { useQuery } from '@tanstack/react-query'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,7 +40,7 @@ const UserProfile = () => {
 
 	const [fileBlob, setFileBlob] = useState<any>(null)
 	const [selectedFile, setSelectedFile] = useState<any>(null)
-	const [profileImageUrl, setProfileImageUrl] = useState<string>('')
+	const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>()
 	const [isImageReady, setIsImageReady] = useState<boolean>(true)
 
 	const { currentJwt } = useCookie()
@@ -115,22 +120,10 @@ const UserProfile = () => {
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 	)
 
-	const loadProfilePicture = async () => {
-		const jwtObj: any = decode(currentJwt ?? '')
-
-		const { data: userDisplayData, error } = await supabase
-			.from('usersDisplay')
-			.select('*')
-			.filter('id', 'eq', jwtObj?.sub)
-			.single()
-		setDisplayName(userDisplayData?.display_name)
-		setBio(userDisplayData?.bio)
-		setCompany(userDisplayData?.company)
-		const { data: storageData } = supabase.storage
-			.from('profile')
-			.getPublicUrl(userDisplayData?.avatar_url)
-		setProfileImageUrl(storageData?.publicUrl)
-	}
+	const { data: profileData } = useQuery({
+		queryKey: ['loadProfileImage', wallets?.[0]?.address],
+		queryFn: fetchProfileUrlForAddress,
+	})
 
 	const triggerFileInput = () => {
 		document.getElementById('fileInput')?.click()
@@ -140,10 +133,6 @@ const UserProfile = () => {
 		logout()
 		removeTokenCookie()
 	}
-
-	useEffect(() => {
-		loadProfilePicture()
-	}, [wallets, currentJwt])
 
 	return (
 		<Page>
@@ -174,7 +163,11 @@ const UserProfile = () => {
 							>
 								<img
 									className='rounded-full w-40 aspect-square center object-cover z-0'
-									src={profileImageUrl}
+									src={
+										profileImageUrl ??
+										profileData?.profileImageUrl ??
+										frogImage.src
+									}
 								/>
 								<div
 									className={`w-full h-full rounded-full absolute top-0 left-0 ${styles.overlay} z-10 flex items-center justify-center`}
@@ -194,7 +187,11 @@ const UserProfile = () => {
 							</div>
 							<input
 								type='text'
-								value={displayName}
+								value={
+									displayName == ''
+										? profileData?.userDisplayData.display_name
+										: displayName
+								}
 								onChange={handleDisplayNameChange}
 								placeholder='Display Name'
 								className='rounded-lg my-2 px-4 flex flex-1'
@@ -207,7 +204,7 @@ const UserProfile = () => {
 								<span className='text-xs font-medium'>(optional)</span>
 							</div>
 							<textarea
-								value={bio}
+								value={bio == '' ? profileData?.userDisplayData.bio : bio}
 								onChange={handleBioChange}
 								placeholder='Write something enticing about yourself'
 								className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'
@@ -221,7 +218,9 @@ const UserProfile = () => {
 						</div>
 
 						<textarea
-							value={company}
+							value={
+								company == '' ? profileData?.userDisplayData.company : company
+							}
 							onChange={handleCompanyChange}
 							placeholder='Write something enticing about yourself'
 							className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'

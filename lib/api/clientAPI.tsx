@@ -5,6 +5,7 @@ import { decode } from 'jsonwebtoken'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { UserDisplayRow } from '@/pages/pool-id/[poolId]'
+import { QueryFunction } from '@tanstack/react-query'
 
 export interface writeTestObject {
 	address: string
@@ -248,3 +249,29 @@ export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 		return data
 	}
 }
+
+export const fetchProfileUrlForAddress = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, address] = queryKey
+	const { data: userDisplayData, error } = await supabaseClient
+		.from('usersDisplay')
+		.select('*')
+		.filter('address', 'eq', address)
+		.single()
+	if (error) {
+		console.error('Error reading data:', error)
+		return
+	}
+	const { data: storageData } = await supabaseClient.storage
+		.from('profile')
+		.getPublicUrl(userDisplayData?.avatar_url)
+	return { userDisplayData, profileImageUrl: storageData.publicUrl }
+}
+
+// export const testAsyncFunction = async () => {
+// 	console.log('Hello')
+// 	await 'asdf'
+// }

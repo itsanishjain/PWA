@@ -70,6 +70,7 @@ const PoolPage = () => {
 	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any>([])
+	const [poolSCInfo, setPoolSCInfo] = useState<any>()
 
 	const [copied, setCopied] = useState(false)
 
@@ -145,12 +146,49 @@ const PoolPage = () => {
 		setPoolParticipants(Number(retrievedPoolParticipants))
 	}
 
+	const getAllPoolDataFromSC = async () => {
+		const contract = new ethers.Contract(
+			contractAddress,
+			poolContract.abi,
+			provider,
+		)
+		const poolId = router.query.poolId
+
+		const retrievedAllPoolInfo = await contract.getAllPoolInfo(poolId)
+		setPoolSCInfo(retrievedAllPoolInfo)
+		console.log('retrievedAllPoolInfo', retrievedAllPoolInfo)
+		console.log('retrievedAllPoolInfo[0]', retrievedAllPoolInfo[0])
+		console.log('retrievedAllPoolInfo[1]', retrievedAllPoolInfo[1])
+		console.log('retrievedAllPoolInfo[2]', retrievedAllPoolInfo[2])
+		console.log('retrievedAllPoolInfo[3]', retrievedAllPoolInfo[3])
+		console.log('retrievedAllPoolInfo[2] poolSCBalance', poolSCInfo?.[2][0])
+		console.log('retrievedAllPoolInfo[4]', retrievedAllPoolInfo[4])
+		console.log('retrievedAllPoolInfo[5]', retrievedAllPoolInfo[5])
+		console.log('retrievedAllPoolInfo[6]', retrievedAllPoolInfo[6])
+	}
+
+	const poolSCAdmin = poolSCInfo?.[0]
+	const poolSCDetail = poolSCInfo?.[1]
+	const poolSCBalance = poolSCInfo
+		? (BigInt(poolSCInfo?.[2][0]) / BigInt(1000000000000000000)).toString()
+		: 0
+	const poolSCName = poolSCInfo?.[1][2]
+	const poolSCDepositPerPerson = poolSCInfo ? BigInt(poolSCInfo?.[1][3]) : 0
+	const poolSCDepositPerPersonString = poolSCInfo
+		? (BigInt(poolSCInfo?.[1][3]) / BigInt(1000000000000000000)).toString()
+		: 0
+	const poolSCStatus = poolSCInfo?.[3]
+	const poolSCToken = poolSCInfo?.[4]
+	const poolSCParticipants = poolSCInfo?.[5]
+	const poolSCWinners = poolSCInfo?.[6]
+
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
 			getPoolDataFromSC()
+			getAllPoolDataFromSC()
 			fetchPoolInfoFromServer()
 		}
 
@@ -212,13 +250,19 @@ const PoolPage = () => {
 
 	const handleRegister = async () => {
 		const poolId = router.query.poolId
+		console.log('poolId', poolId)
+		console.log('chainId', chain.id)
+		console.log('contractAddress', contractAddress)
 
 		const iface = new Interface(poolContract.abi)
 		const dataString = iface.encodeFunctionData('deposit', [
-			poolId,
-			poolDbData?.price,
+			// poolId,
+			// BigInt(50000000000000000000),
+			// poolSCDepositPerPerson,
+			'1',
+			'50000000000000000000',
 		])
-
+		console.log('dataString', dataString)
 		const uiConfig = {
 			title: 'Register',
 			description: `You agree to pay the registration fee of ${poolDbData?.price} to join the pool`,
@@ -284,7 +328,8 @@ const PoolPage = () => {
 							<div className='flex flex-col space-y-6 md:space-y-12 '>
 								<div className='flex flex-col space-y-2 md:space-y-4 overflow-hidden'>
 									<h2 className='font-semibold text-lg md:text-4xl'>
-										{poolDbData?.pool_name}
+										{/* {poolDbData?.pool_name} */}
+										{poolSCName}
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
 									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
@@ -294,7 +339,7 @@ const PoolPage = () => {
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
 									<div className='flex flex-rol justify-between'>
 										<p className='max-w-sm '>
-											<span className='font-bold'>{poolBalance} </span>
+											<span className='font-bold'>{poolSCBalance} </span>
 											USDC Prize Pool
 										</p>
 										<p>{135}% funded</p>
@@ -326,7 +371,9 @@ const PoolPage = () => {
 							<p className='md:text-2xl text-md'>{poolDbData?.description}</p>
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Buy-In</h3>
 							<Divider />
-							<p className='text-md md:text-2xl'>${poolDbData?.price} USD</p>
+							<p className='text-md md:text-2xl'>
+								${poolSCDepositPerPersonString} USD
+							</p>
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Terms</h3>
 							<Divider />
 							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
