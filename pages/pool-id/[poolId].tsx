@@ -31,6 +31,7 @@ import {
 import { config } from '@/constants/config'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
+import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
 
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import DropdownChecklist from '@/components/dropdown-checklist'
@@ -250,26 +251,47 @@ const PoolPage = () => {
 
 	const handleRegister = async () => {
 		const poolId = router.query.poolId
-		console.log('poolId', poolId)
-		console.log('chainId', chain.id)
-		console.log('contractAddress', contractAddress)
 
-		const iface = new Interface(poolContract.abi)
-		const dataString = iface.encodeFunctionData('deposit', [
-			// poolId,
-			// BigInt(50000000000000000000),
-			// poolSCDepositPerPerson,
-			'1',
-			'50000000000000000000',
+		let dropIFace = new Interface(dropletContract.abi)
+		let dataString = dropIFace.encodeFunctionData('approve', [
+			contractAddress,
+			poolSCDepositPerPerson,
 		])
 		console.log('dataString', dataString)
-		const uiConfig = {
+		let uiConfig = {
+			title: 'Approve Droplet Spend',
+			description: `You approve the smart contract to spend the fee of ${poolSCDepositPerPersonString}`,
+			buttonText: 'Approve',
+		}
+
+		let unsignedTx: UnsignedTransactionRequest = {
+			to: tokenAddress,
+			chainId: chain.id,
+			data: dataString,
+		}
+		try {
+			const txReceipt: TransactionReceipt = await sendTransaction(
+				unsignedTx,
+				uiConfig,
+			)
+		} catch (e: any) {
+			console.log(e.message)
+			return
+		}
+
+		const iface = new Interface(poolContract.abi)
+		dataString = iface.encodeFunctionData('deposit', [
+			poolId,
+			poolSCDepositPerPerson,
+		])
+		console.log('dataString', dataString)
+		uiConfig = {
 			title: 'Register',
 			description: `You agree to pay the registration fee of ${poolDbData?.price} to join the pool`,
 			buttonText: 'Sign',
 		}
 
-		const unsignedTx: UnsignedTransactionRequest = {
+		unsignedTx = {
 			to: contractAddress,
 			chainId: chain.id,
 			data: dataString,
