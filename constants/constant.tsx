@@ -1,7 +1,9 @@
 import { Network } from '@/models/types'
 import { defineChain } from 'viem'
 import { mainnet, baseSepolia, base } from 'viem/chains'
-import { ethers } from 'ethers'
+import { Interface, ethers } from 'ethers'
+import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
+import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 
 export const localChain = defineChain({
 	id: 31337, // Replace this with your chain's ID
@@ -121,3 +123,6 @@ export const provider = new ethers.JsonRpcProvider(
 
 export const jwtExpiryDurationInDays = 7
 export const jwtDuration = 60 * 60 * 24 * jwtExpiryDurationInDays // Given in seconds
+
+export const dropletIFace = new Interface(dropletContract.abi)
+export const poolIFace = new Interface(poolContract.abi)

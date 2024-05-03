@@ -27,6 +27,8 @@ import {
 	tokenAddress,
 	contractAddress,
 	provider,
+	dropletIFace,
+	poolIFace,
 } from 'constants/constant'
 import { config } from '@/constants/config'
 
@@ -252,57 +254,67 @@ const PoolPage = () => {
 	const handleRegister = async () => {
 		const poolId = router.query.poolId
 
-		let dropIFace = new Interface(dropletContract.abi)
-		let dataString = dropIFace.encodeFunctionData('approve', [
+		let approveDropletDataString = dropletIFace.encodeFunctionData('approve', [
 			contractAddress,
 			poolSCDepositPerPerson,
 		])
-		console.log('dataString', dataString)
-		let uiConfig = {
-			title: 'Approve Droplet Spend',
-			description: `You approve the smart contract to spend the fee of ${poolSCDepositPerPersonString}`,
-			buttonText: 'Approve',
-		}
+		const wallet = wallets[0] // Replace this with your desired wallet
+		const address = wallet.address
 
-		let unsignedTx: UnsignedTransactionRequest = {
-			to: tokenAddress,
-			chainId: chain.id,
-			data: dataString,
-		}
 		try {
-			const txReceipt: TransactionReceipt = await sendTransaction(
-				unsignedTx,
-				uiConfig,
-			)
+			const provider = await wallet.getEthereumProvider()
+			const signedTxn = await provider.request({
+				method: 'eth_sendTransaction',
+				params: [
+					{
+						from: address,
+						to: tokenAddress,
+						data: approveDropletDataString,
+					},
+				],
+			})
+			let transactionReceipt = null
+			while (transactionReceipt === null) {
+				transactionReceipt = await provider.request({
+					method: 'eth_getTransactionReceipt',
+					params: [signedTxn],
+				})
+				await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+			}
+			console.log('Transaction confirmed!', transactionReceipt)
 		} catch (e: any) {
-			console.log(e.message)
+			console.log('User did not sign transaction')
 			return
 		}
 
-		const iface = new Interface(poolContract.abi)
-		dataString = iface.encodeFunctionData('deposit', [
+		let depositDataString = poolIFace.encodeFunctionData('deposit', [
 			poolId,
 			poolSCDepositPerPerson,
 		])
-		console.log('dataString', dataString)
-		uiConfig = {
-			title: 'Register',
-			description: `You agree to pay the registration fee of ${poolDbData?.price} to join the pool`,
-			buttonText: 'Sign',
-		}
 
-		unsignedTx = {
-			to: contractAddress,
-			chainId: chain.id,
-			data: dataString,
-		}
 		try {
-			const txReceipt: TransactionReceipt = await sendTransaction(
-				unsignedTx,
-				uiConfig,
-			)
+			const provider = await wallet.getEthereumProvider()
+			const signedTxn = await provider.request({
+				method: 'eth_sendTransaction',
+				params: [
+					{
+						from: address,
+						to: contractAddress,
+						data: depositDataString,
+					},
+				],
+			})
+			let transactionReceipt = null
+			while (transactionReceipt === null) {
+				transactionReceipt = await provider.request({
+					method: 'eth_getTransactionReceipt',
+					params: [signedTxn],
+				})
+				await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+			}
+			console.log('Transaction confirmed!', transactionReceipt)
 		} catch (e: any) {
-			console.log(e.message)
+			console.log('User did not sign transaction')
 			return
 		}
 
