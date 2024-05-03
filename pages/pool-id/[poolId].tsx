@@ -147,7 +147,7 @@ const PoolPage = () => {
 
 	const poolSCAdmin = poolSCInfo?.[0]
 	const poolSCDetail = poolSCInfo?.[1]
-	const poolSCBalance = poolSCInfo
+	let poolSCBalance = poolSCInfo
 		? (BigInt(poolSCInfo?.[2][0]) / BigInt(1000000000000000000)).toString()
 		: 0
 	const poolSCName = poolSCInfo?.[1][2]
@@ -157,7 +157,7 @@ const PoolPage = () => {
 		: 0
 	const poolSCStatus = poolSCInfo?.[3]
 	const poolSCToken = poolSCInfo?.[4]
-	const poolSCParticipants = poolSCInfo?.[5]
+	let poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
 	const isRegisteredOnSC =
 		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
@@ -338,14 +338,18 @@ const PoolPage = () => {
 	const unregisterMutation = useMutation({
 		mutationFn: handleUnregister,
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: [poolId?.toString() ?? ' '] })
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+			})
 		},
 	})
 
 	const registerMutation = useMutation({
 		mutationFn: handleRegister,
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: [poolId?.toString() ?? ' '] })
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+			})
 		},
 	})
 
