@@ -42,6 +42,8 @@ import defaultPoolImage from '@/public/images/frog.png'
 import qrCodeIcon from '@/public/images/qr_code_icon.svg'
 import shareIcon from '@/public/images/share_icon.svg'
 import editIcon from '@/public/images/edit_icon.svg'
+import tripleDotsIcon from '@/public/images/tripleDots.svg'
+
 import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
 import { Tables, Database } from '@/types/supabase'
@@ -52,7 +54,12 @@ import {
 } from '@/lib/utils'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
-import { fetchUserDisplayInfoFromServer } from '@/lib/api/clientAPI'
+import {
+	fetchAllPoolDataFromSC,
+	fetchProfileUrlForAddress,
+	fetchUserDisplayInfoFromServer,
+} from '@/lib/api/clientAPI'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -73,7 +80,6 @@ const PoolPage = () => {
 	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any>([])
-	const [poolSCInfo, setPoolSCInfo] = useState<any>()
 
 	const [copied, setCopied] = useState(false)
 
@@ -93,9 +99,16 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	async function fetchPoolInfoFromServer() {
-		const poolId = router.query.poolId
+	const poolId = router?.query?.poolId
+	const queryClient = useQueryClient()
 
+	const { data: poolSCInfo } = useQuery({
+		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+		queryFn: fetchAllPoolDataFromSC,
+		enabled: !!poolId,
+	})
+
+	async function fetchPoolInfoFromServer() {
 		const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
 			.from('pool') // Replace 'your_table_name' with your actual table name
 			.select()
@@ -132,44 +145,6 @@ const PoolPage = () => {
 		setCohostDbData(userDisplayData)
 	}
 
-	const getPoolDataFromSC = async () => {
-		const contract = new ethers.Contract(
-			contractAddress,
-			poolContract.abi,
-			provider,
-		)
-		const poolId = router.query.poolId
-
-		const retrievedPoolBalance = await contract.getPoolBalance(poolId)
-		console.log('retrievedPoolBalance', retrievedPoolBalance)
-		setPoolBalance(Number(retrievedPoolBalance))
-
-		const retrievedPoolParticipants = await contract.getParticipants(poolId)
-		console.log('retrievedPoolBalance', retrievedPoolParticipants)
-		setPoolParticipants(Number(retrievedPoolParticipants))
-	}
-
-	const getAllPoolDataFromSC = async () => {
-		const contract = new ethers.Contract(
-			contractAddress,
-			poolContract.abi,
-			provider,
-		)
-		const poolId = router.query.poolId
-
-		const retrievedAllPoolInfo = await contract.getAllPoolInfo(poolId)
-		setPoolSCInfo(retrievedAllPoolInfo)
-		console.log('retrievedAllPoolInfo', retrievedAllPoolInfo)
-		console.log('retrievedAllPoolInfo[0]', retrievedAllPoolInfo[0])
-		console.log('retrievedAllPoolInfo[1]', retrievedAllPoolInfo[1])
-		console.log('retrievedAllPoolInfo[2]', retrievedAllPoolInfo[2])
-		console.log('retrievedAllPoolInfo[3]', retrievedAllPoolInfo[3])
-		console.log('retrievedAllPoolInfo[2] poolSCBalance', poolSCInfo?.[2][0])
-		console.log('retrievedAllPoolInfo[4]', retrievedAllPoolInfo[4])
-		console.log('retrievedAllPoolInfo[5]', retrievedAllPoolInfo[5])
-		console.log('retrievedAllPoolInfo[6]', retrievedAllPoolInfo[6])
-	}
-
 	const poolSCAdmin = poolSCInfo?.[0]
 	const poolSCDetail = poolSCInfo?.[1]
 	const poolSCBalance = poolSCInfo
@@ -184,19 +159,20 @@ const PoolPage = () => {
 	const poolSCToken = poolSCInfo?.[4]
 	const poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
+	const isRegisteredOnSC =
+		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
 
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
-			getPoolDataFromSC()
-			getAllPoolDataFromSC()
 			fetchPoolInfoFromServer()
 		}
+		console.log('participants', poolSCParticipants)
 
 		setPageUrl(window?.location.href)
-	}, [ready, authenticated])
+	}, [ready, authenticated, poolSCInfo])
 
 	const handleRegisterServer = async () => {
 		console.log('handleJoinPool')
@@ -321,6 +297,58 @@ const PoolPage = () => {
 		handleRegisterServer()
 	}
 
+	const handleUnregisterServer = () => {}
+	const handleUnregister = async () => {
+		const wallet = wallets[0] // Replace this with your desired wallet
+		const address = wallet.address
+
+		let selfRefundDataString = poolIFace.encodeFunctionData('selfRefund', [
+			poolId,
+		])
+
+		try {
+			const provider = await wallet.getEthereumProvider()
+			const signedTxn = await provider.request({
+				method: 'eth_sendTransaction',
+				params: [
+					{
+						from: address,
+						to: contractAddress,
+						data: selfRefundDataString,
+					},
+				],
+			})
+			let transactionReceipt = null
+			while (transactionReceipt === null) {
+				transactionReceipt = await provider.request({
+					method: 'eth_getTransactionReceipt',
+					params: [signedTxn],
+				})
+				await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+			}
+			console.log('Transaction confirmed!', transactionReceipt)
+		} catch (e: any) {
+			console.log('User did not sign transaction')
+			return
+		}
+
+		handleUnregisterServer()
+	}
+
+	const unregisterMutation = useMutation({
+		mutationFn: handleUnregister,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [poolId?.toString() ?? ' '] })
+		},
+	})
+
+	const registerMutation = useMutation({
+		mutationFn: handleRegister,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [poolId?.toString() ?? ' '] })
+		},
+	})
+
 	// const percentFunded = poolDbData?.price
 	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
 	// 	: poolParticipants / poolDbData?.soft_cap
@@ -412,14 +440,34 @@ const PoolPage = () => {
 							<Divider />
 							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
 						</div>
-						<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
-							<button
-								className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-								onClick={handleRegister}
-							>
-								Register
-							</button>
-						</div>
+						{isRegisteredOnSC ? (
+							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<button
+									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={handleRegister} //TODO: Change function
+								>
+									View My Ticket
+								</button>
+								<button
+									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={() => unregisterMutation.mutate()}
+								>
+									<img
+										className='flex w-full h-full'
+										src={tripleDotsIcon.src}
+									></img>
+								</button>
+							</div>
+						) : (
+							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<button
+									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={() => registerMutation.mutate()}
+								>
+									Register
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 			</Section>

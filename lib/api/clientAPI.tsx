@@ -6,6 +6,11 @@ import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { UserDisplayRow } from '@/pages/pool-id/[poolId]'
 import { QueryFunction } from '@tanstack/react-query'
+import { ethers } from 'ethers'
+import { contractAddress, provider } from '@/constants/constant'
+
+import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
+import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
 
 export interface writeTestObject {
 	address: string
@@ -269,6 +274,31 @@ export const fetchProfileUrlForAddress = async ({
 		.from('profile')
 		.getPublicUrl(userDisplayData?.avatar_url)
 	return { userDisplayData, profileImageUrl: storageData.publicUrl }
+}
+
+export const fetchAllPoolDataFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const poolSCInfo = await contract.getAllPoolInfo(poolId)
+
+	console.log('retrievedAllPoolInfo', poolSCInfo)
+	console.log('retrievedAllPoolInfo[0]', poolSCInfo[0])
+	console.log('retrievedAllPoolInfo[1]', poolSCInfo[1])
+	console.log('retrievedAllPoolInfo[2]', poolSCInfo[2])
+	console.log('retrievedAllPoolInfo[3]', poolSCInfo[3])
+	console.log('retrievedAllPoolInfo[4]', poolSCInfo[4])
+	console.log('retrievedAllPoolInfo[5]', poolSCInfo[5])
+	console.log('retrievedAllPoolInfo[6]', poolSCInfo[6])
+	return poolSCInfo
 }
 
 // export const testAsyncFunction = async () => {
