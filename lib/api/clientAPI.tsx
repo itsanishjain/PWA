@@ -34,7 +34,7 @@ export interface FileObj {
 	data: Blob
 }
 
-const supabaseClient = createSupabaseBrowserClient()
+const supabaseBrowserClient = createSupabaseBrowserClient()
 
 export async function fetchNonce(addressObject: addressObject) {
 	try {
@@ -242,10 +242,11 @@ export const fetchPastPools = async () => {
 export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 	console.log('addressList', addressList)
 	const lowerAddressList = addressList.map((address) => address.toLowerCase())
-	const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
-		.from('usersDisplay')
-		.select()
-		.in('address', lowerAddressList)
+	const { data, error }: PostgrestSingleResponse<any[]> =
+		await supabaseBrowserClient
+			.from('usersDisplay')
+			.select()
+			.in('address', lowerAddressList)
 
 	if (error) {
 		console.error('Error reading data:', error)
@@ -268,7 +269,7 @@ export const fetchUserDisplayForAddress = async ({
 
 	console.log('lowerAddress', lowerAddress)
 
-	const { data: userDisplayData, error } = await supabaseClient
+	const { data: userDisplayData, error } = await supabaseBrowserClient
 		.from('usersDisplay')
 		.select('*')
 		.eq('address', lowerAddress)
@@ -282,7 +283,7 @@ export const fetchUserDisplayForAddress = async ({
 		return { userDisplayData: '', profileImageUrl: '' }
 	}
 	if (userDisplayData?.avatar_url) {
-		const { data: storageData } = await supabaseClient.storage
+		const { data: storageData } = await supabaseBrowserClient.storage
 			.from('profile')
 			.getPublicUrl(userDisplayData?.avatar_url)
 		console.log('userDisplayData', userDisplayData)
@@ -318,6 +319,49 @@ export const fetchAllPoolDataFromSC = async ({
 	return poolSCInfo
 }
 
+export const fetchPoolDataFromDB = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	console.log('fetchPoolDataFromDB')
+	const [_, poolId] = queryKey
+	const { data, error }: PostgrestSingleResponse<any[]> =
+		await supabaseBrowserClient
+			.from('pool') // Replace 'your_table_name' with your actual table name
+			.select()
+			.eq('pool_id', poolId)
+
+	if (error) {
+		console.error('Error reading data:', error)
+		return {}
+	}
+
+	console.log('Pool data', JSON.stringify(data))
+	if (data.length == 0) {
+		console.log('No Such Pool')
+		return {}
+	}
+
+	let poolImageUrl = ''
+	if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
+		const { data: storageData } = supabaseBrowserClient.storage
+			.from('pool')
+			.getPublicUrl(data[0].pool_image_url)
+		poolImageUrl = storageData.publicUrl
+		console.log('poolImageUrl', storageData.publicUrl)
+	}
+
+	let cohostUserDisplayData
+	if (data[0]?.co_host_addresses.length > 0) {
+		const cohostDisplayData = await fetchUserDisplayInfoFromServer(
+			data[0]?.co_host_addresses,
+		)
+		cohostUserDisplayData = cohostDisplayData
+	}
+
+	return { poolDBInfo: data[0], poolImageUrl, cohostUserDisplayData }
+}
 // export const testAsyncFunction = async () => {
 // 	console.log('Hello')
 // 	await 'asdf'

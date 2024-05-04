@@ -56,6 +56,7 @@ import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
 import {
 	fetchAllPoolDataFromSC,
+	fetchPoolDataFromDB,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
 } from '@/lib/api/clientAPI'
@@ -77,7 +78,7 @@ const PoolPage = () => {
 	const [poolBalance, setPoolBalance] = useState<number>(0)
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
 
-	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
+	const [poolDbData, setPoolDbData] = useState<any | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any>([])
 
@@ -99,51 +100,20 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	const poolId = router.query.poolId ?? 'testPool'
+	const poolId = router.query.poolId ?? '0'
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
-		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
 		queryFn: fetchAllPoolDataFromSC,
 		enabled: !!poolId,
 	})
 
-	async function fetchPoolInfoFromServer() {
-		const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
-			.from('pool') // Replace 'your_table_name' with your actual table name
-			.select()
-			.eq('pool_id', poolId)
-		// .eq('participant_address', walletAddress)
-
-		if (error) {
-			console.error('Error reading data:', error)
-			return
-		}
-
-		console.log('Pool data', JSON.stringify(data))
-		if (data.length == 0) {
-			console.log('No Such Pool')
-			return
-		}
-		setPoolDbData(data[0])
-		console.log('timestamp', data[0]?.event_timestamp)
-		calculateTimeLeft(data[0]?.event_timestamp)
-
-		if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
-			const { data: storageData } = supabaseClient.storage
-				.from('pool')
-				.getPublicUrl(data[0].pool_image_url)
-			setPoolImageUrl(storageData.publicUrl)
-			console.log('storageData', storageData)
-
-			console.log('poolImageUrl', storageData.publicUrl)
-		}
-
-		const userDisplayData = await fetchUserDisplayInfoFromServer(
-			data[0]?.co_host_addresses,
-		)
-		setCohostDbData(userDisplayData)
-	}
+	const { data: poolDBInfo } = useQuery({
+		queryKey: ['fetchPoolDataFromDB', poolId?.toString()],
+		queryFn: fetchPoolDataFromDB,
+		enabled: !!poolId,
+	})
 
 	const poolSCAdmin = poolSCInfo?.[0]
 	const poolSCDetail = poolSCInfo?.[1]
@@ -167,12 +137,16 @@ const PoolPage = () => {
 		if (ready && authenticated) {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
-			fetchPoolInfoFromServer()
 		}
 		console.log('participants', poolSCParticipants)
 
+		setPoolDbData(poolDBInfo?.poolDBInfo)
+		setCohostDbData(poolDBInfo?.cohostUserDisplayData)
+		setPoolImageUrl(poolDBInfo?.poolImageUrl)
+
+		console.log('poolDBInfo', poolDBInfo)
 		setPageUrl(window?.location.href)
-	}, [ready, authenticated, poolSCInfo])
+	}, [ready, authenticated, poolSCInfo, poolDBInfo])
 
 	const handleRegisterServer = async () => {
 		console.log('handleJoinPool')
@@ -198,7 +172,7 @@ const PoolPage = () => {
 				const msg = await response.json()
 				console.log(msg)
 				// Handle success
-				fetchPoolInfoFromServer()
+				// fetchPoolDataFromDB()
 			} else {
 				console.error('Error sending data')
 				// Handle error
