@@ -264,6 +264,55 @@ export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 	}
 }
 
+// This is a similar query as above, but using Tanstack
+export const fetchParticipantsDataFromServer = async ({
+	queryKey,
+}: {
+	queryKey: [string, string, string[]]
+}) => {
+	const [_, poolId, addressList] = queryKey
+	const lowerAddressList = addressList.map((address) => address.toLowerCase())
+	const { data, error }: PostgrestSingleResponse<any[]> =
+		await supabaseBrowserClient
+			.from('usersDisplay')
+			.select()
+			.in('address', lowerAddressList)
+	if (error) {
+		console.error('Error reading data:', error)
+		return
+	}
+
+	console.log('usersDisplayData', data)
+
+	const {
+		data: participationData,
+		error: participationError,
+	}: PostgrestSingleResponse<any[]> = await supabaseBrowserClient
+		.from('participantStatus')
+		.select()
+		.match({ pool_id: poolId })
+		.in('participant_address', lowerAddressList)
+	if (participationError) {
+		console.error('Error reading participation data:', error)
+		return
+	}
+	console.log('participationData', participationData)
+
+	const joinedData = data.map((row1) => {
+		const matchingRows = participationData.filter(
+			(row2) => row2.participant_address === row1.address,
+		)
+		return {
+			...row1,
+			participationData: matchingRows,
+		}
+	})
+
+	console.log('fetchUserDisplayInfoFromServer data:', joinedData)
+
+	return joinedData
+}
+
 export const fetchUserDisplayForAddress = async ({
 	queryKey,
 }: {

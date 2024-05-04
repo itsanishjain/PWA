@@ -236,6 +236,11 @@ const PoolPage = () => {
 	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
 	// 	: poolParticipants / poolDbData?.soft_cap
 
+	const viewParticipantsClick = () => {
+		const currentRoute = router.asPath
+
+		router.push(`${currentRoute}/participants`)
+	}
 	const cohostNames: string = cohostDbData
 		.map((data: any) => data.display_name)
 		.join(',')
@@ -298,7 +303,10 @@ const PoolPage = () => {
 								</div>
 								<div className='flex text-sm md:text-3xl justify-between'>
 									<span className='font-bold'>Participants </span>
-									<button className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'>
+									<button
+										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
+										onClick={viewParticipantsClick}
+									>
 										<span>View all</span>
 										<span>
 											<img src={`${rightArrow.src}`}></img>
