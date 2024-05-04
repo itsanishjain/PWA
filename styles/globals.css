@@ -57,8 +57,12 @@ body {
 	background-color: #757e85;
 }
 
-.barBackground {
+.barForeground {
 	background-color: #6993ff;
+}
+
+.barBackground {
+	background-color: rgba(105, 147, 255, 0.2);
 }
 
 .fontRegistered {

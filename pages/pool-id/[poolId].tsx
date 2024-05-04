@@ -236,6 +236,8 @@ const PoolPage = () => {
 	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
 	// 	: poolParticipants / poolDbData?.soft_cap
 
+	const participantPercent =
+		(poolSCParticipants.length / poolDbData?.soft_cap) * 100
 	const viewParticipantsClicked = () => {
 		const currentRoute = router.asPath
 
@@ -297,13 +299,18 @@ const PoolPage = () => {
 											<span className='font-bold'>{poolSCBalance} </span>
 											USDC Prize Pool
 										</p>
-										<p>{135}% funded</p>
+										<p>{participantPercent}% funded</p>
 									</div>
-									<div className='w-full h-full flex'>
+									<div className='w-full h-full flex rounded-full overflow-hidden'>
 										<div
-											style={{ width: '100%' }}
+											style={{ width: `100%` }}
 											className={`flex h-3 md:h-6 rounded-full barBackground`}
-										></div>
+										>
+											<div
+												style={{ width: `${participantPercent}%` }}
+												className={`flex h-3 md:h-6 rounded-full barForeground`}
+											></div>
+										</div>
 									</div>
 								</div>
 								<div className='flex text-sm md:text-3xl justify-between'>
