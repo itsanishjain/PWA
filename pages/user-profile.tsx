@@ -19,7 +19,7 @@ import { provider } from '@/constants/constant'
 import { Inter } from 'next/font/google'
 import styles from './styles/user-profile.module.css'
 import {
-	fetchProfileUrlForAddress,
+	fetchUserDisplayForAddress,
 	updateUserDisplayData,
 	uploadProfileImage,
 } from '@/lib/api/clientAPI'
@@ -114,9 +114,9 @@ const UserProfile = () => {
 
 	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
-		queryKey: ['loadProfileImage', address],
-		queryFn: fetchProfileUrlForAddress,
-		enabled: !!wallets?.[0]?.address,
+		queryKey: ['loadProfileImage', wallets?.[0]?.address],
+		queryFn: fetchUserDisplayForAddress,
+		enabled: wallets.length > 0,
 	})
 
 	const triggerFileInput = () => {
@@ -124,19 +124,13 @@ const UserProfile = () => {
 	}
 
 	const handleSignOut = async () => {
+		console.log('handleSignOut')
+		wallets[0].disconnect()
+
 		await logout()
+
 		removeTokenCookie()
 	}
-
-	const queryClient = useQueryClient()
-	const signOutMutation = useMutation({
-		mutationFn: handleSignOut,
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['loadProfileImage', address.toLowerCase()],
-			})
-		},
-	})
 
 	useEffect(() => {
 		if (ready && !authenticated) {
@@ -145,13 +139,22 @@ const UserProfile = () => {
 			router.push('/login')
 		}
 
+		if (wallets.length > 0) {
+			console.log(`Wallet Length: ${wallets.length}`)
+			// console.log(`Wallet Address: ${wallets[0].address}`)
+		}
+		for (var i = 0; i < wallets.length; i++) {
+			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
+		}
+
 		if (profileData?.profileImageUrl) {
 			setProfileImageUrl(profileData?.profileImageUrl)
 		}
 		setBio(profileData?.userDisplayData.bio ?? '')
 		setDisplayName(profileData?.userDisplayData.display_name ?? '')
-		setCompany(profileData?.userDisplayData.company ?? '"')
-	}, [profileData])
+		setCompany(profileData?.userDisplayData.company ?? '')
+		console.log('displayName', profileData)
+	}, [profileData, ready, authenticated])
 
 	return (
 		<Page>
@@ -244,7 +247,7 @@ const UserProfile = () => {
 							)}
 						</div>
 						<div className='mt-8 flex justify-center'>
-							<button onClick={() => signOutMutation.mutate()}>Sign Out</button>
+							<button onClick={handleSignOut}>Sign Out</button>
 						</div>
 					</div>
 				</div>

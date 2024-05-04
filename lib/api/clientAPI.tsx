@@ -256,19 +256,28 @@ export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 	}
 }
 
-export const fetchProfileUrlForAddress = async ({
+export const fetchUserDisplayForAddress = async ({
 	queryKey,
 }: {
 	queryKey: [string, string]
 }) => {
 	const [_, address] = queryKey
+
 	const lowerAddress = address.toLowerCase()
+	console.log('123456')
+
+	console.log('lowerAddress', lowerAddress)
+
 	const { data: userDisplayData, error } = await supabaseClient
 		.from('usersDisplay')
 		.select('*')
-		.filter('address', 'eq', lowerAddress)
+		.eq('address', lowerAddress)
 		.single()
+
+	console.log('userDisplayData', userDisplayData)
+
 	if (error) {
+		console.error('address error:', lowerAddress)
 		console.error('Error reading data:', error)
 		return { userDisplayData: '', profileImageUrl: '' }
 	}
@@ -276,9 +285,11 @@ export const fetchProfileUrlForAddress = async ({
 		const { data: storageData } = await supabaseClient.storage
 			.from('profile')
 			.getPublicUrl(userDisplayData?.avatar_url)
+		console.log('userDisplayData', userDisplayData)
+
 		return { userDisplayData, profileImageUrl: storageData.publicUrl }
 	}
-
+	console.log('userDisplayData', userDisplayData)
 	return { userDisplayData }
 }
 

@@ -33,15 +33,6 @@ const Home = () => {
 
 	// Replace this with the text you'd like on your signature modal,
 	// if you do not have `noPromptsOnSignature` enabled
-	if (ready && !authenticated) {
-		// Replace this code with however you'd like to handle an unauthenticated user
-		// As an example, you might redirect them to a sign-in page
-		router.push('/login')
-	}
-
-	const handleCreatePool = async () => {
-		router.push('/create-pool')
-	}
 
 	const [selectedTab, setSelectedTab] = useState(0)
 	const selectTab = (tabIndex: number) => {
@@ -49,6 +40,11 @@ const Home = () => {
 	}
 
 	useEffect(() => {
+		if (ready && !authenticated) {
+			// Replace this code with however you'd like to handle an unauthenticated user
+			// As an example, you might redirect them to a sign-in page
+			router.push('/login')
+		}
 		// Update the document title using the browser API
 		if (wallets.length > 0) {
 			console.log(`Wallet Length: ${wallets.length}`)

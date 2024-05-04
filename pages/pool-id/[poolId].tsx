@@ -56,7 +56,7 @@ import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
 import {
 	fetchAllPoolDataFromSC,
-	fetchProfileUrlForAddress,
+	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
 } from '@/lib/api/clientAPI'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'

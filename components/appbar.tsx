@@ -20,7 +20,7 @@ import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
 import frogImage from '@/public/images/frog.png'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
-import { fetchProfileUrlForAddress } from '@/lib/api/clientAPI'
+import { fetchUserDisplayForAddress } from '@/lib/api/clientAPI'
 
 const comfortaa = Comfortaa({ subsets: ['latin'] })
 
@@ -57,9 +57,9 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 
 	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
-		queryKey: ['loadProfileImage', address],
-		queryFn: fetchProfileUrlForAddress,
-		enabled: !!wallets?.[0]?.address,
+		queryKey: ['loadProfileImage', wallets?.[0]?.address],
+		queryFn: fetchUserDisplayForAddress,
+		enabled: wallets.length > 0,
 	})
 
 	return (

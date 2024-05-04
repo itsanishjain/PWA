@@ -24,7 +24,8 @@ const supabase = createSupabaseBrowserClient()
 
 const handlePoolRowClicked = (poolId: number) => {
 	const currentRoute = router.pathname
-	router.push(`${currentRoute}/pool-id/${poolId}`)
+	console.log('currentRouge', currentRoute)
+	router.push(`/pool-id/${poolId}`)
 }
 
 const UpcomingPoolTab: React.FC = () => {
