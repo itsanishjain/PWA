@@ -60,3 +60,15 @@ body {
 .barBackground {
 	background-color: #6993ff;
 }
+
+.fontRegistered {
+	color: #b2b2b2;
+}
+
+.fontCheckedIn {
+	color: #6993ff;
+}
+
+.bottomDivider {
+	border-bottom: 1px solid #e2e8f0;
+}

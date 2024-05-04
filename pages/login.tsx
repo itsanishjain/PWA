@@ -10,7 +10,7 @@ import { fetchNonce, fetchToken, writeTest } from '@/lib/api/clientAPI'
 
 import { getTokenCookie, setTokenCookie } from '@/hooks/cookie'
 
-const Index = () => {
+const LoginPage = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, login } = usePrivy()
 
@@ -115,7 +115,7 @@ const Index = () => {
 	)
 }
 
-export default Index
+export default LoginPage
 function setToken(tokenCookie: string) {
 	throw new Error('Function not implemented.')
 }

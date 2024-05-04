@@ -23,7 +23,8 @@ interface poolData {
 const supabase = createSupabaseBrowserClient()
 
 const handlePoolRowClicked = (poolId: number) => {
-	const currentRoute = router.pathname
+	const currentRoute = router.asPath
+
 	router.push(`${currentRoute}/pool-id/${poolId}`)
 }
 
