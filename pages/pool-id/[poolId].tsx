@@ -236,10 +236,15 @@ const PoolPage = () => {
 	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
 	// 	: poolParticipants / poolDbData?.soft_cap
 
-	const viewParticipantsClick = () => {
+	const viewParticipantsClicked = () => {
 		const currentRoute = router.asPath
 
 		router.push(`${currentRoute}/participants`)
+	}
+
+	const viewTicketClicked = () => {
+		const currentRoute = router.asPath
+		router.push(`${currentRoute}/ticket`)
 	}
 	const cohostNames: string = cohostDbData
 		.map((data: any) => data.display_name)
@@ -305,7 +310,7 @@ const PoolPage = () => {
 									<span className='font-bold'>Participants </span>
 									<button
 										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
-										onClick={viewParticipantsClick}
+										onClick={viewParticipantsClicked}
 									>
 										<span>View all</span>
 										<span>
@@ -335,7 +340,7 @@ const PoolPage = () => {
 							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={() => {}} //TODO: Change function
+									onClick={viewTicketClicked} //TODO: Change function
 								>
 									View My Ticket
 								</button>
