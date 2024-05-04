@@ -139,9 +139,9 @@ const PoolPage = () => {
 			console.log('poolImageUrl', storageData.publicUrl)
 		}
 
-		const userDisplayData = await fetchUserDisplayInfoFromServer([
+		const userDisplayData = await fetchUserDisplayInfoFromServer(
 			data[0]?.co_host_addresses,
-		])
+		)
 		setCohostDbData(userDisplayData)
 	}
 

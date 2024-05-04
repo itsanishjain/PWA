@@ -241,9 +241,7 @@ export const fetchPastPools = async () => {
 
 export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 	console.log('addressList', addressList)
-	const lowerAddressList = addressList.map((address) => {
-		address.toLowerCase()
-	})
+	const lowerAddressList = addressList.map((address) => address.toLowerCase())
 	const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
 		.from('usersDisplay')
 		.select()
