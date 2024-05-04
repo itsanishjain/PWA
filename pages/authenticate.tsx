@@ -68,22 +68,19 @@ const Authenticate = () => {
 
 	// let showAuthenticateBackendButton = false
 
-	if (!ready) {
-		// Do nothing while the PrivyProvider initializes with updated user state
-		return <></>
-	}
+	useEffect(() => {
+		if (ready && !authenticated) {
+			// Replace this code with however you'd like to handle an unauthenticated user
+			// As an example, you might redirect them to a sign-in page
+			router.push('/login')
+		}
 
-	if (ready && !authenticated) {
-		// Replace this code with however you'd like to handle an unauthenticated user
-		// As an example, you might redirect them to a sign-in page
-		router.push('/login')
-	}
-
-	if (ready && authenticated && isJwtValid) {
-		// Replace this code with however you'd like to handle an authenticated user
-		console.log('ready and authenticated')
-		router.push('/')
-	}
+		if (ready && authenticated && isJwtValid) {
+			// Replace this code with however you'd like to handle an authenticated user
+			console.log('ready and authenticated')
+			router.push('/')
+		}
+	}, [ready, authenticated, isJwtValid])
 
 	return (
 		<Page>

@@ -19,15 +19,16 @@ import { provider } from '@/constants/constant'
 import { Inter } from 'next/font/google'
 import styles from './styles/user-profile.module.css'
 import {
-	fetchProfileUrlForAddress,
+	fetchUserDisplayForAddress,
 	updateUserDisplayData,
 	uploadProfileImage,
 } from '@/lib/api/clientAPI'
 import { removeTokenCookie, useCookie } from '@/hooks/cookie'
-import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
 import camera from '@/public/images/camera.png'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import * as _ from 'lodash'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -40,7 +41,9 @@ const UserProfile = () => {
 
 	const [fileBlob, setFileBlob] = useState<any>(null)
 	const [selectedFile, setSelectedFile] = useState<any>(null)
-	const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>()
+	const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>(
+		`${frogImage.src}`,
+	)
 	const [isImageReady, setIsImageReady] = useState<boolean>(true)
 
 	const { currentJwt } = useCookie()
@@ -109,30 +112,49 @@ const UserProfile = () => {
 		)
 	}
 
-	if (ready && !authenticated) {
-		// Replace this code with however you'd like to handle an unauthenticated user
-		// As an example, you might redirect them to a sign-in page
-		router.push('/login')
-	}
-
-	const supabase = createClient(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-	)
-
+	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', wallets?.[0]?.address],
-		queryFn: fetchProfileUrlForAddress,
+		queryFn: fetchUserDisplayForAddress,
+		enabled: wallets.length > 0,
 	})
 
 	const triggerFileInput = () => {
 		document.getElementById('fileInput')?.click()
 	}
 
-	const handleSignOut = () => {
-		logout()
+	const handleSignOut = async () => {
+		console.log('handleSignOut')
+		wallets[0].disconnect()
+
+		await logout()
+
 		removeTokenCookie()
 	}
+
+	useEffect(() => {
+		if (ready && !authenticated) {
+			// Replace this code with however you'd like to handle an unauthenticated user
+			// As an example, you might redirect them to a sign-in page
+			router.push('/login')
+		}
+
+		if (wallets.length > 0) {
+			console.log(`Wallet Length: ${wallets.length}`)
+			// console.log(`Wallet Address: ${wallets[0].address}`)
+		}
+		for (var i = 0; i < wallets.length; i++) {
+			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
+		}
+
+		if (profileData?.profileImageUrl) {
+			setProfileImageUrl(profileData?.profileImageUrl)
+		}
+		setBio(profileData?.userDisplayData.bio ?? '')
+		setDisplayName(profileData?.userDisplayData.display_name ?? '')
+		setCompany(profileData?.userDisplayData.company ?? '')
+		console.log('displayName', profileData)
+	}, [profileData, ready, authenticated])
 
 	return (
 		<Page>
@@ -151,7 +173,6 @@ const UserProfile = () => {
 								accept='image/*'
 								id='fileInput'
 								onChange={handleImageChange}
-								style={{ display: '' }}
 								className='hidden'
 							/>
 						</div>
@@ -163,11 +184,7 @@ const UserProfile = () => {
 							>
 								<img
 									className='rounded-full w-40 aspect-square center object-cover z-0'
-									src={
-										profileImageUrl ??
-										profileData?.profileImageUrl ??
-										frogImage.src
-									}
+									src={profileImageUrl}
 								/>
 								<div
 									className={`w-full h-full rounded-full absolute top-0 left-0 ${styles.overlay} z-10 flex items-center justify-center`}
@@ -187,11 +204,7 @@ const UserProfile = () => {
 							</div>
 							<input
 								type='text'
-								value={
-									displayName == ''
-										? profileData?.userDisplayData.display_name
-										: displayName
-								}
+								value={displayName}
 								onChange={handleDisplayNameChange}
 								placeholder='Display Name'
 								className='rounded-lg my-2 px-4 flex flex-1'
@@ -204,7 +217,7 @@ const UserProfile = () => {
 								<span className='text-xs font-medium'>(optional)</span>
 							</div>
 							<textarea
-								value={bio == '' ? profileData?.userDisplayData.bio : bio}
+								value={bio}
 								onChange={handleBioChange}
 								placeholder='Write something enticing about yourself'
 								className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'
@@ -218,9 +231,7 @@ const UserProfile = () => {
 						</div>
 
 						<textarea
-							value={
-								company == '' ? profileData?.userDisplayData.company : company
-							}
+							value={company}
 							onChange={handleCompanyChange}
 							placeholder='Write something enticing about yourself'
 							className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'

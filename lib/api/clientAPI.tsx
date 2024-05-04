@@ -6,6 +6,18 @@ import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { UserDisplayRow } from '@/pages/pool-id/[poolId]'
 import { QueryFunction } from '@tanstack/react-query'
+import { ethers } from 'ethers'
+import {
+	contractAddress,
+	dropletIFace,
+	poolIFace,
+	provider,
+	tokenAddress,
+} from '@/constants/constant'
+
+import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
+import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
+import { ConnectedWallet } from '@privy-io/react-auth'
 
 export interface writeTestObject {
 	address: string
@@ -29,7 +41,7 @@ export interface FileObj {
 	data: Blob
 }
 
-const supabaseClient = createSupabaseBrowserClient()
+const supabaseBrowserClient = createSupabaseBrowserClient()
 
 export async function fetchNonce(addressObject: addressObject) {
 	try {
@@ -236,10 +248,12 @@ export const fetchPastPools = async () => {
 
 export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 	console.log('addressList', addressList)
-	const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
-		.from('usersDisplay')
-		.select()
-		.in('address', addressList)
+	const lowerAddressList = addressList.map((address) => address.toLowerCase())
+	const { data, error }: PostgrestSingleResponse<any[]> =
+		await supabaseBrowserClient
+			.from('usersDisplay')
+			.select()
+			.in('address', lowerAddressList)
 
 	if (error) {
 		console.error('Error reading data:', error)
@@ -250,27 +264,298 @@ export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 	}
 }
 
-export const fetchProfileUrlForAddress = async ({
+export const fetchUserDisplayForAddress = async ({
 	queryKey,
 }: {
 	queryKey: [string, string]
 }) => {
 	const [_, address] = queryKey
-	const { data: userDisplayData, error } = await supabaseClient
+
+	const lowerAddress = address.toLowerCase()
+	console.log('123456')
+
+	console.log('lowerAddress', lowerAddress)
+
+	const { data: userDisplayData, error } = await supabaseBrowserClient
 		.from('usersDisplay')
 		.select('*')
-		.filter('address', 'eq', address)
+		.eq('address', lowerAddress)
 		.single()
+
+	console.log('userDisplayData', userDisplayData)
+
 	if (error) {
+		console.error('address error:', lowerAddress)
 		console.error('Error reading data:', error)
-		return
+		return { userDisplayData: '', profileImageUrl: '' }
 	}
-	const { data: storageData } = await supabaseClient.storage
-		.from('profile')
-		.getPublicUrl(userDisplayData?.avatar_url)
-	return { userDisplayData, profileImageUrl: storageData.publicUrl }
+	if (userDisplayData?.avatar_url) {
+		const { data: storageData } = await supabaseBrowserClient.storage
+			.from('profile')
+			.getPublicUrl(userDisplayData?.avatar_url)
+		console.log('userDisplayData', userDisplayData)
+
+		return { userDisplayData, profileImageUrl: storageData.publicUrl }
+	}
+	console.log('userDisplayData', userDisplayData)
+	return { userDisplayData }
 }
 
+export const fetchAllPoolDataFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const poolSCInfo = await contract.getAllPoolInfo(poolId)
+
+	console.log('retrievedAllPoolInfo', poolSCInfo)
+	console.log('retrievedAllPoolInfo[0]', poolSCInfo[0])
+	console.log('retrievedAllPoolInfo[1]', poolSCInfo[1])
+	console.log('retrievedAllPoolInfo[2]', poolSCInfo[2])
+	console.log('retrievedAllPoolInfo[3]', poolSCInfo[3])
+	console.log('retrievedAllPoolInfo[4]', poolSCInfo[4])
+	console.log('retrievedAllPoolInfo[5]', poolSCInfo[5])
+	console.log('retrievedAllPoolInfo[6]', poolSCInfo[6])
+	return poolSCInfo
+}
+
+export const fetchAllPoolDataFromDB = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	console.log('fetchPoolDataFromDB')
+	const [_, poolId] = queryKey
+	const { data, error }: PostgrestSingleResponse<any[]> =
+		await supabaseBrowserClient
+			.from('pool') // Replace 'your_table_name' with your actual table name
+			.select()
+			.eq('pool_id', poolId)
+
+	if (error) {
+		console.error('Error reading data:', error)
+		return {}
+	}
+
+	console.log('Pool data', JSON.stringify(data))
+	if (data.length == 0) {
+		console.log('No Such Pool')
+		return {}
+	}
+
+	let poolImageUrl = ''
+	if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
+		const { data: storageData } = supabaseBrowserClient.storage
+			.from('pool')
+			.getPublicUrl(data[0].pool_image_url)
+		poolImageUrl = storageData.publicUrl
+		console.log('poolImageUrl', storageData.publicUrl)
+	}
+
+	let cohostUserDisplayData
+	if (data[0]?.co_host_addresses.length > 0) {
+		const cohostDisplayData = await fetchUserDisplayInfoFromServer(
+			data[0]?.co_host_addresses,
+		)
+		cohostUserDisplayData = cohostDisplayData
+	}
+
+	return { poolDBInfo: data[0], poolImageUrl, cohostUserDisplayData }
+}
+
+export const handleRegisterServer = async ({
+	params,
+}: {
+	params: [string, string, string]
+}) => {
+	const [poolId, walletAddress, jwtString] = params
+
+	const formData = {
+		poolId,
+		walletAddress,
+		jwtString,
+	}
+	try {
+		const response = await fetch('/api/join_pool', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(formData),
+		})
+
+		if (response.ok) {
+			console.log('Join success')
+			const msg = await response.json()
+			console.log(msg)
+			// Handle success
+			// fetchPoolDataFromDB()
+		} else {
+			console.error('Error sending data')
+			// Handle error
+		}
+	} catch (error) {
+		console.error('Error:', error)
+		// Handle error
+	}
+}
+
+export const handleUnregisterServer = async ({
+	params,
+}: {
+	params: [string, string, string]
+}) => {
+	const [poolId, walletAddress, jwtString] = params
+
+	const formData = {
+		poolId,
+		walletAddress,
+		jwtString,
+	}
+	try {
+		const response = await fetch('/api/unjoin_pool', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(formData),
+		})
+
+		if (response.ok) {
+			console.log('Unjoin success')
+			const msg = await response.json()
+			console.log(msg)
+		} else {
+			console.error('Error sending data')
+			// Handle error
+		}
+	} catch (error) {
+		console.error('Error:', error)
+		// Handle error
+	}
+}
+
+export const handleRegister = async ({
+	params,
+}: {
+	params: [string, string, ConnectedWallet[]]
+}) => {
+	const [poolId, deposit, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	let approveDropletDataString = dropletIFace.encodeFunctionData('approve', [
+		contractAddress,
+		deposit,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: tokenAddress,
+					data: approveDropletDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		return
+	}
+
+	let depositDataString = poolIFace.encodeFunctionData('deposit', [
+		poolId,
+		deposit,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: depositDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		return
+	}
+}
+
+export const handleUnregister = async ({
+	params,
+}: {
+	params: [string, ConnectedWallet[]]
+}) => {
+	const [poolId, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+
+	const address = wallet.address
+
+	let selfRefundDataString = poolIFace.encodeFunctionData('selfRefund', [
+		poolId,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: address,
+					to: contractAddress,
+					data: selfRefundDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		return
+	}
+}
 // export const testAsyncFunction = async () => {
 // 	console.log('Hello')
 // 	await 'asdf'

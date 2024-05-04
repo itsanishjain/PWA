@@ -27,10 +27,13 @@ import {
 	tokenAddress,
 	contractAddress,
 	provider,
+	dropletIFace,
+	poolIFace,
 } from 'constants/constant'
 import { config } from '@/constants/config'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
+import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
 
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import DropdownChecklist from '@/components/dropdown-checklist'
@@ -39,6 +42,8 @@ import defaultPoolImage from '@/public/images/frog.png'
 import qrCodeIcon from '@/public/images/qr_code_icon.svg'
 import shareIcon from '@/public/images/share_icon.svg'
 import editIcon from '@/public/images/edit_icon.svg'
+import tripleDotsIcon from '@/public/images/tripleDots.svg'
+
 import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
 import { Tables, Database } from '@/types/supabase'
@@ -49,7 +54,18 @@ import {
 } from '@/lib/utils'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
-import { fetchUserDisplayInfoFromServer } from '@/lib/api/clientAPI'
+import {
+	fetchAllPoolDataFromDB,
+	fetchAllPoolDataFromSC,
+	fetchUserDisplayForAddress,
+	fetchUserDisplayInfoFromServer,
+	handleRegister,
+	handleRegisterServer,
+	handleUnregister,
+	handleUnregisterServer,
+} from '@/lib/api/clientAPI'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCookie } from '@/hooks/cookie'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -67,15 +83,16 @@ const PoolPage = () => {
 	const [poolBalance, setPoolBalance] = useState<number>(0)
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
 
-	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
+	const [poolDbData, setPoolDbData] = useState<any | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
-	const [cohostDbData, setCohostDbData] = useState<any>([])
-	const [poolSCInfo, setPoolSCInfo] = useState<any>()
+	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 
 	const [copied, setCopied] = useState(false)
 
 	const [pageUrl, setPageUrl] = useState('')
 	const [timeLeft, setTimeLeft] = useState<number>()
+
+	const { currentJwt } = useCookie()
 
 	const calculateTimeLeft = (startTime: string) => {
 		const currentTimestamp: Date = new Date()
@@ -90,86 +107,24 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	async function fetchPoolInfoFromServer() {
-		const poolId = router.query.poolId
+	const poolId = router?.query?.poolId
+	const queryClient = useQueryClient()
 
-		const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
-			.from('pool') // Replace 'your_table_name' with your actual table name
-			.select()
-			.eq('pool_id', poolId)
-		// .eq('participant_address', walletAddress)
+	const { data: poolSCInfo } = useQuery({
+		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+		queryFn: fetchAllPoolDataFromSC,
+		enabled: !!poolId,
+	})
 
-		if (error) {
-			console.error('Error reading data:', error)
-			return
-		}
-
-		console.log('Pool data', JSON.stringify(data))
-		if (data.length == 0) {
-			console.log('No Such Pool')
-			return
-		}
-		setPoolDbData(data[0])
-		console.log('timestamp', data[0]?.event_timestamp)
-		calculateTimeLeft(data[0]?.event_timestamp)
-
-		if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
-			const { data: storageData } = supabaseClient.storage
-				.from('pool')
-				.getPublicUrl(data[0].pool_image_url)
-			setPoolImageUrl(storageData.publicUrl)
-			console.log('storageData', storageData)
-
-			console.log('poolImageUrl', storageData.publicUrl)
-		}
-
-		const userDisplayData = await fetchUserDisplayInfoFromServer([
-			data[0]?.co_host_addresses,
-		])
-		setCohostDbData(userDisplayData)
-	}
-
-	const getPoolDataFromSC = async () => {
-		const contract = new ethers.Contract(
-			contractAddress,
-			poolContract.abi,
-			provider,
-		)
-		const poolId = router.query.poolId
-
-		const retrievedPoolBalance = await contract.getPoolBalance(poolId)
-		console.log('retrievedPoolBalance', retrievedPoolBalance)
-		setPoolBalance(Number(retrievedPoolBalance))
-
-		const retrievedPoolParticipants = await contract.getParticipants(poolId)
-		console.log('retrievedPoolBalance', retrievedPoolParticipants)
-		setPoolParticipants(Number(retrievedPoolParticipants))
-	}
-
-	const getAllPoolDataFromSC = async () => {
-		const contract = new ethers.Contract(
-			contractAddress,
-			poolContract.abi,
-			provider,
-		)
-		const poolId = router.query.poolId
-
-		const retrievedAllPoolInfo = await contract.getAllPoolInfo(poolId)
-		setPoolSCInfo(retrievedAllPoolInfo)
-		console.log('retrievedAllPoolInfo', retrievedAllPoolInfo)
-		console.log('retrievedAllPoolInfo[0]', retrievedAllPoolInfo[0])
-		console.log('retrievedAllPoolInfo[1]', retrievedAllPoolInfo[1])
-		console.log('retrievedAllPoolInfo[2]', retrievedAllPoolInfo[2])
-		console.log('retrievedAllPoolInfo[3]', retrievedAllPoolInfo[3])
-		console.log('retrievedAllPoolInfo[2] poolSCBalance', poolSCInfo?.[2][0])
-		console.log('retrievedAllPoolInfo[4]', retrievedAllPoolInfo[4])
-		console.log('retrievedAllPoolInfo[5]', retrievedAllPoolInfo[5])
-		console.log('retrievedAllPoolInfo[6]', retrievedAllPoolInfo[6])
-	}
+	const { data: poolDBInfo } = useQuery({
+		queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+		queryFn: fetchAllPoolDataFromDB,
+		enabled: !!poolId,
+	})
 
 	const poolSCAdmin = poolSCInfo?.[0]
 	const poolSCDetail = poolSCInfo?.[1]
-	const poolSCBalance = poolSCInfo
+	let poolSCBalance = poolSCInfo
 		? (BigInt(poolSCInfo?.[2][0]) / BigInt(1000000000000000000)).toString()
 		: 0
 	const poolSCName = poolSCInfo?.[1][2]
@@ -179,56 +134,26 @@ const PoolPage = () => {
 		: 0
 	const poolSCStatus = poolSCInfo?.[3]
 	const poolSCToken = poolSCInfo?.[4]
-	const poolSCParticipants = poolSCInfo?.[5]
+	let poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
+	const isRegisteredOnSC =
+		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
 
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
-			getPoolDataFromSC()
-			getAllPoolDataFromSC()
-			fetchPoolInfoFromServer()
 		}
+		console.log('participants', poolSCParticipants)
 
+		setPoolDbData(poolDBInfo?.poolDBInfo)
+		setCohostDbData(poolDBInfo?.cohostUserDisplayData ?? [])
+		setPoolImageUrl(poolDBInfo?.poolImageUrl)
+
+		console.log('poolDBInfo', poolDBInfo)
 		setPageUrl(window?.location.href)
-	}, [ready, authenticated])
-
-	const handleRegisterServer = async () => {
-		console.log('handleJoinPool')
-		console.log(`wallet address: ${user!.wallet!.address}`)
-
-		const poolId = router.query.poolId
-
-		const formData = {
-			poolId,
-			walletAddress: user!.wallet!.address,
-		}
-		try {
-			const response = await fetch('/api/join_pool', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(formData),
-			})
-
-			if (response.ok) {
-				console.log('Join success')
-				const msg = await response.json()
-				console.log(msg)
-				// Handle success
-				fetchPoolInfoFromServer()
-			} else {
-				console.error('Error sending data')
-				// Handle error
-			}
-		} catch (error) {
-			console.error('Error:', error)
-			// Handle error
-		}
-	}
+	}, [ready, authenticated, poolSCInfo, poolDBInfo])
 
 	const handleSharePool = () => {
 		console.log('handleSharePool')
@@ -248,45 +173,65 @@ const PoolPage = () => {
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
-	const handleRegister = async () => {
-		const poolId = router.query.poolId
-		console.log('poolId', poolId)
-		console.log('chainId', chain.id)
-		console.log('contractAddress', contractAddress)
+	const registerServerMutation = useMutation({
+		mutationFn: handleRegisterServer,
+		onSuccess: () => {
+			console.log('registerServerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+			})
+		},
+	})
 
-		const iface = new Interface(poolContract.abi)
-		const dataString = iface.encodeFunctionData('deposit', [
-			// poolId,
-			// BigInt(50000000000000000000),
-			// poolSCDepositPerPerson,
-			'1',
-			'50000000000000000000',
-		])
-		console.log('dataString', dataString)
-		const uiConfig = {
-			title: 'Register',
-			description: `You agree to pay the registration fee of ${poolDbData?.price} to join the pool`,
-			buttonText: 'Sign',
-		}
+	const registerMutation = useMutation({
+		mutationFn: handleRegister,
+		onSuccess: () => {
+			console.log('registerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+			})
+			registerServerMutation.mutate({
+				params: [
+					poolId?.toString() ?? ' ',
+					wallets[0].address,
+					currentJwt ?? ' ',
+				],
+			})
+		},
+	})
 
-		const unsignedTx: UnsignedTransactionRequest = {
-			to: contractAddress,
-			chainId: chain.id,
-			data: dataString,
-		}
-		try {
-			const txReceipt: TransactionReceipt = await sendTransaction(
-				unsignedTx,
-				uiConfig,
-			)
-		} catch (e: any) {
-			console.log(e.message)
-			return
-		}
+	const unregisterServerMutation = useMutation({
+		mutationFn: handleUnregisterServer,
+		onSuccess: () => {
+			console.log('unregisterServerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+			})
+		},
+	})
 
-		handleRegisterServer()
-	}
-
+	const unregisterMutation = useMutation({
+		mutationFn: handleUnregister,
+		onSuccess: () => {
+			console.log('unregisterMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+			})
+			unregisterServerMutation.mutate({
+				params: [
+					poolId?.toString() ?? ' ',
+					wallets[0].address,
+					currentJwt ?? ' ',
+				],
+			})
+		},
+	})
 	// const percentFunded = poolDbData?.price
 	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
 	// 	: poolParticipants / poolDbData?.soft_cap
@@ -378,14 +323,46 @@ const PoolPage = () => {
 							<Divider />
 							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
 						</div>
-						<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
-							<button
-								className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-								onClick={handleRegister}
-							>
-								Register
-							</button>
-						</div>
+						{isRegisteredOnSC ? (
+							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<button
+									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={() => {}} //TODO: Change function
+								>
+									View My Ticket
+								</button>
+								<button
+									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={() =>
+										unregisterMutation.mutate({
+											params: [poolId?.toString() ?? ' ', wallets],
+										})
+									}
+								>
+									<img
+										className='flex w-full h-full'
+										src={tripleDotsIcon.src}
+									></img>
+								</button>
+							</div>
+						) : (
+							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<button
+									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={() =>
+										registerMutation.mutate({
+											params: [
+												poolId?.toString() ?? ' ',
+												poolSCDepositPerPerson.toString(),
+												wallets,
+											],
+										})
+									}
+								>
+									Register
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 			</Section>

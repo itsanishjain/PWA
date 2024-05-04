@@ -22,7 +22,6 @@ export default async function handler(
 	res: NextApiResponse,
 ) {
 	const { message, signedMessage, nonce, address } = req.body
-	const supabaseClient = createSupabaseBrowserClient()
 
 	const supabaseAdminClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,10 +39,12 @@ export default async function handler(
 	console.log('nonce', nonce)
 	console.log('address', address)
 
+	const addressLower = address.toLowerCase()
+
 	const recoveredAddress = recoverAddress(hashMessage(message), signedMessage)
 	console.log('recoveredAddress', recoveredAddress)
 
-	if (recoveredAddress != address) {
+	if (recoveredAddress.toLowerCase() != addressLower) {
 		return res
 			.status(401)
 			.json({ message: 'Address does not match signature address' })
@@ -52,7 +53,7 @@ export default async function handler(
 	const { data, error } = await supabaseAdminClient
 		.from('users')
 		.select('*')
-		.eq('address', address)
+		.eq('address', addressLower)
 
 	console.log('data', data)
 
@@ -67,8 +68,8 @@ export default async function handler(
 	if (data![0].id == '' || data![0].id == null || data![0].id == undefined) {
 		const { data: user, error: createUserError } =
 			await supabaseAdminClient.auth.admin.createUser({
-				email: `${address}@email.com`,
-				user_metadata: { address: address },
+				email: `${addressLower}@email.com`,
+				user_metadata: { address: addressLower },
 				email_confirm: true,
 			})
 
@@ -80,15 +81,30 @@ export default async function handler(
 		userId = user.user?.id
 		console.log('New Auth User', user)
 
-		const { data, error: updateIdError } = await supabaseAdminClient
+		const { error: updateIdError } = await supabaseAdminClient
 			.from('users')
 			.update({ id: userId })
-			.eq('address', address)
+			.eq('address', addressLower)
 
 		if (updateIdError) {
 			console.log('updateIdError', updateIdError.message)
 			return res.status(401).json({ message: 'Unable to create user' })
 		}
+
+		// TODO: Should only update usersDisplayDataa when creating user?
+	}
+
+	const { data: usersDisplayData, error: updateUsersDisplayError } =
+		await supabaseAdminClient
+			.from('usersDisplay')
+			.upsert({ id: userId, address: addressLower })
+			.match({
+				id: userId,
+			})
+
+	if (updateUsersDisplayError) {
+		console.log('updateIdError', updateUsersDisplayError.message)
+		return res.status(401).json({ message: 'Unable to create user' })
 	}
 
 	// 5. insert response into public.users table with id
@@ -105,16 +121,17 @@ export default async function handler(
 			},
 			id: userId, // same uuid as auth.users table
 		})
-		.eq('address', address) // primary key
+		.eq('address', addressLower) // primary key
 	if (updateUserError) {
 		console.log('updateUserError', updateUserError.message)
 		return res
 			.status(401)
 			.json({ message: 'Address does not match signature address' })
 	}
+
 	const token = jwt.sign(
 		{
-			address: address, // this will be read by RLS policy
+			address: addressLower, // this will be read by RLS policy
 			sub: userId,
 			aud: 'authenticated',
 			role: 'authenticated',

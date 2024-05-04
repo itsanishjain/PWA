@@ -24,6 +24,7 @@ export default async function handler(
 
 	const walletAddressLower = walletAddress.toLowerCase()
 	console.log('jwt', JSON.stringify(jwtString))
+
 	// Return a response
 	const supabaseClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,7 +40,7 @@ export default async function handler(
 
 	const supabaseRow = {
 		participant_address: walletAddressLower,
-		status: 1,
+		status: 0,
 		pool_id: poolId,
 		// Add other columns as needed
 	}
@@ -48,12 +49,13 @@ export default async function handler(
 		const jwtObj = decode(jwtString, { json: true })
 		const jwtAddress = jwtObj!.address
 		if (jwtAddress.toLowerCase() != walletAddress.toLowerCase()) {
-			res.status(401).json({ error: 'Unauthorized' })
+			res.status(401).json({ error: 'Invalid Permissons' })
 			return
 		}
 	} catch (error) {
 		console.error(error)
-		res.status(500).json({ error: 'Invalid Jwt' })
+		res.status(500).json({ error: 'Failed to decode Jwt.' })
+
 		return
 	}
 
@@ -67,7 +69,7 @@ export default async function handler(
 			})
 
 		if (existingData?.length === 0) {
-			console.log('No previous user activity for pool', selectError)
+			console.error('Error fetching existing data:', selectError)
 			// Insert a new row
 			const { data: insertedData, error: insertError } = await supabaseClient
 				.from('participantStatus')
@@ -78,7 +80,7 @@ export default async function handler(
 			} else {
 				console.log('Data inserted successfully:', insertedData)
 			}
-			res.status(500).json({ error: 'Internal Server Error' })
+			res.status(500).json({ message: 'Success' })
 
 			return
 		} else {
@@ -93,7 +95,7 @@ export default async function handler(
 
 			if (updateError) {
 				console.error('Error updating data:', updateError)
-				res.status(500).json({ error: 'Internal Server Error' })
+				res.status(500).json({ message: 'Error upating data' })
 			} else {
 				console.log('Data updated successfully:', updatedData)
 			}
