@@ -237,7 +237,7 @@ const PoolPage = () => {
 	// 	: poolParticipants / poolDbData?.soft_cap
 
 	const participantPercent =
-		(poolSCParticipants.length / poolDbData?.soft_cap) * 100
+		(poolSCParticipants?.length / poolDbData?.soft_cap) * 100
 	const viewParticipantsClicked = () => {
 		const currentRoute = router.asPath
 
