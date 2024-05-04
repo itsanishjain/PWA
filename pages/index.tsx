@@ -52,7 +52,10 @@ const Home = () => {
 		// Update the document title using the browser API
 		if (wallets.length > 0) {
 			console.log(`Wallet Length: ${wallets.length}`)
-			console.log(`Wallet Address: ${wallets[0].address}`)
+			// console.log(`Wallet Address: ${wallets[0].address}`)
+		}
+		for (var i = 0; i < wallets.length; i++) {
+			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
 	}, [wallets])
 

@@ -99,7 +99,7 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	const poolId = router?.query?.poolId
+	const poolId = router.query.poolId ?? 'testPool'
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({

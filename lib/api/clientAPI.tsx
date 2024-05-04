@@ -241,10 +241,13 @@ export const fetchPastPools = async () => {
 
 export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 	console.log('addressList', addressList)
+	const lowerAddressList = addressList.map((address) => {
+		address.toLowerCase()
+	})
 	const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
 		.from('usersDisplay')
 		.select()
-		.in('address', addressList)
+		.in('address', lowerAddressList)
 
 	if (error) {
 		console.error('Error reading data:', error)
@@ -261,19 +264,24 @@ export const fetchProfileUrlForAddress = async ({
 	queryKey: [string, string]
 }) => {
 	const [_, address] = queryKey
+	const lowerAddress = address.toLowerCase()
 	const { data: userDisplayData, error } = await supabaseClient
 		.from('usersDisplay')
 		.select('*')
-		.filter('address', 'eq', address)
+		.filter('address', 'eq', lowerAddress)
 		.single()
 	if (error) {
 		console.error('Error reading data:', error)
-		return
+		return { userDisplayData: '', profileImageUrl: '' }
 	}
-	const { data: storageData } = await supabaseClient.storage
-		.from('profile')
-		.getPublicUrl(userDisplayData?.avatar_url)
-	return { userDisplayData, profileImageUrl: storageData.publicUrl }
+	if (userDisplayData?.avatar_url) {
+		const { data: storageData } = await supabaseClient.storage
+			.from('profile')
+			.getPublicUrl(userDisplayData?.avatar_url)
+		return { userDisplayData, profileImageUrl: storageData.publicUrl }
+	}
+
+	return { userDisplayData }
 }
 
 export const fetchAllPoolDataFromSC = async ({

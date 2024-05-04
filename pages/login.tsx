@@ -56,21 +56,18 @@ const Index = () => {
 
 	const showBackend = ready && authenticated
 
-	if (!ready) {
-		// Do nothing while the PrivyProvider initializes with updated user state
-		return <></>
-	}
+	useEffect(() => {
+		if (ready && !authenticated) {
+			// Replace this code with however you'd like to handle an unauthenticated user
+			// As an example, you might redirect them to a sign-in page
+		}
 
-	if (ready && !authenticated) {
-		// Replace this code with however you'd like to handle an unauthenticated user
-		// As an example, you might redirect them to a sign-in page
-	}
-
-	if (ready && authenticated) {
-		// Replace this code with however you'd like to handle an authenticated user
-		router.push('/authenticate')
-		// console.log('ready and authenticated')
-	}
+		if (ready && authenticated) {
+			// Replace this code with however you'd like to handle an authenticated user
+			router.push('/authenticate')
+			// console.log('ready and authenticated')
+		}
+	}, [ready, authenticated])
 
 	return (
 		<Page>

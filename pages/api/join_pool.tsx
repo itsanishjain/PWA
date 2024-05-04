@@ -21,10 +21,7 @@ export default async function handler(
 	const requestData = await req.body
 	const { poolId, walletAddress } = requestData
 
-	// const recoveredAddress = recoverAddress(
-	// 	hashMessage(`Join Pool: ${poolId}`),
-	// 	signedMessage,
-	// )
+	const walletAddressLower = walletAddress.toLowerCase()
 
 	// Return a response
 	const supabase = createClient(
@@ -32,7 +29,7 @@ export default async function handler(
 		process.env.SUPABASE_SERVICE_KEY!,
 	)
 	const supabaseRow = {
-		participant_address: walletAddress,
+		participant_address: walletAddressLower,
 		status: 1,
 		pool_id: poolId,
 		// Add other columns as needed

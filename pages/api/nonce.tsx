@@ -21,7 +21,7 @@ export default async function handler(
 ) {
 	const { address } = req.body
 	const nonce = Math.floor(Math.random() * 1000000)
-
+	const addressLower = address.toLowerCase()
 	const supabaseAdminClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
 		process.env.SUPABASE_SERVICE_KEY!,
@@ -34,7 +34,7 @@ export default async function handler(
 	)
 
 	console.log('nonce called')
-	console.log('address', address)
+	console.log('address', addressLower)
 
 	const { status, error } = await supabaseAdminClient.from('users').upsert(
 		{
@@ -43,7 +43,7 @@ export default async function handler(
 				lastAuth: new Date().toISOString(),
 				lastAuthStatus: 'pending',
 			},
-			address,
+			address: addressLower,
 		},
 		{ onConflict: 'address' },
 	)
