@@ -7,10 +7,17 @@ import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { UserDisplayRow } from '@/pages/pool-id/[poolId]'
 import { QueryFunction } from '@tanstack/react-query'
 import { ethers } from 'ethers'
-import { contractAddress, provider } from '@/constants/constant'
+import {
+	contractAddress,
+	dropletIFace,
+	poolIFace,
+	provider,
+	tokenAddress,
+} from '@/constants/constant'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
+import { ConnectedWallet } from '@privy-io/react-auth'
 
 export interface writeTestObject {
 	address: string
@@ -319,7 +326,7 @@ export const fetchAllPoolDataFromSC = async ({
 	return poolSCInfo
 }
 
-export const fetchPoolDataFromDB = async ({
+export const fetchAllPoolDataFromDB = async ({
 	queryKey,
 }: {
 	queryKey: [string, string]
@@ -361,6 +368,193 @@ export const fetchPoolDataFromDB = async ({
 	}
 
 	return { poolDBInfo: data[0], poolImageUrl, cohostUserDisplayData }
+}
+
+export const handleRegisterServer = async ({
+	params,
+}: {
+	params: [string, string, string]
+}) => {
+	const [poolId, walletAddress, jwtString] = params
+
+	const formData = {
+		poolId,
+		walletAddress,
+		jwtString,
+	}
+	try {
+		const response = await fetch('/api/join_pool', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(formData),
+		})
+
+		if (response.ok) {
+			console.log('Join success')
+			const msg = await response.json()
+			console.log(msg)
+			// Handle success
+			// fetchPoolDataFromDB()
+		} else {
+			console.error('Error sending data')
+			// Handle error
+		}
+	} catch (error) {
+		console.error('Error:', error)
+		// Handle error
+	}
+}
+
+export const handleUnregisterServer = async ({
+	params,
+}: {
+	params: [string, string, string]
+}) => {
+	const [poolId, walletAddress, jwtString] = params
+
+	const formData = {
+		poolId,
+		walletAddress,
+		jwtString,
+	}
+	try {
+		const response = await fetch('/api/unjoin_pool', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(formData),
+		})
+
+		if (response.ok) {
+			console.log('Unjoin success')
+			const msg = await response.json()
+			console.log(msg)
+		} else {
+			console.error('Error sending data')
+			// Handle error
+		}
+	} catch (error) {
+		console.error('Error:', error)
+		// Handle error
+	}
+}
+
+export const handleRegister = async ({
+	params,
+}: {
+	params: [string, string, ConnectedWallet[]]
+}) => {
+	const [poolId, deposit, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	let approveDropletDataString = dropletIFace.encodeFunctionData('approve', [
+		contractAddress,
+		deposit,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: tokenAddress,
+					data: approveDropletDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		return
+	}
+
+	let depositDataString = poolIFace.encodeFunctionData('deposit', [
+		poolId,
+		deposit,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: depositDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		return
+	}
+}
+
+export const handleUnregister = async ({
+	params,
+}: {
+	params: [string, ConnectedWallet[]]
+}) => {
+	const [poolId, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+
+	const address = wallet.address
+
+	let selfRefundDataString = poolIFace.encodeFunctionData('selfRefund', [
+		poolId,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: address,
+					to: contractAddress,
+					data: selfRefundDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		return
+	}
 }
 // export const testAsyncFunction = async () => {
 // 	console.log('Hello')

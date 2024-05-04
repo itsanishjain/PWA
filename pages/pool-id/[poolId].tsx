@@ -55,12 +55,17 @@ import {
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
 import {
+	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
-	fetchPoolDataFromDB,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
+	handleRegister,
+	handleRegisterServer,
+	handleUnregister,
+	handleUnregisterServer,
 } from '@/lib/api/clientAPI'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCookie } from '@/hooks/cookie'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -80,12 +85,14 @@ const PoolPage = () => {
 
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
-	const [cohostDbData, setCohostDbData] = useState<any>([])
+	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 
 	const [copied, setCopied] = useState(false)
 
 	const [pageUrl, setPageUrl] = useState('')
 	const [timeLeft, setTimeLeft] = useState<number>()
+
+	const { currentJwt } = useCookie()
 
 	const calculateTimeLeft = (startTime: string) => {
 		const currentTimestamp: Date = new Date()
@@ -100,18 +107,18 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	const poolId = router.query.poolId ?? '0'
+	const poolId = router?.query?.poolId
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
-		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
+		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
 		queryFn: fetchAllPoolDataFromSC,
 		enabled: !!poolId,
 	})
 
 	const { data: poolDBInfo } = useQuery({
-		queryKey: ['fetchPoolDataFromDB', poolId?.toString()],
-		queryFn: fetchPoolDataFromDB,
+		queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+		queryFn: fetchAllPoolDataFromDB,
 		enabled: !!poolId,
 	})
 
@@ -141,47 +148,12 @@ const PoolPage = () => {
 		console.log('participants', poolSCParticipants)
 
 		setPoolDbData(poolDBInfo?.poolDBInfo)
-		setCohostDbData(poolDBInfo?.cohostUserDisplayData)
+		setCohostDbData(poolDBInfo?.cohostUserDisplayData ?? [])
 		setPoolImageUrl(poolDBInfo?.poolImageUrl)
 
 		console.log('poolDBInfo', poolDBInfo)
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo])
-
-	const handleRegisterServer = async () => {
-		console.log('handleJoinPool')
-		console.log(`wallet address: ${user!.wallet!.address}`)
-
-		const poolId = router.query.poolId
-
-		const formData = {
-			poolId,
-			walletAddress: user!.wallet!.address,
-		}
-		try {
-			const response = await fetch('/api/join_pool', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(formData),
-			})
-
-			if (response.ok) {
-				console.log('Join success')
-				const msg = await response.json()
-				console.log(msg)
-				// Handle success
-				// fetchPoolDataFromDB()
-			} else {
-				console.error('Error sending data')
-				// Handle error
-			}
-		} catch (error) {
-			console.error('Error:', error)
-			// Handle error
-		}
-	}
 
 	const handleSharePool = () => {
 		console.log('handleSharePool')
@@ -201,117 +173,13 @@ const PoolPage = () => {
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
-	const handleRegister = async () => {
-		const poolId = router.query.poolId
-
-		let approveDropletDataString = dropletIFace.encodeFunctionData('approve', [
-			contractAddress,
-			poolSCDepositPerPerson,
-		])
-		const wallet = wallets[0] // Replace this with your desired wallet
-		const address = wallet.address
-
-		try {
-			const provider = await wallet.getEthereumProvider()
-			const signedTxn = await provider.request({
-				method: 'eth_sendTransaction',
-				params: [
-					{
-						from: address,
-						to: tokenAddress,
-						data: approveDropletDataString,
-					},
-				],
-			})
-			let transactionReceipt = null
-			while (transactionReceipt === null) {
-				transactionReceipt = await provider.request({
-					method: 'eth_getTransactionReceipt',
-					params: [signedTxn],
-				})
-				await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
-			}
-			console.log('Transaction confirmed!', transactionReceipt)
-		} catch (e: any) {
-			console.log('User did not sign transaction')
-			return
-		}
-
-		let depositDataString = poolIFace.encodeFunctionData('deposit', [
-			poolId,
-			poolSCDepositPerPerson,
-		])
-
-		try {
-			const provider = await wallet.getEthereumProvider()
-			const signedTxn = await provider.request({
-				method: 'eth_sendTransaction',
-				params: [
-					{
-						from: address,
-						to: contractAddress,
-						data: depositDataString,
-					},
-				],
-			})
-			let transactionReceipt = null
-			while (transactionReceipt === null) {
-				transactionReceipt = await provider.request({
-					method: 'eth_getTransactionReceipt',
-					params: [signedTxn],
-				})
-				await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
-			}
-			console.log('Transaction confirmed!', transactionReceipt)
-		} catch (e: any) {
-			console.log('User did not sign transaction')
-			return
-		}
-
-		handleRegisterServer()
-	}
-
-	const handleUnregisterServer = () => {}
-	const handleUnregister = async () => {
-		const wallet = wallets[0] // Replace this with your desired wallet
-		const address = wallet.address
-
-		let selfRefundDataString = poolIFace.encodeFunctionData('selfRefund', [
-			poolId,
-		])
-
-		try {
-			const provider = await wallet.getEthereumProvider()
-			const signedTxn = await provider.request({
-				method: 'eth_sendTransaction',
-				params: [
-					{
-						from: address,
-						to: contractAddress,
-						data: selfRefundDataString,
-					},
-				],
-			})
-			let transactionReceipt = null
-			while (transactionReceipt === null) {
-				transactionReceipt = await provider.request({
-					method: 'eth_getTransactionReceipt',
-					params: [signedTxn],
-				})
-				await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
-			}
-			console.log('Transaction confirmed!', transactionReceipt)
-		} catch (e: any) {
-			console.log('User did not sign transaction')
-			return
-		}
-
-		handleUnregisterServer()
-	}
-
-	const unregisterMutation = useMutation({
-		mutationFn: handleUnregister,
+	const registerServerMutation = useMutation({
+		mutationFn: handleRegisterServer,
 		onSuccess: () => {
+			console.log('registerServerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+			})
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
 			})
@@ -321,12 +189,49 @@ const PoolPage = () => {
 	const registerMutation = useMutation({
 		mutationFn: handleRegister,
 		onSuccess: () => {
+			console.log('registerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+			})
+			registerServerMutation.mutate({
+				params: [
+					poolId?.toString() ?? ' ',
+					wallets[0].address,
+					currentJwt ?? ' ',
+				],
+			})
+		},
+	})
+
+	const unregisterServerMutation = useMutation({
+		mutationFn: handleUnregisterServer,
+		onSuccess: () => {
+			console.log('unregisterServerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+			})
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
 			})
 		},
 	})
 
+	const unregisterMutation = useMutation({
+		mutationFn: handleUnregister,
+		onSuccess: () => {
+			console.log('unregisterMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+			})
+			unregisterServerMutation.mutate({
+				params: [
+					poolId?.toString() ?? ' ',
+					wallets[0].address,
+					currentJwt ?? ' ',
+				],
+			})
+		},
+	})
 	// const percentFunded = poolDbData?.price
 	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
 	// 	: poolParticipants / poolDbData?.soft_cap
@@ -422,13 +327,17 @@ const PoolPage = () => {
 							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={handleRegister} //TODO: Change function
+									onClick={() => {}} //TODO: Change function
 								>
 									View My Ticket
 								</button>
 								<button
 									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={() => unregisterMutation.mutate()}
+									onClick={() =>
+										unregisterMutation.mutate({
+											params: [poolId?.toString() ?? ' ', wallets],
+										})
+									}
 								>
 									<img
 										className='flex w-full h-full'
@@ -440,7 +349,15 @@ const PoolPage = () => {
 							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={() => registerMutation.mutate()}
+									onClick={() =>
+										registerMutation.mutate({
+											params: [
+												poolId?.toString() ?? ' ',
+												poolSCDepositPerPerson.toString(),
+												wallets,
+											],
+										})
+									}
 								>
 									Register
 								</button>
