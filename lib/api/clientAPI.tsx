@@ -202,7 +202,7 @@ export const updateUserDisplayData = async (
 	if (userError) {
 		console.error('Error updating user data:', userError.message)
 	}
-
+	return { userData, userError }
 	console.log('usersDisplay Information updated successfully')
 }
 
