@@ -22,11 +22,6 @@ interface poolData {
 
 const supabase = createSupabaseBrowserClient()
 
-const handlePoolRowClicked = (poolId: number) => {
-	const currentRoute = router.asPath
-	router.push(`${currentRoute}/pool-id/${poolId}`)
-}
-
 const UpcomingPoolTab: React.FC = () => {
 	const [poolsData, setPoolsData] = useState<poolData[] | undefined>([])
 
@@ -52,7 +47,6 @@ const UpcomingPoolTab: React.FC = () => {
 						capacity={pool.soft_cap}
 						startTime={pool.event_timestamp}
 						poolId={pool.pool_id}
-						handlePoolRowClicked={handlePoolRowClicked}
 					/>
 				)
 			})}

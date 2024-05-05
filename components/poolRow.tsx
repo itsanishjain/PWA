@@ -4,6 +4,8 @@ import frogImage from '@/public/images/frog.png'
 
 import { formatTimeDiff } from '@/lib/utils'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import Link from 'next/link'
+import router from 'next/router'
 
 interface PoolRowProps {
 	title: string
@@ -12,7 +14,6 @@ interface PoolRowProps {
 	capacity: number
 	startTime: Date
 	poolId: number
-	handlePoolRowClicked: (poolId: number) => void
 }
 
 const PoolRow: React.FC<PoolRowProps> = ({
@@ -22,7 +23,6 @@ const PoolRow: React.FC<PoolRowProps> = ({
 	capacity,
 	startTime,
 	poolId,
-	handlePoolRowClicked,
 }) => {
 	const currentTimestamp: Date = new Date()
 	const startDateObject: Date = new Date(startTime)
@@ -32,6 +32,8 @@ const PoolRow: React.FC<PoolRowProps> = ({
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 
 	const supabaseClient = createSupabaseBrowserClient()
+
+	const currentRoute = router.asPath
 
 	const loadPoolImage = async () => {
 		if (poolImagePath == undefined || poolImagePath == null) {
@@ -48,7 +50,10 @@ const PoolRow: React.FC<PoolRowProps> = ({
 	}, [])
 
 	return (
-		<div className='flex flex-row space-x-4'>
+		<Link
+			href={`${currentRoute}/pool-id/${poolId}`}
+			className='flex flex-row space-x-4'
+		>
 			<div className='relative w-20 h-20 rounded-2xl overflow-hidden bg-red-500'>
 				<img
 					src={`${poolImageUrl ?? frogImage.src}`}
@@ -58,10 +63,7 @@ const PoolRow: React.FC<PoolRowProps> = ({
 					Upcoming
 				</div>
 			</div>
-			<div
-				className='flex flex-grow flex-col justify-evenly py-1'
-				onClick={() => handlePoolRowClicked(poolId)}
-			>
+			<div className='flex flex-grow flex-col justify-evenly py-1'>
 				<h3 className='font-semibold'>{title}</h3>
 				<p className='text-sm'>
 					{registered}/{capacity} registered
@@ -75,7 +77,7 @@ const PoolRow: React.FC<PoolRowProps> = ({
 			<div className=' flex flex-col items-center justify-center'>
 				<img src={`${rightArrow.src}`}></img>
 			</div>
-		</div>
+		</Link>
 	)
 }
 
