@@ -66,6 +66,10 @@ import {
 } from '@/lib/api/clientAPI'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCookie } from '@/hooks/cookie'
+import { Button } from '@/components/ui/button'
+
+import LoadingAnimation from '@/components/loadingAnimation'
+import TransactionDialog from '@/components/transactionDialog'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -86,6 +90,8 @@ const PoolPage = () => {
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
+	const [transactionInProgress, setTransactionInProgress] =
+		useState<boolean>(false)
 
 	const [copied, setCopied] = useState(false)
 
@@ -248,6 +254,22 @@ const PoolPage = () => {
 		const currentRoute = router.asPath
 		router.push(`${currentRoute}/ticket`)
 	}
+
+	const onRegisterButtonClicked = (e: any) => {
+		setTransactionInProgress(true)
+
+		console.log('onRegisterButtonClicked')
+		const connectorType = wallets[0].connectorType
+		console.log('connectorType', connectorType)
+
+		// registerMutation.mutate({
+		// 	params: [
+		// 		poolId?.toString() ?? ' ',
+		// 		poolSCDepositPerPerson.toString(),
+		// 		wallets,
+		// 	],
+		// })
+	}
 	const cohostNames: string = cohostDbData
 		.map((data: any) => data.display_name)
 		.join(',')
@@ -369,21 +391,20 @@ const PoolPage = () => {
 							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={() =>
-										registerMutation.mutate({
-											params: [
-												poolId?.toString() ?? ' ',
-												poolSCDepositPerPerson.toString(),
-												wallets,
-											],
-										})
-									}
+									onClick={onRegisterButtonClicked}
 								>
 									Register
 								</button>
 							</div>
 						)}
 					</div>
+					{wallets?.[0]?.connectorType != 'embedded' && (
+						<TransactionDialog
+							open={transactionInProgress}
+							showLoadAnimation={true}
+							setOpen={setTransactionInProgress}
+						/>
+					)}
 				</div>
 			</Section>
 		</Page>

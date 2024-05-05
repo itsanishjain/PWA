@@ -125,7 +125,7 @@ const UserProfile = () => {
 
 	const handleSignOut = async () => {
 		console.log('handleSignOut')
-		wallets[0].disconnect()
+		wallets?.[0]?.disconnect()
 
 		await logout()
 
