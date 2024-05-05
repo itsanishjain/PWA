@@ -33,8 +33,6 @@ const PoolRow: React.FC<PoolRowProps> = ({
 
 	const supabaseClient = createSupabaseBrowserClient()
 
-	const currentRoute = router.asPath
-
 	const loadPoolImage = async () => {
 		if (poolImagePath == undefined || poolImagePath == null) {
 			return
@@ -47,13 +45,11 @@ const PoolRow: React.FC<PoolRowProps> = ({
 
 	useEffect(() => {
 		loadPoolImage()
+		// console.log('poolroute', `${currentRoute}/pool-id/${poolId}`)
 	}, [])
 
 	return (
-		<Link
-			href={`${currentRoute}/pool-id/${poolId}`}
-			className='flex flex-row space-x-4'
-		>
+		<Link href={`/pool-id/${poolId}`} className='flex flex-row space-x-4'>
 			<div className='relative w-20 h-20 rounded-2xl overflow-hidden bg-red-500'>
 				<img
 					src={`${poolImageUrl ?? frogImage.src}`}

@@ -18,12 +18,6 @@ const Authenticate = () => {
 	const { currentJwt, saveJwt, isJwtValid } = useCookie()
 	const { wallets } = useWallets()
 
-	const handleClick = () => {
-		// Replace '/your-link' with the actual path you want to navigate to
-		// router.push('/wallet-selection')
-		login()
-	}
-
 	const handleBackendLogin = async () => {
 		console.log('handleBackendLogin')
 		let result = await fetchNonce({ address: user?.wallet?.address! })
@@ -80,7 +74,12 @@ const Authenticate = () => {
 			console.log('ready and authenticated')
 			router.push('/')
 		}
-	}, [ready, authenticated, isJwtValid])
+		if (ready && authenticated) {
+			if (!wallets?.[0]?.isConnected) {
+				router.push('/login')
+			}
+		}
+	}, [ready, authenticated, isJwtValid, wallets])
 
 	return (
 		<Page>

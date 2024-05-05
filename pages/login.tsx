@@ -3,7 +3,7 @@ import Section from '@/components/section'
 import Image from 'next/image'
 import poolImage from '@/public/images/pool.png'
 import { useRouter } from 'next/router'
-import { usePrivy } from '@privy-io/react-auth'
+import { useLogout, usePrivy, useWallets } from '@privy-io/react-auth'
 import { chain } from '@/constants/constant'
 import React, { useState, useEffect } from 'react'
 import { fetchNonce, fetchToken, writeTest } from '@/lib/api/clientAPI'
@@ -12,13 +12,15 @@ import { getTokenCookie, setTokenCookie } from '@/hooks/cookie'
 
 const LoginPage = () => {
 	const router = useRouter()
-	const { ready, authenticated, user, signMessage, login } = usePrivy()
+	const { ready, authenticated, user, signMessage, login, logout } = usePrivy()
 
 	const handleClick = () => {
 		// Replace '/your-link' with the actual path you want to navigate to
 		// router.push('/wallet-selection')
 		login()
 	}
+
+	const { wallets } = useWallets()
 
 	const handleBackendLogin = async () => {
 		console.log('handleBackendLogin')
@@ -56,18 +58,27 @@ const LoginPage = () => {
 
 	const showBackend = ready && authenticated
 
+	const signOut = async () => {
+		await logout()
+	}
+
 	useEffect(() => {
 		if (ready && !authenticated) {
 			// Replace this code with however you'd like to handle an unauthenticated user
 			// As an example, you might redirect them to a sign-in page
 		}
 
-		if (ready && authenticated) {
+		console.log('wallets', wallets)
+		if (ready && authenticated && wallets?.length > 0) {
 			// Replace this code with however you'd like to handle an authenticated user
 			router.push('/authenticate')
 			// console.log('ready and authenticated')
 		}
-	}, [ready, authenticated])
+
+		if (ready && authenticated && wallets?.length === 0) {
+			signOut()
+		}
+	}, [ready, authenticated, wallets])
 
 	return (
 		<Page>
