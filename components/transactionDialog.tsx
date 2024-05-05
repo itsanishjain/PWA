@@ -35,11 +35,8 @@ const TransactionDialog = (props: transactionDialog) => {
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel onClick={() => props.setOpen(false)}>
-						Cancel
-					</AlertDialogCancel>
 					<AlertDialogAction onClick={() => props.setOpen(false)}>
-						Continue
+						Okay
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

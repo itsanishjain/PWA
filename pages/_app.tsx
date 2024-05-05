@@ -13,6 +13,8 @@ import { config } from '@/constants/config'
 // import { publicProvider } from 'wagmi/providers/public'
 import Head from 'next/head'
 
+import { Toaster } from '@/components/ui/toaster'
+
 export default function App({ Component, pageProps }: AppProps) {
 	// const configureChainsConfig = createConfig({
 	// 	chains: [mainnet, goerli, foundry],
@@ -72,6 +74,7 @@ export default function App({ Component, pageProps }: AppProps) {
 							disableTransitionOnChange
 						>
 							<Component {...pageProps} />
+							<Toaster />
 						</ThemeProvider>
 						{/* </PrivyWagmiConnector> */}
 					</QueryClientProvider>

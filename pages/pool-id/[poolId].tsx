@@ -70,6 +70,7 @@ import { Button } from '@/components/ui/button'
 
 import LoadingAnimation from '@/components/loadingAnimation'
 import TransactionDialog from '@/components/transactionDialog'
+import { useToast } from '@/components/ui/use-toast'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -112,6 +113,8 @@ const PoolPage = () => {
 
 		setTimeLeft(timeDiff)
 	}
+
+	const { toast } = useToast()
 
 	const poolId = router?.query?.poolId
 	const queryClient = useQueryClient()
@@ -183,6 +186,10 @@ const PoolPage = () => {
 		mutationFn: handleRegisterServer,
 		onSuccess: () => {
 			console.log('registerServerMutation Success')
+			toast({
+				title: 'Registration Suceessful',
+				description: 'You have joined the pool.',
+			})
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
 			})
@@ -212,6 +219,10 @@ const PoolPage = () => {
 	const unregisterServerMutation = useMutation({
 		mutationFn: handleUnregisterServer,
 		onSuccess: () => {
+			toast({
+				title: 'Withdrawal Suceessful',
+				description: 'You have successfully withdrawn from the pool.',
+			})
 			console.log('unregisterServerMutation Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
@@ -256,20 +267,40 @@ const PoolPage = () => {
 	}
 
 	const onRegisterButtonClicked = (e: any) => {
-		setTransactionInProgress(true)
+		// setTransactionInProgress(true)
 
 		console.log('onRegisterButtonClicked')
 		const connectorType = wallets[0].connectorType
 		console.log('connectorType', connectorType)
-
-		// registerMutation.mutate({
-		// 	params: [
-		// 		poolId?.toString() ?? ' ',
-		// 		poolSCDepositPerPerson.toString(),
-		// 		wallets,
-		// 	],
-		// })
+		toast({
+			title: 'Requesting Transaction/s',
+			description: 'Approve spending of token, followed by depositing token.',
+		})
+		registerMutation.mutate({
+			params: [
+				poolId?.toString() ?? ' ',
+				poolSCDepositPerPerson.toString(),
+				wallets,
+			],
+		})
 	}
+
+	const onUnregisterButtonClicked = (e: any) => {
+		// setTransactionInProgress(true)
+
+		console.log('onUnregisterButtonClicked')
+		const connectorType = wallets[0].connectorType
+		console.log('connectorType', connectorType)
+		toast({
+			title: 'Requesting Transaction',
+			description: 'Withdrawing from pool',
+		})
+
+		unregisterMutation.mutate({
+			params: [poolId?.toString() ?? ' ', wallets],
+		})
+	}
+
 	const cohostNames: string = cohostDbData
 		.map((data: any) => data.display_name)
 		.join(',')
@@ -375,11 +406,7 @@ const PoolPage = () => {
 								</button>
 								<button
 									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={() =>
-										unregisterMutation.mutate({
-											params: [poolId?.toString() ?? ' ', wallets],
-										})
-									}
+									onClick={onUnregisterButtonClicked}
 								>
 									<img
 										className='flex w-full h-full'
