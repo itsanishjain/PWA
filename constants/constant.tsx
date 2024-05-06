@@ -66,7 +66,10 @@ export const mainChain = base
 // 		default: { name: 'Explorer', url: 'https://basescan.org' },
 // 	},
 // })
-export const network: Network = Network.Testnet
+export const network: Network =
+	process.env.NEXT_PUBLIC_ENV === 'production'
+		? Network.Mainnet
+		: Network.Testnet
 
 export const localnetTokenAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
 export const localnetContractAddress =
