@@ -17,48 +17,11 @@ import {
 	useWallets,
 } from '@privy-io/react-auth'
 
-import { useReadContract, createConfig, http } from 'wagmi'
-import { readContract, readContracts } from '@wagmi/core'
-import { foundry, hardhat, mainnet, sepolia } from 'viem/chains'
-import { Interface, ethers } from 'ethers'
-
-import {
-	chain,
-	tokenAddress,
-	contractAddress,
-	provider,
-	dropletIFace,
-	poolIFace,
-} from 'constants/constant'
-import { config } from '@/constants/config'
-
-import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
-import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
-
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
-import DropdownChecklist from '@/components/dropdown-checklist'
-
-import defaultPoolImage from '@/public/images/frog.png'
-import qrCodeIcon from '@/public/images/qr_code_icon.svg'
-import shareIcon from '@/public/images/share_icon.svg'
-import editIcon from '@/public/images/edit_icon.svg'
-import tripleDotsIcon from '@/public/images/tripleDots.svg'
-
-import rightArrow from '@/public/images/right_arrow.svg'
-import Divider from '@/components/divider'
 import { Tables, Database } from '@/types/supabase'
-import {
-	formatCountdownTime,
-	formatEventDateTime,
-	formatTimeDiff,
-} from '@/lib/utils'
-import { PostgrestSingleResponse } from '@supabase/supabase-js'
 
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
-	fetchUserDisplayForAddress,
-	fetchUserDisplayInfoFromServer,
 	fetchParticipantsDataFromServer,
 	handleRegister,
 	handleRegisterServer,
@@ -156,11 +119,11 @@ const ParticipantsPage = () => {
 					<div className='relative flex flex-col pt-16 w-full min-h-screen space-y-0 pb-20 md:pb-24 justify-start'>
 						{participantsInfo?.map((participant) => (
 							<ParticipantRow
-								key={participant.id}
-								name={participant.display_name}
-								participantStatus={participant.participationData[0].status}
-								imageUrl={participant.avatar_url}
-								address={participant.address}
+								key={participant?.id}
+								name={participant?.display_name}
+								participantStatus={participant?.participationData?.[0]?.status}
+								imageUrl={participant?.avatar_url}
+								address={participant?.address}
 							/>
 						))}
 					</div>

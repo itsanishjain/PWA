@@ -224,7 +224,7 @@ const UserProfile = () => {
 								value={displayName}
 								onChange={handleDisplayNameChange}
 								placeholder='Display Name'
-								className='rounded-lg my-2 px-4 flex flex-1'
+								className='rounded-lg my-2 px-4 flex flex-1 bg-white text-black'
 							/>
 						</div>
 						<div className={`border-t-4 ${styles.divider}`}></div>
@@ -237,7 +237,7 @@ const UserProfile = () => {
 								value={bio}
 								onChange={handleBioChange}
 								placeholder='Write something enticing about yourself'
-								className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'
+								className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2 bg-white text-black'
 							></textarea>
 						</div>
 
@@ -251,7 +251,7 @@ const UserProfile = () => {
 							value={company}
 							onChange={handleCompanyChange}
 							placeholder='Write something enticing about yourself'
-							className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'
+							className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2 bg-white text-black'
 						></textarea>
 						<div className='flex justify-center mt-8'>
 							{isImageReady && (
