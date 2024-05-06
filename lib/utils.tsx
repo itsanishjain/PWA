@@ -1,3 +1,6 @@
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
 export const formatTimeDiff = (diffInMs: number) => {
 	const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
 	// console.log('diffInMs', diffInMs)
@@ -65,4 +68,8 @@ export const formatCountdownTime = (timeLeft: number): string => {
 	} else {
 		return `${seconds}s`
 	}
+}
+
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs))
 }

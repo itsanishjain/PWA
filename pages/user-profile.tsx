@@ -29,6 +29,7 @@ import camera from '@/public/images/camera.png'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import * as _ from 'lodash'
+import { useToast } from '@/components/ui/use-toast'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -47,6 +48,7 @@ const UserProfile = () => {
 	const [isImageReady, setIsImageReady] = useState<boolean>(true)
 
 	const { currentJwt } = useCookie()
+	const { toast } = useToast()
 
 	const [displayName, setDisplayName] = useState<string>('')
 	const [company, setCompany] = useState<string>('')
@@ -103,13 +105,25 @@ const UserProfile = () => {
 				currentJwt!,
 			)
 		}
-		await updateUserDisplayData(
+		const { userData, userError } = await updateUserDisplayData(
 			displayName,
 			company,
 			bio,
 			currentJwt!,
 			wallets[0].address,
 		)
+
+		if (userError) {
+			toast({
+				title: 'Error',
+				description: userError.message,
+			})
+		} else {
+			toast({
+				title: 'Saving Details',
+				description: 'You have saved the data successfully',
+			})
+		}
 	}
 
 	const address = wallets?.[0]?.address ?? '0x'
@@ -125,8 +139,11 @@ const UserProfile = () => {
 
 	const handleSignOut = async () => {
 		console.log('handleSignOut')
-		wallets[0].disconnect()
-
+		wallets?.[0]?.disconnect()
+		toast({
+			title: 'Logging Out',
+			description: 'Please wait...',
+		})
 		await logout()
 
 		removeTokenCookie()
@@ -207,7 +224,7 @@ const UserProfile = () => {
 								value={displayName}
 								onChange={handleDisplayNameChange}
 								placeholder='Display Name'
-								className='rounded-lg my-2 px-4 flex flex-1'
+								className='rounded-lg my-2 px-4 flex flex-1 bg-white text-black'
 							/>
 						</div>
 						<div className={`border-t-4 ${styles.divider}`}></div>
@@ -220,7 +237,7 @@ const UserProfile = () => {
 								value={bio}
 								onChange={handleBioChange}
 								placeholder='Write something enticing about yourself'
-								className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'
+								className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2 bg-white text-black'
 							></textarea>
 						</div>
 
@@ -234,7 +251,7 @@ const UserProfile = () => {
 							value={company}
 							onChange={handleCompanyChange}
 							placeholder='Write something enticing about yourself'
-							className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2'
+							className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2 bg-white text-black'
 						></textarea>
 						<div className='flex justify-center mt-8'>
 							{isImageReady && (
