@@ -4,21 +4,7 @@ import PoolRow from '../poolRow'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { fetchPastPools } from '@/lib/api/clientAPI'
 import router from 'next/router'
-
-interface poolData {
-	co_host_addresses: null | string
-	created_at: string
-	created_by: string
-	description: string
-	event_timestamp: Date
-	host_address: string
-	link_to_rules: string
-	pool_id: number
-	pool_image_url: string
-	pool_name: string
-	price: number
-	soft_cap: number
-}
+import { poolData } from '@/types/types'
 
 const supabase = createSupabaseBrowserClient()
 
@@ -43,7 +29,7 @@ const PastPoolTab: React.FC = () => {
 						key={pool.pool_id}
 						title={pool.pool_name}
 						poolImagePath={pool.pool_image_url}
-						registered={0}
+						registered={pool.participant_count}
 						capacity={pool.soft_cap}
 						startTime={pool.event_timestamp}
 						poolId={pool.pool_id}
