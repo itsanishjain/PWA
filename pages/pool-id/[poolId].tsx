@@ -57,6 +57,7 @@ import CountdownTimer from '@/components/countdown'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
+	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
 	handleRegister,
@@ -71,6 +72,8 @@ import { Button } from '@/components/ui/button'
 import LoadingAnimation from '@/components/loadingAnimation'
 import TransactionDialog from '@/components/transactionDialog'
 import { useToast } from '@/components/ui/use-toast'
+
+import * as _ from 'lodash'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -147,6 +150,12 @@ const PoolPage = () => {
 	const poolSCWinners = poolSCInfo?.[6]
 	const isRegisteredOnSC =
 		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
+
+	const { data: tokenSymbol } = useQuery({
+		queryKey: ['fetchTokenSymbol', poolSCToken],
+		queryFn: fetchTokenSymbol,
+		enabled: !_.isEmpty(poolSCToken),
+	})
 
 	useEffect(() => {
 		// Update the document title using the browser API
@@ -350,7 +359,7 @@ const PoolPage = () => {
 									<div className='flex flex-rol justify-between'>
 										<p className='max-w-sm '>
 											<span className='font-bold'>{poolSCBalance} </span>
-											USDC Prize Pool
+											{tokenSymbol} Prize Pool
 										</p>
 										<p>{participantPercent}% funded</p>
 									</div>
@@ -390,7 +399,7 @@ const PoolPage = () => {
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Buy-In</h3>
 							<Divider />
 							<p className='text-md md:text-2xl'>
-								${poolSCDepositPerPersonString} USD
+								{poolSCDepositPerPersonString} {tokenSymbol}
 							</p>
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Terms</h3>
 							<Divider />

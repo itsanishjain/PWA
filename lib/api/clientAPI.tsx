@@ -605,6 +605,25 @@ export const handleUnregister = async ({
 		return
 	}
 }
+
+export const fetchTokenSymbol = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolTokenAddress] = queryKey
+	const contract = new ethers.Contract(
+		poolTokenAddress,
+		dropletContract.abi,
+		provider,
+	)
+	console.log('poolTokenAddress', poolTokenAddress)
+
+	const tokenSymbol = await contract.symbol()
+
+	console.log('tokenSymbol', tokenSymbol)
+	return tokenSymbol
+}
 // export const testAsyncFunction = async () => {
 // 	console.log('Hello')
 // 	await 'asdf'
