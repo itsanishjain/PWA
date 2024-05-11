@@ -389,17 +389,21 @@ export const fetchAllPoolDataFromDB = async ({
 			.eq('pool_id', poolId)
 
 	if (error) {
-		console.error('Error reading data:', error)
+		console.error('Error fetchPoolDataFromDB:', error.message)
 		return {}
 	}
 
 	console.log('Pool data', JSON.stringify(data))
 	if (data.length == 0) {
 		console.log('No Such Pool')
+		console.error('Error fetchPoolDataFromDB:')
+
 		return {}
 	}
 
-	let poolImageUrl = ''
+	console.log('fetchPoolDataFromDB: Fetching Pool Image Url')
+
+	let poolImageUrl = null
 	if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
 		const { data: storageData } = supabaseBrowserClient.storage
 			.from('pool')
@@ -408,15 +412,22 @@ export const fetchAllPoolDataFromDB = async ({
 		console.log('poolImageUrl', storageData.publicUrl)
 	}
 
+	console.log('fetchPoolDataFromDB: Fetching cohostUserDisplayData')
+
 	let cohostUserDisplayData
-	if (data[0]?.co_host_addresses.length > 0) {
+	if (data[0]?.co_host_addresses?.length > 0) {
 		const cohostDisplayData = await fetchUserDisplayInfoFromServer(
 			data[0]?.co_host_addresses,
 		)
 		cohostUserDisplayData = cohostDisplayData
 	}
+	console.log('fetchPoolDataFromDB return')
 
-	return { poolDBInfo: data[0], poolImageUrl, cohostUserDisplayData }
+	return {
+		poolDBInfo: data[0],
+		poolImageUrl,
+		cohostUserDisplayData,
+	}
 }
 
 export const handleRegisterServer = async ({
