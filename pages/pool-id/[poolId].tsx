@@ -115,7 +115,7 @@ const PoolPage = () => {
 
 	const { toast } = useToast()
 
-	const poolId = router?.query?.poolId!
+	const poolId = router?.query?.poolId! ?? 0
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
