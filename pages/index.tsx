@@ -53,7 +53,7 @@ const Home = () => {
 		for (var i = 0; i < wallets.length; i++) {
 			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
-	}, [wallets, ready, authenticated])
+	}, [wallets, ready, authenticated, router])
 
 	return (
 		<Page>

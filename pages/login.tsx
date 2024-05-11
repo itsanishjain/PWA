@@ -74,7 +74,7 @@ const LoginPage = () => {
 			router.push('/authenticate')
 			// console.log('ready and authenticated')
 		}
-	}, [ready, authenticated, wallets])
+	}, [ready, authenticated, wallets, router])
 
 	return (
 		<Page>

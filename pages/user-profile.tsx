@@ -171,7 +171,7 @@ const UserProfile = () => {
 		setDisplayName(profileData?.userDisplayData.display_name ?? '')
 		setCompany(profileData?.userDisplayData.company ?? '')
 		console.log('displayName', profileData)
-	}, [profileData, ready, authenticated])
+	}, [profileData, ready, authenticated, router])
 
 	return (
 		<Page>
