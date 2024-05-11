@@ -68,7 +68,6 @@ const Authenticate = () => {
 
 			// Replace this code with however you'd like to handle an unauthenticated user
 			// As an example, you might redirect them to a sign-in page
-			console.log('authenticated: ', authenticated)
 			router.push('/login')
 		}
 

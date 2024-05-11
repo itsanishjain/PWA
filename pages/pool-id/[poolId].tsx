@@ -74,6 +74,7 @@ import TransactionDialog from '@/components/transactionDialog'
 import { useToast } from '@/components/ui/use-toast'
 
 import * as _ from 'lodash'
+import PoolStatus from '@/components/poolStatus'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -337,16 +338,7 @@ const PoolPage = () => {
 										<img className='w-full h-full flex' src={shareIcon.src} />
 									</button>
 								</div>
-								<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
-									{poolSCStatus == 1 && (
-										<div className='flex flex-row space-x-3 items-center'>
-											<div
-												className={`dotBackground rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
-											></div>
-											<div className='md:text-2xl text-xs'>Upcoming</div>
-										</div>
-									)}
-								</div>
+								<PoolStatus status={poolSCStatus} />
 							</div>
 							<div className='flex flex-col space-y-6 md:space-y-12 '>
 								<div className='flex flex-col space-y-2 md:space-y-4 overflow-hidden'>
