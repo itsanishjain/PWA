@@ -338,10 +338,14 @@ const PoolPage = () => {
 									</button>
 								</div>
 								<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
-									<div
-										className={`dotBackground rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
-									></div>
-									<div className='md:text-2xl text-xs'>Upcoming</div>
+									{poolSCStatus == 1 && (
+										<div className='flex flex-row space-x-3 items-center'>
+											<div
+												className={`dotBackground rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
+											></div>
+											<div className='md:text-2xl text-xs'>Upcoming</div>
+										</div>
+									)}
 								</div>
 							</div>
 							<div className='flex flex-col space-y-6 md:space-y-12 '>

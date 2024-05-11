@@ -64,8 +64,11 @@ const Authenticate = () => {
 
 	useEffect(() => {
 		if (ready && !authenticated) {
+			console.log('authenticated: ', authenticated)
+
 			// Replace this code with however you'd like to handle an unauthenticated user
 			// As an example, you might redirect them to a sign-in page
+			console.log('authenticated: ', authenticated)
 			router.push('/login')
 		}
 
@@ -74,12 +77,12 @@ const Authenticate = () => {
 			console.log('ready and authenticated')
 			router.push('/')
 		}
-		if (ready && authenticated) {
-			if (!wallets?.[0]?.isConnected) {
-				router.push('/login')
-			}
-		}
-	}, [ready, authenticated, isJwtValid, wallets])
+		// if (ready && authenticated) {
+		// 	if (!wallets?.[0]?.isConnected) {
+		// 		router.push('/login')
+		// 	}
+		// }
+	}, [ready, authenticated, isJwtValid, wallets, router])
 
 	return (
 		<Page>

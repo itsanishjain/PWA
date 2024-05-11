@@ -74,10 +74,6 @@ const LoginPage = () => {
 			router.push('/authenticate')
 			// console.log('ready and authenticated')
 		}
-
-		if (ready && authenticated && wallets?.length === 0) {
-			signOut()
-		}
 	}, [ready, authenticated, wallets])
 
 	return (
