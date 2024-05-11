@@ -6,10 +6,6 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import Appbar from '@/components/appbar'
 
-import { createBrowserClient } from '@supabase/ssr'
-
-import QRCode from 'react-qr-code'
-
 import {
 	TransactionReceipt,
 	UnsignedTransactionRequest,
@@ -83,10 +79,10 @@ export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 
 const PoolPage = () => {
-	const supabaseClient = createSupabaseBrowserClient()
-
 	const router = useRouter()
-
+	if (_.isEmpty(router.query.poolId)) {
+		return <></>
+	}
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
 
@@ -96,7 +92,7 @@ const PoolPage = () => {
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
 
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
-	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
+	const [poolImageUrl, setPoolImageUrl] = useState<String | null | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 	const [transactionInProgress, setTransactionInProgress] =
 		useState<boolean>(false)
@@ -121,17 +117,17 @@ const PoolPage = () => {
 
 	const { toast } = useToast()
 
-	const poolId = router?.query?.poolId
+	const poolId = router?.query?.poolId!
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
-		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+		queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 		queryFn: fetchAllPoolDataFromSC,
 		enabled: !!poolId,
 	})
 
 	const { data: poolDBInfo } = useQuery({
-		queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+		queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
 		queryFn: fetchAllPoolDataFromDB,
 		enabled: !!poolId,
 	})
@@ -186,10 +182,10 @@ const PoolPage = () => {
 				description: 'You have joined the pool.',
 			})
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
 			})
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
 			})
 		},
 	})
@@ -199,14 +195,10 @@ const PoolPage = () => {
 		onSuccess: () => {
 			console.log('registerMutation Success')
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 			registerServerMutation.mutate({
-				params: [
-					poolId?.toString() ?? ' ',
-					wallets[0].address,
-					currentJwt ?? ' ',
-				],
+				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
 			})
 		},
 	})
@@ -220,10 +212,10 @@ const PoolPage = () => {
 			})
 			console.log('unregisterServerMutation Success')
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
 			})
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
 			})
 		},
 	})
@@ -233,14 +225,10 @@ const PoolPage = () => {
 		onSuccess: () => {
 			console.log('unregisterMutation Success')
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 			unregisterServerMutation.mutate({
-				params: [
-					poolId?.toString() ?? ' ',
-					wallets[0].address,
-					currentJwt ?? ' ',
-				],
+				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
 			})
 		},
 	})
@@ -272,11 +260,7 @@ const PoolPage = () => {
 			description: 'Approve spending of token, followed by depositing token.',
 		})
 		registerMutation.mutate({
-			params: [
-				poolId?.toString() ?? ' ',
-				poolSCDepositPerPerson.toString(),
-				wallets,
-			],
+			params: [poolId.toString(), poolSCDepositPerPerson.toString(), wallets],
 		})
 	}
 
@@ -292,7 +276,7 @@ const PoolPage = () => {
 		})
 
 		unregisterMutation.mutate({
-			params: [poolId?.toString() ?? ' ', wallets],
+			params: [poolId.toString(), wallets],
 		})
 	}
 
@@ -337,7 +321,7 @@ const PoolPage = () => {
 											<span className='font-bold'>{poolSCBalance} </span>
 											{tokenSymbol} Prize Pool
 										</p>
-										<p>{participantPercent}% funded</p>
+										<p>{participantPercent.toPrecision(2)}% funded</p>
 									</div>
 									<Progress value={participantPercent} />
 								</div>
