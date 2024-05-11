@@ -101,9 +101,6 @@ const PoolPage = () => {
 	const [transactionInProgress, setTransactionInProgress] =
 		useState<boolean>(false)
 
-	const [copied, setCopied] = useState(false)
-	const [shareDialogOpened, setShareDialogOpened] = useState<boolean>(false)
-
 	const [pageUrl, setPageUrl] = useState('')
 	const [timeLeft, setTimeLeft] = useState<number>()
 
@@ -177,31 +174,6 @@ const PoolPage = () => {
 		console.log('poolDBInfo', poolDBInfo)
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo])
-
-	const sharePoolButtonClicked = () => {
-		console.log('sharePoolButtonClicked')
-		setShareDialogOpened(true)
-		// copyToClipboard()
-	}
-
-	const copyToClipboard = async () => {
-		console.log('copyToClipboard')
-
-		try {
-			await navigator.clipboard.writeText(pageUrl)
-			toast({
-				title: 'Share Link',
-				description: 'Copied link to clipboard!',
-			})
-			setCopied(true)
-		} catch (error) {
-			console.error('Failed to copy:', error)
-			toast({
-				title: 'Share Link',
-				description: 'Failed to copy link to clipboard!',
-			})
-		}
-	}
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
