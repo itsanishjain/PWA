@@ -77,6 +77,7 @@ import * as _ from 'lodash'
 import PoolStatus from '@/components/poolStatus'
 import { Progress } from '@/components/ui/progress'
 import MyProgressBar from '@/components/myProgressBar'
+import ShareDialog from '@/components/shareDialog'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -101,6 +102,7 @@ const PoolPage = () => {
 		useState<boolean>(false)
 
 	const [copied, setCopied] = useState(false)
+	const [shareDialogOpened, setShareDialogOpened] = useState<boolean>(false)
 
 	const [pageUrl, setPageUrl] = useState('')
 	const [timeLeft, setTimeLeft] = useState<number>()
@@ -176,9 +178,10 @@ const PoolPage = () => {
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo])
 
-	const handleSharePool = () => {
-		console.log('handleSharePool')
-		copyToClipboard()
+	const sharePoolButtonClicked = () => {
+		console.log('sharePoolButtonClicked')
+		setShareDialogOpened(true)
+		// copyToClipboard()
 	}
 
 	const copyToClipboard = async () => {
@@ -186,9 +189,17 @@ const PoolPage = () => {
 
 		try {
 			await navigator.clipboard.writeText(pageUrl)
+			toast({
+				title: 'Share Link',
+				description: 'Copied link to clipboard!',
+			})
 			setCopied(true)
 		} catch (error) {
 			console.error('Failed to copy:', error)
+			toast({
+				title: 'Share Link',
+				description: 'Failed to copy link to clipboard!',
+			})
 		}
 	}
 
@@ -333,12 +344,7 @@ const PoolPage = () => {
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
 								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
-									<button
-										onClick={handleSharePool}
-										className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'
-									>
-										<img className='w-full h-full flex' src={shareIcon.src} />
-									</button>
+									<ShareDialog />
 								</div>
 								<PoolStatus status={poolSCStatus} />
 							</div>
