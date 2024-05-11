@@ -574,7 +574,8 @@ export const handleUnregister = async ({
 	const wallet = wallets[0]
 
 	const address = wallet.address
-
+	console.log('wallet', walletAddress)
+	console.log('poolId', poolId)
 	let selfRefundDataString = poolIFace.encodeFunctionData('selfRefund', [
 		poolId,
 	])
@@ -602,6 +603,7 @@ export const handleUnregister = async ({
 		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
 		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
 		return
 	}
 }

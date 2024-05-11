@@ -82,6 +82,10 @@ export default async function handler(
 
 			return
 		} else {
+			if (existingData?.[0]['status'] == 1) {
+				console.log('Already joined!')
+				return
+			}
 			// Update the existing row
 			const { data: updatedData, error: updateError } =
 				await supabaseAdminClient

@@ -84,6 +84,10 @@ export default async function handler(
 
 			return
 		} else {
+			if (existingData?.[0]['status'] == 0) {
+				console.log('Already unjoined!')
+				return
+			}
 			// Update the existing row
 			const { data: updatedData, error: updateError } =
 				await supabaseAdminClient
