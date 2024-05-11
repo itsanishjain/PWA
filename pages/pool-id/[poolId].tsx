@@ -80,9 +80,7 @@ export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 
 const PoolPage = () => {
 	const router = useRouter()
-	if (_.isEmpty(router.query.poolId)) {
-		return <></>
-	}
+
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
 
@@ -287,6 +285,9 @@ const PoolPage = () => {
 		.map((data: any) => data.display_name)
 		.join(',')
 
+	if (_.isEmpty(router.query.poolId)) {
+		return <></>
+	}
 	return (
 		<Page>
 			<Appbar backRoute='/' />
