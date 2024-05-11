@@ -201,6 +201,9 @@ const PoolPage = () => {
 				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
 			})
 		},
+		onError: () => {
+			console.log('registerMutation Error')
+		},
 	})
 
 	const unregisterServerMutation = useMutation({

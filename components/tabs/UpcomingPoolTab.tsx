@@ -6,8 +6,6 @@ import { fetchUpcomingPools } from '@/lib/api/clientAPI'
 import router from 'next/router'
 import { poolData } from '@/types/types'
 
-const supabase = createSupabaseBrowserClient()
-
 const UpcomingPoolTab: React.FC = () => {
 	const [poolsData, setPoolsData] = useState<poolData[] | undefined>([])
 

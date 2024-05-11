@@ -463,6 +463,8 @@ export const handleRegisterServer = async ({
 		}
 	} catch (error) {
 		console.error('Error:', error)
+		throw new Error('Failed handleRegisterServer')
+
 		// Handle error
 	}
 }
@@ -498,6 +500,8 @@ export const handleUnregisterServer = async ({
 		}
 	} catch (error) {
 		console.error('Error:', error)
+		throw new Error('Failed handleUnregisterServer')
+
 		// Handle error
 	}
 }
@@ -539,6 +543,7 @@ export const handleRegister = async ({
 		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
 		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
 		return
 	}
 
@@ -615,7 +620,6 @@ export const handleUnregister = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }
 

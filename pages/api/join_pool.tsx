@@ -82,6 +82,7 @@ export default async function handler(
 
 			return
 		} else {
+			console.log('existingData', JSON.stringify(existingData))
 			if (existingData?.[0]['status'] == 1) {
 				console.log('Already joined!')
 				return
