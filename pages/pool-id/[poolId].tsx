@@ -75,6 +75,8 @@ import { useToast } from '@/components/ui/use-toast'
 
 import * as _ from 'lodash'
 import PoolStatus from '@/components/poolStatus'
+import { Progress } from '@/components/ui/progress'
+import MyProgressBar from '@/components/myProgressBar'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -359,20 +361,15 @@ const PoolPage = () => {
 										</p>
 										<p>{participantPercent}% funded</p>
 									</div>
-									<div className='w-full h-full flex rounded-full overflow-hidden'>
-										<div
-											style={{ width: `100%` }}
-											className={`flex h-3 md:h-6 rounded-full barBackground`}
-										>
-											<div
-												style={{ width: `${participantPercent}%` }}
-												className={`flex h-3 md:h-6 rounded-full barForeground`}
-											></div>
-										</div>
-									</div>
+									<Progress value={participantPercent} />
 								</div>
 								<div className='flex text-sm md:text-3xl justify-between'>
-									<span className='font-bold'>Participants </span>
+									<p className='flex flex-row space-x-2'>
+										<span className='font-bold'>
+											{poolSCParticipants?.length}
+										</span>
+										<span>Participants</span>
+									</p>
 									<button
 										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
 										onClick={viewParticipantsClicked}
@@ -383,6 +380,7 @@ const PoolPage = () => {
 										</span>
 									</button>
 								</div>
+								<Progress value={participantPercent} />
 							</div>
 						</div>
 
