@@ -26,14 +26,13 @@ export default async function handler(
 	console.log('jwt', JSON.stringify(jwtString))
 
 	// Return a response
-	const supabaseClient = createClient(
+	const supabaseAdminClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+		process.env.SUPABASE_SERVICE_KEY!,
 		{
-			global: {
-				headers: {
-					Authorization: `Bearer ${jwtString}`,
-				},
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false,
 			},
 		},
 	)
@@ -60,7 +59,7 @@ export default async function handler(
 	}
 
 	async function upsertData() {
-		const { data: existingData, error: selectError } = await supabaseClient
+		const { data: existingData, error: selectError } = await supabaseAdminClient
 			.from('participantStatus')
 			.select('*')
 			.match({
@@ -71,9 +70,10 @@ export default async function handler(
 		if (existingData?.length === 0) {
 			console.error('Error fetching existing data:', selectError)
 			// Insert a new row
-			const { data: insertedData, error: insertError } = await supabaseClient
-				.from('participantStatus')
-				.insert([supabaseRow])
+			const { data: insertedData, error: insertError } =
+				await supabaseAdminClient
+					.from('participantStatus')
+					.insert([supabaseRow])
 
 			if (insertError) {
 				console.error('Error inserting data:', insertError)
@@ -84,14 +84,19 @@ export default async function handler(
 
 			return
 		} else {
+			if (existingData?.[0]['status'] == 0) {
+				console.log('Already unjoined!')
+				return
+			}
 			// Update the existing row
-			const { data: updatedData, error: updateError } = await supabaseClient
-				.from('participantStatus')
-				.update({ status: supabaseRow.status })
-				.match({
-					pool_id: supabaseRow.pool_id,
-					participant_address: supabaseRow.participant_address,
-				})
+			const { data: updatedData, error: updateError } =
+				await supabaseAdminClient
+					.from('participantStatus')
+					.update({ status: supabaseRow.status })
+					.match({
+						pool_id: supabaseRow.pool_id,
+						participant_address: supabaseRow.participant_address,
+					})
 
 			if (updateError) {
 				console.error('Error updating data:', updateError)
@@ -99,6 +104,39 @@ export default async function handler(
 			} else {
 				console.log('Data updated successfully:', updatedData)
 			}
+		}
+
+		// Update the participant count
+		const { data: participantCount, error: participantCountError } =
+			await supabaseAdminClient
+				.from('pool') // replace with your table name
+				.select('participant_count')
+				.eq('pool_id', poolId)
+
+		if (participantCountError) {
+			console.error('Error reading participant_count:', participantCountError)
+			res.status(500).json({ error: 'Internal Server Error' })
+		}
+		console.log('participantCount', participantCount?.[0].participant_count)
+		console.log('poolId', poolId)
+
+		let count = participantCount?.[0].participant_count ?? 0
+		const { data: updateData, error: updateParticipantCountError } =
+			await supabaseAdminClient
+				.from('pool') // replace with your table name
+				.update({ participant_count: count - 1 })
+				.match({
+					pool_id: poolId,
+				})
+		if (updateParticipantCountError) {
+			console.log(
+				'Error updating participant count',
+				participantCountError?.message,
+			)
+			res.status(500).json({ error: 'Internal Server Error' })
+		} else {
+			console.log('updateData', updateData)
+			console.log('participant_count updated successfully')
 		}
 	}
 

@@ -6,10 +6,6 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import Appbar from '@/components/appbar'
 
-import { createBrowserClient } from '@supabase/ssr'
-
-import QRCode from 'react-qr-code'
-
 import {
 	TransactionReceipt,
 	UnsignedTransactionRequest,
@@ -57,6 +53,7 @@ import CountdownTimer from '@/components/countdown'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
+	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
 	handleRegister,
@@ -72,12 +69,16 @@ import LoadingAnimation from '@/components/loadingAnimation'
 import TransactionDialog from '@/components/transactionDialog'
 import { useToast } from '@/components/ui/use-toast'
 
+import * as _ from 'lodash'
+import PoolStatus from '@/components/poolStatus'
+import { Progress } from '@/components/ui/progress'
+import MyProgressBar from '@/components/myProgressBar'
+import ShareDialog from '@/components/shareDialog'
+
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 
 const PoolPage = () => {
-	const supabaseClient = createSupabaseBrowserClient()
-
 	const router = useRouter()
 
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
@@ -89,12 +90,10 @@ const PoolPage = () => {
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
 
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
-	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
+	const [poolImageUrl, setPoolImageUrl] = useState<String | null | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 	const [transactionInProgress, setTransactionInProgress] =
 		useState<boolean>(false)
-
-	const [copied, setCopied] = useState(false)
 
 	const [pageUrl, setPageUrl] = useState('')
 	const [timeLeft, setTimeLeft] = useState<number>()
@@ -116,17 +115,17 @@ const PoolPage = () => {
 
 	const { toast } = useToast()
 
-	const poolId = router?.query?.poolId
+	const poolId = router?.query?.poolId! ?? 0
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
-		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+		queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 		queryFn: fetchAllPoolDataFromSC,
 		enabled: !!poolId,
 	})
 
 	const { data: poolDBInfo } = useQuery({
-		queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+		queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
 		queryFn: fetchAllPoolDataFromDB,
 		enabled: !!poolId,
 	})
@@ -148,6 +147,12 @@ const PoolPage = () => {
 	const isRegisteredOnSC =
 		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
 
+	const { data: tokenSymbol } = useQuery({
+		queryKey: ['fetchTokenSymbol', poolSCToken],
+		queryFn: fetchTokenSymbol,
+		enabled: !_.isEmpty(poolSCToken),
+	})
+
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
@@ -164,22 +169,6 @@ const PoolPage = () => {
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo])
 
-	const handleSharePool = () => {
-		console.log('handleSharePool')
-		copyToClipboard()
-	}
-
-	const copyToClipboard = async () => {
-		console.log('copyToClipboard')
-
-		try {
-			await navigator.clipboard.writeText(pageUrl)
-			setCopied(true)
-		} catch (error) {
-			console.error('Failed to copy:', error)
-		}
-	}
-
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
 	const registerServerMutation = useMutation({
@@ -191,10 +180,10 @@ const PoolPage = () => {
 				description: 'You have joined the pool.',
 			})
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
 			})
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
 			})
 		},
 	})
@@ -204,15 +193,14 @@ const PoolPage = () => {
 		onSuccess: () => {
 			console.log('registerMutation Success')
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 			registerServerMutation.mutate({
-				params: [
-					poolId?.toString() ?? ' ',
-					wallets[0].address,
-					currentJwt ?? ' ',
-				],
+				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
 			})
+		},
+		onError: () => {
+			console.log('registerMutation Error')
 		},
 	})
 
@@ -225,10 +213,10 @@ const PoolPage = () => {
 			})
 			console.log('unregisterServerMutation Success')
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
 			})
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
 			})
 		},
 	})
@@ -238,14 +226,10 @@ const PoolPage = () => {
 		onSuccess: () => {
 			console.log('unregisterMutation Success')
 			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 			unregisterServerMutation.mutate({
-				params: [
-					poolId?.toString() ?? ' ',
-					wallets[0].address,
-					currentJwt ?? ' ',
-				],
+				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
 			})
 		},
 	})
@@ -277,11 +261,7 @@ const PoolPage = () => {
 			description: 'Approve spending of token, followed by depositing token.',
 		})
 		registerMutation.mutate({
-			params: [
-				poolId?.toString() ?? ' ',
-				poolSCDepositPerPerson.toString(),
-				wallets,
-			],
+			params: [poolId.toString(), poolSCDepositPerPerson.toString(), wallets],
 		})
 	}
 
@@ -297,7 +277,7 @@ const PoolPage = () => {
 		})
 
 		unregisterMutation.mutate({
-			params: [poolId?.toString() ?? ' ', wallets],
+			params: [poolId.toString(), wallets],
 		})
 	}
 
@@ -305,6 +285,9 @@ const PoolPage = () => {
 		.map((data: any) => data.display_name)
 		.join(',')
 
+	if (_.isEmpty(router.query.poolId)) {
+		return <></>
+	}
 	return (
 		<Page>
 			<Appbar backRoute='/' />
@@ -321,19 +304,9 @@ const PoolPage = () => {
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
 								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
-									<button
-										onClick={handleSharePool}
-										className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'
-									>
-										<img className='w-full h-full flex' src={shareIcon.src} />
-									</button>
+									<ShareDialog />
 								</div>
-								<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
-									<div
-										className={`dotBackground rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
-									></div>
-									<div className='md:text-2xl text-xs'>Upcoming</div>
-								</div>
+								<PoolStatus status={poolSCStatus} />
 							</div>
 							<div className='flex flex-col space-y-6 md:space-y-12 '>
 								<div className='flex flex-col space-y-2 md:space-y-4 overflow-hidden'>
@@ -350,24 +323,19 @@ const PoolPage = () => {
 									<div className='flex flex-rol justify-between'>
 										<p className='max-w-sm '>
 											<span className='font-bold'>{poolSCBalance} </span>
-											USDC Prize Pool
+											{tokenSymbol} Prize Pool
 										</p>
-										<p>{participantPercent}% funded</p>
+										<p>{participantPercent.toPrecision(2)}% funded</p>
 									</div>
-									<div className='w-full h-full flex rounded-full overflow-hidden'>
-										<div
-											style={{ width: `100%` }}
-											className={`flex h-3 md:h-6 rounded-full barBackground`}
-										>
-											<div
-												style={{ width: `${participantPercent}%` }}
-												className={`flex h-3 md:h-6 rounded-full barForeground`}
-											></div>
-										</div>
-									</div>
+									<Progress value={participantPercent} />
 								</div>
 								<div className='flex text-sm md:text-3xl justify-between'>
-									<span className='font-bold'>Participants </span>
+									<p className='flex flex-row space-x-2'>
+										<span className='font-bold'>
+											{poolSCParticipants?.length}
+										</span>
+										<span>Participants</span>
+									</p>
 									<button
 										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
 										onClick={viewParticipantsClicked}
@@ -378,6 +346,7 @@ const PoolPage = () => {
 										</span>
 									</button>
 								</div>
+								<Progress value={participantPercent} />
 							</div>
 						</div>
 
@@ -390,7 +359,7 @@ const PoolPage = () => {
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Buy-In</h3>
 							<Divider />
 							<p className='text-md md:text-2xl'>
-								${poolSCDepositPerPersonString} USD
+								{poolSCDepositPerPersonString} {tokenSymbol}
 							</p>
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Terms</h3>
 							<Divider />
