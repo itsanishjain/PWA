@@ -66,7 +66,7 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 		<header className='fixed top-0 left-0 z-20 w-full pt-safe bg-white'>
 			<nav className=' px-safe '>
 				<div className='mx-auto flex h-20 max-w-screen-md items-center justify-between px-6'>
-					<div className='flex-1 flex'>
+					<div className='flex w-16'>
 						{backRoute && (
 							<Link href={backRoute ?? ''}>
 								<img className='h-10 w-10' src={`${leftArrowImage.src}`} />
@@ -75,7 +75,9 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 					</div>
 					<div className='flex flex-1 items-center'>
 						{pageTitle ? (
-							<h1 className={`text-center w-full h-full font-medium text-3xl`}>
+							<h1
+								className={`text-center w-full h-full font-medium md:text-3xl text-xl`}
+							>
 								{pageTitle}
 							</h1>
 						) : (
@@ -88,7 +90,7 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 							</Link>
 						)}
 					</div>
-					<div className='flex justify-end space-x-6 flex-1'>
+					<div className='flex justify-end space-x-6 w-16'>
 						<div>
 							<button
 								className='flex flex-col items-center'
