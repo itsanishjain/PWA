@@ -369,7 +369,7 @@ const PoolPage = () => {
 							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={viewTicketClicked} //TODO: Change function
+									onClick={viewTicketClicked}
 								>
 									View My Ticket
 								</button>

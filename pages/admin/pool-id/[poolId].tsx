@@ -56,8 +56,10 @@ import {
 	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
+	handleEndPool,
 	handleRegister,
 	handleRegisterServer,
+	handleStartPool,
 	handleUnregister,
 	handleUnregisterServer,
 } from '@/lib/api/clientAPI'
@@ -78,7 +80,7 @@ import ShareDialog from '@/components/shareDialog'
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 
-const PoolPage = () => {
+const AdminPoolPage = () => {
 	const router = useRouter()
 
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
@@ -173,68 +175,6 @@ const PoolPage = () => {
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
-	const registerServerMutation = useMutation({
-		mutationFn: handleRegisterServer,
-		onSuccess: () => {
-			console.log('registerServerMutation Success')
-			toast({
-				title: 'Registration Suceessful',
-				description: 'You have joined the pool.',
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
-			})
-		},
-	})
-
-	const registerMutation = useMutation({
-		mutationFn: handleRegister,
-		onSuccess: () => {
-			console.log('registerMutation Success')
-			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
-			})
-			registerServerMutation.mutate({
-				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
-			})
-		},
-		onError: () => {
-			console.log('registerMutation Error')
-		},
-	})
-
-	const unregisterServerMutation = useMutation({
-		mutationFn: handleUnregisterServer,
-		onSuccess: () => {
-			toast({
-				title: 'Withdrawal Suceessful',
-				description: 'You have successfully withdrawn from the pool.',
-			})
-			console.log('unregisterServerMutation Success')
-			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
-			})
-		},
-	})
-
-	const unregisterMutation = useMutation({
-		mutationFn: handleUnregister,
-		onSuccess: () => {
-			console.log('unregisterMutation Success')
-			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
-			})
-			unregisterServerMutation.mutate({
-				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
-			})
-		},
-	})
 	// const percentFunded = poolDbData?.price
 	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
 	// 	: poolParticipants / poolDbData?.soft_cap
@@ -247,38 +187,49 @@ const PoolPage = () => {
 		router.push(`${currentRoute}/participants`)
 	}
 
-	const viewTicketClicked = () => {
-		const currentRoute = router.asPath
-		router.push(`${currentRoute}/ticket`)
-	}
+	const startPoolMutation = useMutation({
+		mutationFn: handleStartPool,
+		onSuccess: () => {
+			console.log('startPool Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
+			})
+		},
+		onError: () => {
+			console.log('startPoolMutation Error')
+		},
+	})
 
-	const onRegisterButtonClicked = (e: any) => {
-		// setTransactionInProgress(true)
+	const endPoolMutation = useMutation({
+		mutationFn: handleEndPool,
+		onSuccess: () => {
+			console.log('endPool Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
+			})
+		},
+		onError: () => {
+			console.log('endPoolMutation Error')
+		},
+	})
 
-		console.log('onRegisterButtonClicked')
-		const connectorType = wallets[0].connectorType
-		console.log('connectorType', connectorType)
-		toast({
-			title: 'Requesting Transaction/s',
-			description: 'Approve spending of token, followed by depositing token.',
-		})
-		registerMutation.mutate({
-			params: [poolId.toString(), poolSCDepositPerPerson.toString(), wallets],
-		})
-	}
-
-	const onUnregisterButtonClicked = (e: any) => {
-		// setTransactionInProgress(true)
-
-		console.log('onUnregisterButtonClicked')
-		const connectorType = wallets[0].connectorType
-		console.log('connectorType', connectorType)
+	const onStartPoolButtonClicked = () => {
 		toast({
 			title: 'Requesting Transaction',
-			description: 'Withdrawing from pool',
+			description: 'Start pool',
+		})
+		startPoolMutation.mutate({
+			params: [poolId.toString(), wallets],
+		})
+	}
+
+	const onEndPoolButtonClicked = (e: any) => {
+		toast({
+			title: 'Requesting Transaction',
+			description: 'End pool',
 		})
 
-		unregisterMutation.mutate({
+		endPoolMutation.mutate({
 			params: [poolId.toString(), wallets],
 		})
 	}
@@ -292,7 +243,7 @@ const PoolPage = () => {
 	}
 	return (
 		<Page>
-			<Appbar backRoute='/' />
+			<Appbar backRoute='/admin' />
 
 			<Section>
 				<div className='flex flex-col w-full justify-center items-center'>
@@ -384,31 +335,23 @@ const PoolPage = () => {
 							<Divider />
 							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
 						</div>
-						{isRegisteredOnSC ? (
+						{poolSCStatus == 0 && (
 							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={viewTicketClicked} //TODO: Change function
+									onClick={onStartPoolButtonClicked}
 								>
-									View My Ticket
-								</button>
-								<button
-									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={onUnregisterButtonClicked}
-								>
-									<img
-										className='flex w-full h-full'
-										src={tripleDotsIcon.src}
-									></img>
+									Start Pool
 								</button>
 							</div>
-						) : (
+						)}
+						{poolSCStatus == 1 && (
 							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={onRegisterButtonClicked}
+									onClick={onEndPoolButtonClicked}
 								>
-									Register
+									End Pool
 								</button>
 							</div>
 						)}
@@ -426,4 +369,4 @@ const PoolPage = () => {
 	)
 }
 
-export default PoolPage
+export default AdminPoolPage
