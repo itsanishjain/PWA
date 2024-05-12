@@ -76,6 +76,7 @@ import PoolStatus from '@/components/poolStatus'
 import { Progress } from '@/components/ui/progress'
 import MyProgressBar from '@/components/myProgressBar'
 import ShareDialog from '@/components/shareDialog'
+import Link from 'next/link'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -306,15 +307,15 @@ const AdminPoolPage = () => {
 										</span>
 										<span>Participants</span>
 									</p>
-									<button
+									<Link
 										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
-										onClick={viewParticipantsClicked}
+										href={`${window.location.href}/participants`}
 									>
 										<span>View all</span>
 										<span>
 											<img src={`${rightArrow.src}`}></img>
 										</span>
-									</button>
+									</Link>
 								</div>
 								<Progress value={participantPercent} />
 							</div>
