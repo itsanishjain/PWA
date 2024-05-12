@@ -6,10 +6,6 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import Appbar from '@/components/appbar'
 
-import { createBrowserClient } from '@supabase/ssr'
-
-import QRCode from 'react-qr-code'
-
 import {
 	TransactionReceipt,
 	UnsignedTransactionRequest,
@@ -22,10 +18,18 @@ import { readContract, readContracts } from '@wagmi/core'
 import { foundry, hardhat, mainnet, sepolia } from 'viem/chains'
 import { Interface, ethers } from 'ethers'
 
-import { contractAddress, provider } from 'constants/constant'
+import {
+	chain,
+	tokenAddress,
+	contractAddress,
+	provider,
+	dropletIFace,
+	poolIFace,
+} from 'constants/constant'
 import { config } from '@/constants/config'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
+import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
 
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import DropdownChecklist from '@/components/dropdown-checklist'
@@ -34,6 +38,8 @@ import defaultPoolImage from '@/public/images/frog.png'
 import qrCodeIcon from '@/public/images/qr_code_icon.svg'
 import shareIcon from '@/public/images/share_icon.svg'
 import editIcon from '@/public/images/edit_icon.svg'
+import tripleDotsIcon from '@/public/images/tripleDots.svg'
+
 import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
 import { Tables, Database } from '@/types/supabase'
@@ -44,13 +50,35 @@ import {
 } from '@/lib/utils'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
-import { fetchUserDisplayInfoFromServer } from '@/lib/api/clientAPI'
+import {
+	fetchAllPoolDataFromDB,
+	fetchAllPoolDataFromSC,
+	fetchTokenSymbol,
+	fetchUserDisplayForAddress,
+	fetchUserDisplayInfoFromServer,
+	handleRegister,
+	handleRegisterServer,
+	handleUnregister,
+	handleUnregisterServer,
+} from '@/lib/api/clientAPI'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCookie } from '@/hooks/cookie'
+import { Button } from '@/components/ui/button'
+
+import LoadingAnimation from '@/components/loadingAnimation'
+import TransactionDialog from '@/components/transactionDialog'
+import { useToast } from '@/components/ui/use-toast'
+
+import * as _ from 'lodash'
+import PoolStatus from '@/components/poolStatus'
+import { Progress } from '@/components/ui/progress'
+import MyProgressBar from '@/components/myProgressBar'
+import ShareDialog from '@/components/shareDialog'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
+export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 
 const PoolPage = () => {
-	const supabaseClient = createSupabaseBrowserClient()
-
 	const router = useRouter()
 
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
@@ -58,18 +86,19 @@ const PoolPage = () => {
 
 	const { wallets } = useWallets()
 
-	const [poolInfo, setPoolInfo] = useState([])
-	const [poolDbData, setPoolDbData] = useState<PoolRow | undefined>()
-	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
-
 	const [poolBalance, setPoolBalance] = useState<number>(0)
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
-	const [cohostDbData, setCohostDbData] = useState<any>([])
 
-	const [copied, setCopied] = useState(false)
+	const [poolDbData, setPoolDbData] = useState<any | undefined>()
+	const [poolImageUrl, setPoolImageUrl] = useState<String | null | undefined>()
+	const [cohostDbData, setCohostDbData] = useState<any[]>([])
+	const [transactionInProgress, setTransactionInProgress] =
+		useState<boolean>(false)
 
 	const [pageUrl, setPageUrl] = useState('')
 	const [timeLeft, setTimeLeft] = useState<number>()
+
+	const { currentJwt } = useCookie()
 
 	const calculateTimeLeft = (startTime: string) => {
 		const currentTimestamp: Date = new Date()
@@ -84,103 +113,186 @@ const PoolPage = () => {
 		setTimeLeft(timeDiff)
 	}
 
-	async function fetchPoolInfoFromServer() {
-		const poolId = router.query.poolId
+	const { toast } = useToast()
 
-		const { data, error }: PostgrestSingleResponse<any[]> = await supabaseClient
-			.from('pool') // Replace 'your_table_name' with your actual table name
-			.select()
-			.eq('pool_id', poolId)
-		// .eq('participant_address', walletAddress)
+	const poolId = router?.query?.poolId! ?? 0
+	const queryClient = useQueryClient()
 
-		if (error) {
-			console.error('Error reading data:', error)
-			return
-		}
+	const { data: poolSCInfo } = useQuery({
+		queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
+		queryFn: fetchAllPoolDataFromSC,
+		enabled: !!poolId,
+	})
 
-		console.log('Pool data', JSON.stringify(data))
-		if (data.length == 0) {
-			console.log('No Such Pool')
-			return
-		}
-		setPoolDbData(data[0])
-		console.log('timestamp', data[0]?.event_timestamp)
-		calculateTimeLeft(data[0]?.event_timestamp)
+	const { data: poolDBInfo } = useQuery({
+		queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
+		queryFn: fetchAllPoolDataFromDB,
+		enabled: !!poolId,
+	})
 
-		if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
-			const { data: storageData } = supabaseClient.storage
-				.from('pool')
-				.getPublicUrl(data[0].pool_image_url)
-			setPoolImageUrl(storageData.publicUrl)
-			console.log('storageData', storageData)
+	const poolSCAdmin = poolSCInfo?.[0]
+	const poolSCDetail = poolSCInfo?.[1]
+	let poolSCBalance = poolSCInfo
+		? (BigInt(poolSCInfo?.[2][0]) / BigInt(1000000000000000000)).toString()
+		: 0
+	const poolSCName = poolSCInfo?.[1][2]
+	const poolSCDepositPerPerson = poolSCInfo ? BigInt(poolSCInfo?.[1][3]) : 0
+	const poolSCDepositPerPersonString = poolSCInfo
+		? (BigInt(poolSCInfo?.[1][3]) / BigInt(1000000000000000000)).toString()
+		: 0
+	const poolSCStatus = poolSCInfo?.[3]
+	const poolSCToken = poolSCInfo?.[4]
+	let poolSCParticipants = poolSCInfo?.[5]
+	const poolSCWinners = poolSCInfo?.[6]
+	const isRegisteredOnSC =
+		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
 
-			console.log('poolImageUrl', storageData.publicUrl)
-		}
-
-		const userDisplayData = await fetchUserDisplayInfoFromServer([
-			data[0]?.co_host_addresses,
-		])
-		setCohostDbData(userDisplayData)
-	}
-
-	const getPoolDataFromSC = async () => {
-		const contract = new ethers.Contract(
-			contractAddress,
-			poolContract.abi,
-			provider,
-		)
-		const poolId = router.query.poolId
-
-		const retrievedPoolBalance = await contract.getPoolBalance(poolId)
-		console.log('retrievedPoolBalance', retrievedPoolBalance)
-		setPoolBalance(Number(retrievedPoolBalance))
-
-		const retrievedPoolParticipants = await contract.getParticipants(poolId)
-		console.log('retrievedPoolBalance', retrievedPoolParticipants)
-		setPoolParticipants(Number(retrievedPoolParticipants))
-	}
+	const { data: tokenSymbol } = useQuery({
+		queryKey: ['fetchTokenSymbol', poolSCToken],
+		queryFn: fetchTokenSymbol,
+		enabled: !_.isEmpty(poolSCToken),
+	})
 
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
-			getPoolDataFromSC()
-			fetchPoolInfoFromServer()
 		}
+		console.log('participants', poolSCParticipants)
 
+		setPoolDbData(poolDBInfo?.poolDBInfo)
+		setCohostDbData(poolDBInfo?.cohostUserDisplayData ?? [])
+		setPoolImageUrl(poolDBInfo?.poolImageUrl)
+
+		console.log('poolDBInfo', poolDBInfo)
 		setPageUrl(window?.location.href)
-	}, [ready, authenticated])
-
-	const handleStartPool = () => {
-		console.log('handleStartPool')
-	}
-
-	const handleSharePool = () => {
-		console.log('handleSharePool')
-		copyToClipboard()
-	}
-
-	const copyToClipboard = async () => {
-		console.log('copyToClipboard')
-
-		try {
-			await navigator.clipboard.writeText(pageUrl)
-			setCopied(true)
-		} catch (error) {
-			console.error('Failed to copy:', error)
-		}
-	}
+		console.log('event_timestamp', poolDBInfo?.poolDBInfo?.event_timestamp)
+		calculateTimeLeft(poolDBInfo?.poolDBInfo?.event_timestamp)
+	}, [ready, authenticated, poolSCInfo, poolDBInfo])
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
+
+	const registerServerMutation = useMutation({
+		mutationFn: handleRegisterServer,
+		onSuccess: () => {
+			console.log('registerServerMutation Success')
+			toast({
+				title: 'Registration Suceessful',
+				description: 'You have joined the pool.',
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
+			})
+		},
+	})
+
+	const registerMutation = useMutation({
+		mutationFn: handleRegister,
+		onSuccess: () => {
+			console.log('registerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
+			})
+			registerServerMutation.mutate({
+				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
+			})
+		},
+		onError: () => {
+			console.log('registerMutation Error')
+		},
+	})
+
+	const unregisterServerMutation = useMutation({
+		mutationFn: handleUnregisterServer,
+		onSuccess: () => {
+			toast({
+				title: 'Withdrawal Suceessful',
+				description: 'You have successfully withdrawn from the pool.',
+			})
+			console.log('unregisterServerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString()],
+			})
+		},
+	})
+
+	const unregisterMutation = useMutation({
+		mutationFn: handleUnregister,
+		onSuccess: () => {
+			console.log('unregisterMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
+			})
+			unregisterServerMutation.mutate({
+				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
+			})
+		},
+	})
+	// const percentFunded = poolDbData?.price
+	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
+	// 	: poolParticipants / poolDbData?.soft_cap
+
+	const participantPercent =
+		(poolSCParticipants?.length / poolDbData?.soft_cap) * 100
+	const viewParticipantsClicked = () => {
+		const currentRoute = router.asPath
+
+		router.push(`${currentRoute}/participants`)
+	}
+
+	const viewTicketClicked = () => {
+		const currentRoute = router.asPath
+		router.push(`${currentRoute}/ticket`)
+	}
+
+	const onRegisterButtonClicked = (e: any) => {
+		// setTransactionInProgress(true)
+
+		console.log('onRegisterButtonClicked')
+		const connectorType = wallets[0].connectorType
+		console.log('connectorType', connectorType)
+		toast({
+			title: 'Requesting Transaction/s',
+			description: 'Approve spending of token, followed by depositing token.',
+		})
+		registerMutation.mutate({
+			params: [poolId.toString(), poolSCDepositPerPerson.toString(), wallets],
+		})
+	}
+
+	const onUnregisterButtonClicked = (e: any) => {
+		// setTransactionInProgress(true)
+
+		console.log('onUnregisterButtonClicked')
+		const connectorType = wallets[0].connectorType
+		console.log('connectorType', connectorType)
+		toast({
+			title: 'Requesting Transaction',
+			description: 'Withdrawing from pool',
+		})
+
+		unregisterMutation.mutate({
+			params: [poolId.toString(), wallets],
+		})
+	}
 
 	const cohostNames: string = cohostDbData
 		.map((data: any) => data.display_name)
 		.join(',')
 
+	if (_.isEmpty(router.query.poolId)) {
+		return <></>
+	}
 	return (
 		<Page>
-			<Appbar backRoute='/admin' />
+			<Appbar backRoute='/' />
 
 			<Section>
 				<div className='flex flex-col w-full justify-center items-center'>
@@ -194,35 +306,32 @@ const PoolPage = () => {
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
 								<div className='w-full h-full bg-black absolute bottom-0 backdrop-filter backdrop-blur-sm bg-opacity-60 flex flex-col items-center justify-center space-y-3 md:space-y-6 text-white'>
-									<h4 className='text-xs md:text-2xl'>Starts in</h4>
-									<h3 className='text-4xl md:text-7xl font-semibold '>
-										{timeLeft != undefined && (
-											<CountdownTimer initialTime={timeLeft} />
-										)}
-									</h3>
+									{timeLeft != undefined && timeLeft > 0 && (
+										<div>
+											<h4 className='text-xs md:text-2xl'>Starts in</h4>
+											<h3 className='text-4xl md:text-7xl font-semibold '>
+												{<CountdownTimer timeleft={timeLeft} />}
+											</h3>
+										</div>
+									)}
 								</div>
 								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
 									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
 										<img className='w-full h-full flex' src={qrCodeIcon.src} />
 									</button>
-									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-										<img className='w-full h-full flex' src={shareIcon.src} />
-									</button>
+									<ShareDialog />
+
 									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
 										<img className='w-full h-full flex' src={editIcon.src} />
 									</button>
 								</div>
-								<div className='absolute bottom-0 bg-black bg-opacity-40 md:text-xl text-md w-full text-center flex items-center justify-center space-x-3 text-white md:py-3 py-1'>
-									<div
-										className={`dotBackground rounded-full md:w-3 md:h-3 h-1.5 w-1.5`}
-									></div>
-									<div className='md:text-2xl text-xs'>Upcoming</div>
-								</div>
+								<PoolStatus status={poolSCStatus} />
 							</div>
 							<div className='flex flex-col space-y-6 md:space-y-12 '>
 								<div className='flex flex-col space-y-2 md:space-y-4 overflow-hidden'>
 									<h2 className='font-semibold text-lg md:text-4xl'>
-										{poolDbData?.pool_name}
+										{/* {poolDbData?.pool_name} */}
+										{poolSCName}
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
 									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
@@ -232,27 +341,31 @@ const PoolPage = () => {
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
 									<div className='flex flex-rol justify-between'>
 										<p className='max-w-sm '>
-											<span className='font-bold'>{poolBalance} </span>
-											USDC Prize Pool
+											<span className='font-bold'>{poolSCBalance} </span>
+											{tokenSymbol} Prize Pool
 										</p>
-										<p>135% funded</p>
+										<p>{participantPercent.toPrecision(2)}% funded</p>
 									</div>
-									<div className='w-full h-full flex'>
-										<div
-											style={{ width: '100%' }}
-											className={`flex h-3 md:h-6 rounded-full barBackground`}
-										></div>
-									</div>
+									<Progress value={participantPercent} />
 								</div>
 								<div className='flex text-sm md:text-3xl justify-between'>
-									<span className='font-bold'>Participants </span>
-									<button className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'>
+									<p className='flex flex-row space-x-2'>
+										<span className='font-bold'>
+											{poolSCParticipants?.length}
+										</span>
+										<span>Participants</span>
+									</p>
+									<button
+										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
+										onClick={viewParticipantsClicked}
+									>
 										<span>View all</span>
 										<span>
 											<img src={`${rightArrow.src}`}></img>
 										</span>
 									</button>
 								</div>
+								<Progress value={participantPercent} />
 							</div>
 						</div>
 
@@ -264,20 +377,49 @@ const PoolPage = () => {
 							<p className='md:text-2xl text-md'>{poolDbData?.description}</p>
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Buy-In</h3>
 							<Divider />
-							<p className='text-md md:text-2xl'>${poolDbData?.price} USD</p>
+							<p className='text-md md:text-2xl'>
+								{poolSCDepositPerPersonString} {tokenSymbol}
+							</p>
 							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Terms</h3>
 							<Divider />
 							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
 						</div>
-						<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
-							<button
-								className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-								onClick={handleStartPool}
-							>
-								Start Pool
-							</button>
-						</div>
+						{isRegisteredOnSC ? (
+							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<button
+									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={viewTicketClicked} //TODO: Change function
+								>
+									View My Ticket
+								</button>
+								<button
+									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={onUnregisterButtonClicked}
+								>
+									<img
+										className='flex w-full h-full'
+										src={tripleDotsIcon.src}
+									></img>
+								</button>
+							</div>
+						) : (
+							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<button
+									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={onRegisterButtonClicked}
+								>
+									Register
+								</button>
+							</div>
+						)}
 					</div>
+					{wallets?.[0]?.connectorType != 'embedded' && (
+						<TransactionDialog
+							open={transactionInProgress}
+							showLoadAnimation={true}
+							setOpen={setTransactionInProgress}
+						/>
+					)}
 				</div>
 			</Section>
 		</Page>

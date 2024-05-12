@@ -49,7 +49,10 @@ const PoolRow: React.FC<PoolRowProps> = ({
 	}, [])
 
 	return (
-		<Link href={`/pool-id/${poolId}`} className='flex flex-row space-x-4'>
+		<Link
+			href={`${window.location.href}/pool-id/${poolId}`}
+			className='flex flex-row space-x-4'
+		>
 			<div className='relative w-20 h-20 rounded-2xl overflow-hidden bg-red-500'>
 				<img
 					src={`${poolImageUrl ?? frogImage.src}`}
