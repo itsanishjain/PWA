@@ -9,12 +9,14 @@ import {
 } from '@/lib/api/clientAPI'
 import router from 'next/router'
 import * as _ from 'lodash'
+import Link from 'next/link'
 
 interface ParticipantRowProps {
 	name: string
 	imageUrl: string
 	participantStatus: number
 	address: string
+	routeUrl?: string
 }
 
 const ParticipantRow: React.FC<ParticipantRowProps> = ({
@@ -22,6 +24,7 @@ const ParticipantRow: React.FC<ParticipantRowProps> = ({
 	imageUrl,
 	participantStatus,
 	address,
+	routeUrl,
 }) => {
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', address],
@@ -30,7 +33,10 @@ const ParticipantRow: React.FC<ParticipantRowProps> = ({
 	})
 
 	return (
-		<div className='flex flex-row space-x-4 bottomDivider py-4'>
+		<Link
+			className='flex flex-row space-x-4 bottomDivider py-4'
+			href={routeUrl ?? window.location.href}
+		>
 			<img
 				src={`${profileData?.profileImageUrl ?? frogImage.src}`}
 				className=' flex rounded-full w-14 h-14 object-cover'
@@ -49,7 +55,7 @@ const ParticipantRow: React.FC<ParticipantRowProps> = ({
 					{ParticipantStatus[participantStatus]}
 				</p>
 			</div>
-		</div>
+		</Link>
 	)
 }
 

@@ -90,8 +90,21 @@ const ManageParticipantsPage = () => {
 		enabled: poolSCParticipants?.length > 0 && poolId?.toString() != undefined,
 	})
 
+	const checkedInParticipantsInfo = participantsInfo?.filter(
+		(participant) => participant?.participationData?.[0]?.status == 2,
+	)
+
+	const winnersInfo = participantsInfo?.filter((participant) =>
+		poolSCWinners.includes(
+			participant?.participationData?.[0]?.address?.toLower(),
+		),
+	)
+
 	const onQrButtonClicked = () => {
 		console.log('QR Button Clicked')
+	}
+	const onPayoutButtonClicked = () => {
+		console.log('Payout Button Clicked')
 	}
 	useEffect(() => {
 		// Update the document title using the browser API
@@ -151,7 +164,7 @@ const ManageParticipantsPage = () => {
 								className='rounded-full mb-2 px-10 h-10'
 							/>
 						</div>
-						<Tabs defaultValue='account' className='w-full'>
+						<Tabs defaultValue='registered' className='w-full'>
 							<TabsList className='w-full flex justify-start p-0 space-x-0 md:space-x-8 rounded-none'>
 								<TabsTrigger value='registered'>Registered</TabsTrigger>
 								<TabsTrigger value='checkedIn'>Checked in</TabsTrigger>
@@ -168,11 +181,46 @@ const ManageParticipantsPage = () => {
 										}
 										imageUrl={participant?.avatar_url}
 										address={participant?.address}
+										routeUrl={`${window.location.href}/${participant?.address}`}
 									/>
 								))}
 							</TabsContent>
-							<TabsContent value='checkedIn'>Checked In</TabsContent>
-							<TabsContent value='winners'>Winners</TabsContent>
+							<TabsContent value='checkedIn'>
+								{checkedInParticipantsInfo?.map((participant) => (
+									<ParticipantRow
+										key={participant?.id}
+										name={participant?.display_name}
+										participantStatus={
+											participant?.participationData?.[0]?.status
+										}
+										imageUrl={participant?.avatar_url}
+										address={participant?.address}
+										routeUrl={`${window.location.href}/${participant?.address}`}
+									/>
+								))}
+							</TabsContent>
+							<TabsContent value='winners'>
+								{winnersInfo?.map((participant) => (
+									<ParticipantRow
+										key={participant?.id}
+										name={participant?.display_name}
+										participantStatus={
+											participant?.participationData?.[0]?.status
+										}
+										imageUrl={participant?.avatar_url}
+										address={participant?.address}
+										routeUrl={`${window.location.href}/${participant?.address}`}
+									/>
+								))}
+								<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+									<button
+										className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+										onClick={onPayoutButtonClicked}
+									>
+										Payout
+									</button>
+								</div>
+							</TabsContent>
 							<TabsContent value='refunded'>Refunded</TabsContent>
 						</Tabs>
 					</div>
