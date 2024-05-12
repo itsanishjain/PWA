@@ -75,12 +75,10 @@ export default async function handler(
 
 			if (insertError) {
 				console.error('Error inserting data:', insertError)
+				res.status(500).json({ error: 'Internal Server Error' })
 			} else {
 				console.log('Data inserted successfully:', insertedData)
 			}
-			res.status(500).json({ error: 'Internal Server Error' })
-
-			return
 		} else {
 			console.log('existingData', JSON.stringify(existingData))
 			if (existingData?.[0]['status'] == 1) {
