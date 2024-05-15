@@ -16,6 +16,7 @@ import { Inter } from 'next/font/google'
 
 import {
 	fetchUserDisplayForAddress,
+	handleSavePayout,
 	handleSetWinner,
 	updateUserDisplayData,
 	uploadProfileImage,
@@ -84,6 +85,25 @@ const UserProfile = () => {
 		},
 	})
 
+	const savePayoutMutation = useMutation({
+		mutationFn: handleSavePayout,
+		onSuccess: () => {
+			console.log('endPool Success')
+			queryClient.invalidateQueries({
+				queryKey: [
+					'fetchAllPoolDataFromSC',
+					poolId.toString(),
+					inputValue,
+					wallets?.[0].address,
+					currentJwt,
+				],
+			})
+		},
+		onError: () => {
+			console.log('setWinner Error')
+		},
+	})
+
 	const onPayoutButtonClicked = (e: any) => {
 		toast({
 			title: 'Requesting Transaction',
@@ -96,6 +116,22 @@ const UserProfile = () => {
 				participantAddress.toString(),
 				inputValue,
 				wallets,
+			],
+		})
+	}
+
+	const onSavePayoutButtonClicked = (e: any) => {
+		toast({
+			title: 'Saving Payout',
+			description: 'Saving payout',
+		})
+
+		savePayoutMutation.mutate({
+			params: [
+				poolId.toString(),
+				inputValue,
+				participantAddress.toString(),
+				currentJwt!,
 			],
 		})
 	}
@@ -161,7 +197,10 @@ const UserProfile = () => {
 							/>
 						</div>
 						<div className='flex flex-col w-full items-center justify-center mt-8 space-y-2'>
-							<button className='rounded-full bg-black text-white h-10 w-48 font-medium'>
+							<button
+								className='rounded-full bg-black text-white h-10 w-48 font-medium'
+								onClick={onSavePayoutButtonClicked}
+							>
 								Save
 							</button>
 							<button

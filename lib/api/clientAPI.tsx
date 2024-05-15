@@ -762,3 +762,29 @@ export const handleSetWinner = async ({
 		return
 	}
 }
+
+export const handleSavePayout = async ({
+	params,
+}: {
+	params: [string, string, string, string]
+}) => {
+	const [poolId, winnerAddress, amount, jwt] = params
+
+	let dataObj = { poolId, winnerAddress, amount, jwtString: jwt }
+	try {
+		const response = await fetch('/api/nonce', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(dataObj),
+		})
+		if (!response.ok) {
+			throw new Error('Network response was not ok')
+		}
+		const data = await response.json()
+		return data
+	} catch (error) {
+		console.error('There was a problem with the post operation:', error)
+	}
+}
