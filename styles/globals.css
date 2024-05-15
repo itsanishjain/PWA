@@ -81,6 +81,17 @@ body {
 	border-bottom: 1px solid #e2e8f0;
 }
 
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	margin: 0;
+}
+input[type='number'] {
+	-moz-appearance: textfield;
+}
+
 @layer base {
 	:root {
 		--background: 0 0% 100%;

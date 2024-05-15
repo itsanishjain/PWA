@@ -27,6 +27,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as _ from 'lodash'
 import { useToast } from '@/components/ui/use-toast'
 import { Input } from '@/components/ui/input'
+import styles from './styles/admin.module.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -147,15 +148,16 @@ const UserProfile = () => {
 						<div className='flex flex-row justify-center'>
 							<p>Checked in</p>
 						</div>
-						<div className='flex flex-row justify-center h-12 mt-2 '>
+						<div className='flex flex-row justify-center h-16 mt-2 '>
 							<Input
-								className='justify-center border-none text-center text-6xl font-bold h-12'
+								className='justify-center border-none text-center text-6xl font-bold h-16'
 								placeholder=''
 								autoFocus={true}
 								value={inputValue}
 								type='number'
 								onChange={handleInputChange}
 								ref={inputRef}
+								inputMode='numeric'
 							/>
 						</div>
 						<div className='flex flex-col w-full items-center justify-center mt-8 space-y-2'>
