@@ -79,6 +79,9 @@ const ManageParticipantsPage = () => {
 
 	let poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
+	const poolSCWinnersLowerCase = poolSCWinners?.map((item: string) =>
+		item.toLowerCase(),
+	)
 
 	const { data: participantsInfo } = useQuery({
 		queryKey: [
@@ -94,10 +97,11 @@ const ManageParticipantsPage = () => {
 		(participant) => participant?.participationData?.[0]?.status == 2,
 	)
 
-	const winnersInfo = participantsInfo?.filter((participant) =>
-		poolSCWinners.includes(
-			participant?.participationData?.[0]?.address?.toLower(),
-		),
+	const winnersInfo = participantsInfo?.filter(
+		(participant) =>
+			poolSCWinnersLowerCase.indexOf(
+				participant?.participationData?.[0]?.participant_address,
+			) != -1,
 	)
 
 	const onQrButtonClicked = () => {
@@ -119,6 +123,10 @@ const ManageParticipantsPage = () => {
 		console.log('participantsInfo', JSON.stringify(participantsInfo))
 
 		console.log('poolDBInfo', poolDBInfo)
+		console.log('poolSCInfo', poolSCInfo)
+		console.log('poolSCWInners', poolSCWinners)
+		console.log('poolSCWInnersLowerCase', poolSCWinnersLowerCase)
+
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo, participantsInfo])
 
