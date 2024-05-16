@@ -829,3 +829,20 @@ export const handleSavePayout = async ({
 		console.error('There was a problem with the post operation:', error)
 	}
 }
+
+export const fetchWinnersDetailsFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const winnersDetails = await contract.getWinnersDetails(poolId)
+	console.log('winnersDetails', winnersDetails)
+	return winnersDetails
+}

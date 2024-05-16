@@ -1,6 +1,10 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
+interface Dictionary {
+	[key: number]: string
+}
+
 export const formatTimeDiff = (diffInMs: number) => {
 	const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
 	// console.log('diffInMs', diffInMs)
@@ -72,4 +76,20 @@ export const formatCountdownTime = (timeLeft: number): string => {
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
+}
+
+export function dictionaryToArray(dictionary: Dictionary): string[] | null {
+	if (dictionary == null) {
+		return null
+	}
+	return Object.keys(dictionary).map((key) =>
+		dictionary[parseInt(key)].toLowerCase(),
+	)
+}
+
+export function dictionaryToNestedArray(dictionary: any): any[][] | null {
+	if (dictionary == null) {
+		return null
+	}
+	return Object.keys(dictionary).map((key) => dictionary[parseInt(key)])
 }

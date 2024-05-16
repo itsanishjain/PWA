@@ -23,6 +23,7 @@ import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
 	fetchParticipantsDataFromServer,
+	fetchWinnersDetailsFromSC,
 	handleRegister,
 	handleRegisterServer,
 	handleUnregister,
@@ -38,6 +39,8 @@ import qrIcon from '@/public/images/qr_code_icon.svg'
 import ParticipantRow from '@/components/participantRow'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
+import WinnerRow from '@/components/winnerRow'
+import { dictionaryToArray, dictionaryToNestedArray } from '@/lib/utils'
 
 const ManageParticipantsPage = () => {
 	const router = useRouter()
@@ -54,7 +57,8 @@ const ManageParticipantsPage = () => {
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 
-	const [copied, setCopied] = useState(false)
+	const [winnerAddresses, setWinnerAddresses] = useState<string[] | null>([])
+	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
 
 	const [pageUrl, setPageUrl] = useState('')
 
@@ -69,6 +73,12 @@ const ManageParticipantsPage = () => {
 		enabled: !!poolId,
 	})
 
+	const { data: poolWinnersDetails } = useQuery({
+		queryKey: ['fetchWinnersDetailsFromSC', poolId?.toString() ?? ' '],
+		queryFn: fetchWinnersDetailsFromSC,
+		enabled: !!poolId,
+	})
+
 	const { data: poolDBInfo } = useQuery({
 		queryKey: ['fetchAllPoolDataFromDB', poolId?.toString() ?? ' '],
 		queryFn: fetchAllPoolDataFromDB,
@@ -78,10 +88,14 @@ const ManageParticipantsPage = () => {
 	const poolSCStatus = poolSCInfo?.[3]
 
 	let poolSCParticipants = poolSCInfo?.[5]
-	const poolSCWinners = poolSCInfo?.[6]
-	const poolSCWinnersLowerCase = poolSCWinners?.map((item: string) =>
-		item.toLowerCase(),
-	)
+	// const poolSCWinners = poolSCInfo?.[6] // Another way of getting winner addresses, but not details
+
+	// const poolSCWinnersLowerCase = poolSCWinners?.map((item: any) => {
+	// 	return [item?.[0]?.['0'], item?.[1]?.['0]']]
+	// })
+	// const winnersDetails = poolSCWinnersLowerCase.some(
+	// 	(item: any) => item[0].toLowerCase() === searchString.toLowerCase(),
+	// )
 
 	const { data: participantsInfo } = useQuery({
 		queryKey: [
@@ -99,7 +113,7 @@ const ManageParticipantsPage = () => {
 
 	const winnersInfo = participantsInfo?.filter(
 		(participant) =>
-			poolSCWinnersLowerCase.indexOf(
+			winnerAddresses?.[0]?.indexOf(
 				participant?.participationData?.[0]?.participant_address,
 			) != -1,
 	)
@@ -124,11 +138,23 @@ const ManageParticipantsPage = () => {
 
 		console.log('poolDBInfo', poolDBInfo)
 		console.log('poolSCInfo', poolSCInfo)
-		console.log('poolSCWInners', poolSCWinners)
-		console.log('poolSCWInnersLowerCase', poolSCWinnersLowerCase)
+		setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
+		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
+		console.log('winnerAddresses', winnerAddresses)
+		console.log('winnerDetails', winnerDetails)
+
+		console.log('winnerDetails?.[0]?.[0]', winnerDetails?.[0]?.[0])
+		console.log('winnerDetails?.[0]?.[0]', winnerDetails?.[0]?.[0])
 
 		setPageUrl(window?.location.href)
-	}, [ready, authenticated, poolSCInfo, poolDBInfo, participantsInfo])
+	}, [
+		ready,
+		authenticated,
+		poolSCInfo,
+		poolDBInfo,
+		participantsInfo,
+		poolWinnersDetails,
+	])
 
 	const parentRoute = useMemo(() => {
 		const paths = router.asPath.split('/')
@@ -208,8 +234,8 @@ const ManageParticipantsPage = () => {
 								))}
 							</TabsContent>
 							<TabsContent value='winners'>
-								{winnersInfo?.map((participant) => (
-									<ParticipantRow
+								{winnersInfo?.map((participant, index) => (
+									<WinnerRow
 										key={participant?.id}
 										name={participant?.display_name}
 										participantStatus={
@@ -218,6 +244,7 @@ const ManageParticipantsPage = () => {
 										imageUrl={participant?.avatar_url}
 										address={participant?.address}
 										routeUrl={`${window.location.href}/${participant?.address}`}
+										prizeAmount={winnerDetails?.[index]?.[0]}
 									/>
 								))}
 								<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
