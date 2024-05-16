@@ -56,6 +56,7 @@ import {
 	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
+	handleEnableDeposit,
 	handleEndPool,
 	handleRegister,
 	handleRegisterServer,
@@ -188,6 +189,19 @@ const AdminPoolPage = () => {
 		router.push(`${currentRoute}/participants`)
 	}
 
+	const enableDepositMutation = useMutation({
+		mutationFn: handleEnableDeposit,
+		onSuccess: () => {
+			console.log('startPool Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
+			})
+		},
+		onError: () => {
+			console.log('enableDepositMutation Error')
+		},
+	})
+
 	const startPoolMutation = useMutation({
 		mutationFn: handleStartPool,
 		onSuccess: () => {
@@ -213,6 +227,16 @@ const AdminPoolPage = () => {
 			console.log('endPoolMutation Error')
 		},
 	})
+
+	const onEnableDepositButtonClicked = () => {
+		toast({
+			title: 'Requesting Transaction',
+			description: 'Enable Deposit',
+		})
+		enableDepositMutation.mutate({
+			params: [poolId.toString(), wallets],
+		})
+	}
 
 	const onStartPoolButtonClicked = () => {
 		toast({
@@ -340,13 +364,23 @@ const AdminPoolPage = () => {
 							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={onEnableDepositButtonClicked}
+								>
+									Enable Deposit
+								</button>
+							</div>
+						)}
+						{poolSCStatus == 1 && (
+							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<button
+									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
 									onClick={onStartPoolButtonClicked}
 								>
 									Start Pool
 								</button>
 							</div>
 						)}
-						{poolSCStatus == 1 && (
+						{poolSCStatus == 2 && (
 							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
