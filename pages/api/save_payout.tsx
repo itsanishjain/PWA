@@ -36,23 +36,35 @@ export default async function handler(
 		return
 	}
 
-	async function savePayout() {
+	const { data: existingData, error: selectError } = await supabaseAdminClient
+		.from('pool')
+		.select('*')
+		.match({
+			pool_id: poolId,
+		})
+
+	if (
+		existingData?.[0]?.['host_address'] != jwtAddress &&
+		existingData?.[0]?.['co_host_addresses'].indexOf(jwtAddress) == -1
+	) {
+		console.error('Not authorised to save payouts')
+		res.status(500).json({ message: 'Error' })
+
+		return
+	}
+
+	async function upsertData() {
 		const { data: existingData, error: selectError } = await supabaseAdminClient
-			.from('pool')
+			.from('savedPayouts')
 			.select('*')
 			.match({
 				pool_id: poolId,
+				address: winnerAddress,
 			})
 
-		if (
-			existingData?.[0]?.['host_address'] != jwtAddress &&
-			existingData?.[0]?.['co_host_addresses'].indexOf(jwtAddress) == -1
-		) {
-			console.error('Not authorised to save payouts')
-			res.status(500).json({ message: 'Error' })
-
-			return
-		} else {
+		if (existingData?.length === 0) {
+			console.log('No previous user activity for pool', selectError)
+			// Insert a new row
 			const { data: insertedData, error: insertError } =
 				await supabaseAdminClient.from('savedPayouts').insert({
 					address: walletAddressLower,
@@ -62,10 +74,33 @@ export default async function handler(
 			if (insertError) {
 				console.log('Error inserting into savedPayouts')
 				res.status(500).json({ message: 'Error' })
+			} else {
+				console.log('Data inserted successfully:', insertedData)
+			}
+		} else {
+			// Update the existing row
+			const { data: updatedData, error: updateError } =
+				await supabaseAdminClient
+					.from('savedPayouts')
+					.update({
+						address: walletAddressLower,
+						payout_amount: amount,
+						pool_id: poolId,
+					})
+					.match({
+						pool_id: poolId,
+						address: walletAddressLower,
+					})
+
+			if (updateError) {
+				console.error('Error updating data:', updateError)
+				res.status(500).json({ error: 'Internal Server Error' })
+			} else {
+				console.log('Data updated successfully:', updatedData)
 			}
 		}
 	}
 
-	await savePayout()
+	await upsertData()
 	res.status(200).json({ message: 'Success' })
 }

@@ -809,11 +809,11 @@ export const handleSavePayout = async ({
 }: {
 	params: [string, string, string, string]
 }) => {
-	const [poolId, winnerAddress, amount, jwt] = params
+	const [poolId, amount, winnerAddress, jwt] = params
 
 	let dataObj = { poolId, winnerAddress, amount, jwtString: jwt }
 	try {
-		const response = await fetch('/api/nonce', {
+		const response = await fetch('/api/save_payout', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

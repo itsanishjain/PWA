@@ -29,6 +29,7 @@ import * as _ from 'lodash'
 import { useToast } from '@/components/ui/use-toast'
 import { Input } from '@/components/ui/input'
 import styles from './styles/admin.module.css'
+import { ethers } from 'ethers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -93,7 +94,7 @@ const UserProfile = () => {
 				queryKey: [
 					'fetchAllPoolDataFromSC',
 					poolId.toString(),
-					inputValue,
+					ethers.parseUnits(inputValue, 'ether'),
 					wallets?.[0].address,
 					currentJwt,
 				],
