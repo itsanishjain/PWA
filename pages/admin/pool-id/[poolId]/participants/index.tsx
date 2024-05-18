@@ -6,18 +6,9 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import Appbar from '@/components/appbar'
 
-import { createBrowserClient } from '@supabase/ssr'
-
 import QRCode from 'react-qr-code'
 
-import {
-	TransactionReceipt,
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
-
-import { Tables, Database } from '@/types/supabase'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 
 import {
 	fetchAllPoolDataFromDB,
@@ -26,11 +17,7 @@ import {
 	fetchSavedPayoutsFromServer,
 	fetchWinnersDetailsFromSC,
 	handleDeleteSavedPayouts,
-	handleRegister,
-	handleRegisterServer,
 	handleSetWinners,
-	handleUnregister,
-	handleUnregisterServer,
 } from '@/lib/api/clientAPI'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCookie } from '@/hooks/cookie'
@@ -55,12 +42,7 @@ const ManageParticipantsPage = () => {
 
 	const { wallets } = useWallets()
 
-	const [poolBalance, setPoolBalance] = useState<number>(0)
-	const [poolParticipants, setPoolParticipants] = useState<number>(0)
-
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
-	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
-	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 
 	const [winnerAddresses, setWinnerAddresses] = useState<string[]>([])
 	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
@@ -93,14 +75,6 @@ const ManageParticipantsPage = () => {
 	const poolSCStatus = poolSCInfo?.[3]
 
 	let poolSCParticipants = poolSCInfo?.[5]
-	// const poolSCWinners = poolSCInfo?.[6] // Another way of getting winner addresses, but not details
-
-	// const poolSCWinnersLowerCase = poolSCWinners?.map((item: any) => {
-	// 	return [item?.[0]?.['0'], item?.[1]?.['0]']]
-	// })
-	// const winnersDetails = poolSCWinnersLowerCase.some(
-	// 	(item: any) => item[0].toLowerCase() === searchString.toLowerCase(),
-	// )
 
 	const { data: participantsInfo } = useQuery({
 		queryKey: [
