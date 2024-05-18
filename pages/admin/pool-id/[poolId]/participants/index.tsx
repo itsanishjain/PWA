@@ -23,6 +23,7 @@ import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
 	fetchParticipantsDataFromServer,
+	fetchSavedPayoutsFromServer,
 	fetchWinnersDetailsFromSC,
 	handleRegister,
 	handleRegisterServer,
@@ -41,6 +42,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import WinnerRow from '@/components/winnerRow'
 import { dictionaryToArray, dictionaryToNestedArray } from '@/lib/utils'
+import { ethers } from 'ethers'
 
 const ManageParticipantsPage = () => {
 	const router = useRouter()
@@ -107,6 +109,26 @@ const ManageParticipantsPage = () => {
 		enabled: poolSCParticipants?.length > 0 && poolId?.toString() != undefined,
 	})
 
+	const { data: savedPayoutsInfo } = useQuery({
+		queryKey: ['fetchSavedPayoutsFromServer', poolId?.toString() ?? '0'],
+		queryFn: fetchSavedPayoutsFromServer,
+		enabled: poolId?.toString() != undefined,
+	})
+
+	const savedPayoutsParticipantsAddress =
+		savedPayoutsInfo?.map((participant) => participant?.address) ?? []
+	const { data: savedPayoutsParticipantsInfo } = useQuery({
+		queryKey: [
+			'fetchUserDisplayInfoFromServer',
+			poolId?.toString() ?? '0',
+			savedPayoutsParticipantsAddress,
+		],
+		queryFn: fetchParticipantsDataFromServer,
+		enabled:
+			savedPayoutsParticipantsAddress?.length > 0 &&
+			poolId?.toString() != undefined,
+	})
+
 	const checkedInParticipantsInfo = participantsInfo?.filter(
 		(participant) => participant?.participationData?.[0]?.status == 2,
 	)
@@ -140,12 +162,12 @@ const ManageParticipantsPage = () => {
 		console.log('poolSCInfo', poolSCInfo)
 		setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
 		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
-		console.log('winnerAddresses', winnerAddresses)
-		console.log('winnerDetails', winnerDetails)
-
-		console.log('winnerDetails?.[0]?.[0]', winnerDetails?.[0]?.[0])
-		console.log('winnerDetails?.[0]?.[0]', winnerDetails?.[0]?.[0])
-
+		console.log('savedPayoutsInfo', savedPayoutsInfo)
+		console.log(
+			'savedPayoutsParticipantsAddress',
+			savedPayoutsParticipantsAddress,
+		)
+		console.log('savedPayoutsParticipantsInfo', savedPayoutsParticipantsInfo)
 		setPageUrl(window?.location.href)
 	}, [
 		ready,
@@ -245,6 +267,21 @@ const ManageParticipantsPage = () => {
 										address={participant?.address}
 										routeUrl={`${window.location.href}/${participant?.address}`}
 										prizeAmount={winnerDetails?.[index]?.[0]}
+										setWinner={true}
+									/>
+								))}
+								{savedPayoutsInfo?.map((participant, index) => (
+									<WinnerRow
+										key={participant?.id}
+										name={savedPayoutsParticipantsInfo?.[index]?.display_name}
+										participantStatus={
+											savedPayoutsParticipantsInfo?.[index]
+												?.participationData?.[0]?.status
+										}
+										address={participant?.address}
+										routeUrl={`${window.location.href}/${participant?.address}`}
+										prizeAmount={participant?.payout_amount ?? 0}
+										setWinner={false}
 									/>
 								))}
 								<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>

@@ -846,3 +846,23 @@ export const fetchWinnersDetailsFromSC = async ({
 	console.log('winnersDetails', winnersDetails)
 	return winnersDetails
 }
+
+export const fetchSavedPayoutsFromServer = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const { data: savedPayouts, error }: PostgrestSingleResponse<any[]> =
+		await supabaseBrowserClient
+			.from('savedPayouts')
+			.select('*')
+			.match({ pool_id: poolId })
+	if (error) {
+		console.error('Error reading data:', error)
+		return
+	}
+
+	console.log('savedPayouts', savedPayouts)
+	return savedPayouts
+}

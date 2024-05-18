@@ -15,13 +15,14 @@ import { ParticipantStatus } from './participantRow'
 import { ethers } from 'ethers'
 
 interface WinnerRowProps {
-	name: string
-	imageUrl: string
+	name?: string
+	imageUrl?: string
 	participantStatus: number
 	address: string
 	routeUrl?: string
 	hasClaimed?: boolean
 	prizeAmount?: string
+	setWinner: boolean
 }
 
 const WinnerRow: React.FC<WinnerRowProps> = ({
@@ -32,6 +33,7 @@ const WinnerRow: React.FC<WinnerRowProps> = ({
 	routeUrl,
 	hasClaimed,
 	prizeAmount,
+	setWinner,
 }) => {
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', address],
@@ -62,14 +64,22 @@ const WinnerRow: React.FC<WinnerRowProps> = ({
 					{ParticipantStatus[participantStatus]}
 				</p>
 			</div>
-			<div className='flex flex-row items-center justify-center space-x-2'>
-				<div>
-					<img className='w-6 h-6' src={circleTick.src} />
+			{setWinner ? (
+				<div className='flex flex-row items-center justify-center space-x-2'>
+					<div>
+						<img className='w-6 h-6' src={circleTick.src} />
+					</div>
+					<div className='rounded-2xl paidBackground px-6 py-4 fontCheckedIn font-medium'>
+						{ethers.formatEther(prizeAmount ?? 0).toString()} USD
+					</div>
 				</div>
-				<div className='rounded-2xl paidBackground px-6 py-4 fontCheckedIn font-medium'>
-					{ethers.formatEther(prizeAmount ?? 0).toString()} USD
+			) : (
+				<div className='flex flex-row items-center justify-center space-x-2'>
+					<div className='rounded-2xl px-6 py-4 fontUnpaid backgroundUnpaid font-medium'>
+						{ethers.formatEther(prizeAmount ?? 0).toString()} USD
+					</div>
 				</div>
-			</div>
+			)}
 		</Link>
 	)
 }

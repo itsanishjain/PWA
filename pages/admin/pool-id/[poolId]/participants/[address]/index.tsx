@@ -76,7 +76,7 @@ const UserProfile = () => {
 	const setWinnerMutation = useMutation({
 		mutationFn: handleSetWinner,
 		onSuccess: () => {
-			console.log('endPool Success')
+			console.log('setWinner Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
@@ -91,13 +91,7 @@ const UserProfile = () => {
 		onSuccess: () => {
 			console.log('endPool Success')
 			queryClient.invalidateQueries({
-				queryKey: [
-					'fetchAllPoolDataFromSC',
-					poolId.toString(),
-					ethers.parseUnits(inputValue, 'ether'),
-					wallets?.[0].address,
-					currentJwt,
-				],
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 		},
 		onError: () => {
@@ -130,7 +124,7 @@ const UserProfile = () => {
 		savePayoutMutation.mutate({
 			params: [
 				poolId.toString(),
-				inputValue,
+				ethers.parseEther(inputValue).toString(),
 				participantAddress.toString(),
 				currentJwt!,
 			],
