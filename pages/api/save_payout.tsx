@@ -101,6 +101,25 @@ export default async function handler(
 		}
 	}
 
-	await upsertData()
+	async function deleteData() {
+		const { data: existingData, error: deleteError } = await supabaseAdminClient
+			.from('savedPayouts')
+			.delete()
+			.match({
+				pool_id: poolId,
+				address: winnerAddress,
+			})
+
+		if (deleteError) {
+			console.error(deleteError)
+			res.status(500).json({ error: 'Internal Server Error' })
+		}
+	}
+
+	if (amount == 0) {
+		await deleteData()
+	} else {
+		await upsertData()
+	}
 	res.status(200).json({ message: 'Success' })
 }

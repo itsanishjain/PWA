@@ -78,9 +78,9 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
 
-export function dictionaryToArray(dictionary: Dictionary): string[] | null {
+export function dictionaryToArray(dictionary: Dictionary): string[] {
 	if (dictionary == null) {
-		return null
+		return []
 	}
 	return Object.keys(dictionary).map((key) =>
 		dictionary[parseInt(key)].toLowerCase(),

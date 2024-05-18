@@ -25,8 +25,10 @@ import {
 	fetchParticipantsDataFromServer,
 	fetchSavedPayoutsFromServer,
 	fetchWinnersDetailsFromSC,
+	handleDeleteSavedPayouts,
 	handleRegister,
 	handleRegisterServer,
+	handleSetWinners,
 	handleUnregister,
 	handleUnregisterServer,
 } from '@/lib/api/clientAPI'
@@ -43,6 +45,7 @@ import { Input } from '@/components/ui/input'
 import WinnerRow from '@/components/winnerRow'
 import { dictionaryToArray, dictionaryToNestedArray } from '@/lib/utils'
 import { ethers } from 'ethers'
+import { toast } from '@/components/ui/use-toast'
 
 const ManageParticipantsPage = () => {
 	const router = useRouter()
@@ -59,7 +62,7 @@ const ManageParticipantsPage = () => {
 	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 
-	const [winnerAddresses, setWinnerAddresses] = useState<string[] | null>([])
+	const [winnerAddresses, setWinnerAddresses] = useState<string[]>([])
 	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
 
 	const [pageUrl, setPageUrl] = useState('')
@@ -109,42 +112,81 @@ const ManageParticipantsPage = () => {
 		enabled: poolSCParticipants?.length > 0 && poolId?.toString() != undefined,
 	})
 
+	const participantsInfoDict = participantsInfo?.reduce(
+		(acc, participant) => {
+			acc[participant.address] = participant
+			return acc
+		},
+		{} as { [key: string]: any },
+	)
+
 	const { data: savedPayoutsInfo } = useQuery({
 		queryKey: ['fetchSavedPayoutsFromServer', poolId?.toString() ?? '0'],
 		queryFn: fetchSavedPayoutsFromServer,
 		enabled: poolId?.toString() != undefined,
 	})
 
-	const savedPayoutsParticipantsAddress =
+	const savedPayoutsParticipantsAddresses =
 		savedPayoutsInfo?.map((participant) => participant?.address) ?? []
-	const { data: savedPayoutsParticipantsInfo } = useQuery({
-		queryKey: [
-			'fetchUserDisplayInfoFromServer',
-			poolId?.toString() ?? '0',
-			savedPayoutsParticipantsAddress,
-		],
-		queryFn: fetchParticipantsDataFromServer,
-		enabled:
-			savedPayoutsParticipantsAddress?.length > 0 &&
-			poolId?.toString() != undefined,
-	})
+
+	const savedPayoutsPayoutAmounts =
+		savedPayoutsInfo?.map((participant) => participant?.payout_amount) ?? []
 
 	const checkedInParticipantsInfo = participantsInfo?.filter(
 		(participant) => participant?.participationData?.[0]?.status == 2,
 	)
 
-	const winnersInfo = participantsInfo?.filter(
-		(participant) =>
-			winnerAddresses?.[0]?.indexOf(
-				participant?.participationData?.[0]?.participant_address,
-			) != -1,
-	)
-
 	const onQrButtonClicked = () => {
 		console.log('QR Button Clicked')
 	}
+
+	const setWinnersMutation = useMutation({
+		mutationFn: handleSetWinners,
+		onSuccess: () => {
+			console.log('setWinners Success')
+
+			deleteSavedPayoutsMutation.mutate({
+				params: [
+					poolId?.toString() ?? '0',
+					savedPayoutsParticipantsAddresses,
+					savedPayoutsPayoutAmounts,
+					currentJwt ?? '',
+				],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? '0'],
+			})
+		},
+		onError: (e) => {
+			console.log('setWinnersMutation Error', e.message)
+		},
+	})
+
+	const deleteSavedPayoutsMutation = useMutation({
+		mutationFn: handleDeleteSavedPayouts,
+		onSuccess: () => {
+			console.log('deleteSavedPayouts Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchSavedPayoutsFromServer', poolId?.toString() ?? '0'],
+			})
+		},
+		onError: () => {
+			console.log('setWinnersMutation Error')
+		},
+	})
 	const onPayoutButtonClicked = () => {
-		console.log('Payout Button Clicked')
+		toast({
+			title: 'Requesting Transaction',
+			description: 'Handling Payouts',
+		})
+		setWinnersMutation.mutate({
+			params: [
+				poolId?.toString() ?? '0',
+				savedPayoutsParticipantsAddresses,
+				savedPayoutsPayoutAmounts,
+				wallets,
+			],
+		})
 	}
 	useEffect(() => {
 		// Update the document title using the browser API
@@ -162,12 +204,14 @@ const ManageParticipantsPage = () => {
 		console.log('poolSCInfo', poolSCInfo)
 		setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
 		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
+		console.log('winnersDetailsAddresses', winnerAddresses)
+		console.log('winnersDetails', winnerDetails)
+
 		console.log('savedPayoutsInfo', savedPayoutsInfo)
 		console.log(
 			'savedPayoutsParticipantsAddress',
-			savedPayoutsParticipantsAddress,
+			savedPayoutsParticipantsAddresses,
 		)
-		console.log('savedPayoutsParticipantsInfo', savedPayoutsParticipantsInfo)
 		setPageUrl(window?.location.href)
 	}, [
 		ready,
@@ -237,7 +281,7 @@ const ManageParticipantsPage = () => {
 										}
 										imageUrl={participant?.avatar_url}
 										address={participant?.address}
-										routeUrl={`${window.location.href}/${participant?.address}`}
+										routeUrl={`${pageUrl}/${participant?.address}`}
 									/>
 								))}
 							</TabsContent>
@@ -251,35 +295,44 @@ const ManageParticipantsPage = () => {
 										}
 										imageUrl={participant?.avatar_url}
 										address={participant?.address}
-										routeUrl={`${window.location.href}/${participant?.address}`}
+										routeUrl={`${pageUrl}/${participant?.address}`}
 									/>
 								))}
 							</TabsContent>
 							<TabsContent value='winners'>
-								{winnersInfo?.map((participant, index) => (
+								{winnerDetails?.map((participant, index) => (
 									<WinnerRow
-										key={participant?.id}
-										name={participant?.display_name}
-										participantStatus={
-											participant?.participationData?.[0]?.status
+										key={`${participantsInfoDict?.[winnerAddresses[index]]
+											?.id}_${index}`}
+										name={
+											participantsInfoDict?.[winnerAddresses[index]]
+												?.display_name
 										}
-										imageUrl={participant?.avatar_url}
-										address={participant?.address}
-										routeUrl={`${window.location.href}/${participant?.address}`}
-										prizeAmount={winnerDetails?.[index]?.[0]}
+										participantStatus={
+											participantsInfoDict?.[winnerAddresses[index]]
+												?.participationData?.[0]?.status
+										}
+										imageUrl={
+											participantsInfoDict?.[winnerAddresses[index]]?.avatar_url
+										}
+										address={winnerAddresses[index]}
+										routeUrl={`${pageUrl}/${winnerAddresses[index]}`}
+										prizeAmount={participant?.[0]}
 										setWinner={true}
 									/>
 								))}
 								{savedPayoutsInfo?.map((participant, index) => (
 									<WinnerRow
 										key={participant?.id}
-										name={savedPayoutsParticipantsInfo?.[index]?.display_name}
+										name={
+											participantsInfoDict?.[participant?.address]?.display_name
+										}
 										participantStatus={
-											savedPayoutsParticipantsInfo?.[index]
+											participantsInfoDict?.[participant?.address]
 												?.participationData?.[0]?.status
 										}
 										address={participant?.address}
-										routeUrl={`${window.location.href}/${participant?.address}`}
+										routeUrl={`${pageUrl}/${participant?.address}`}
 										prizeAmount={participant?.payout_amount ?? 0}
 										setWinner={false}
 									/>

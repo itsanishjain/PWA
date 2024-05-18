@@ -44,7 +44,7 @@ const WinnerRow: React.FC<WinnerRowProps> = ({
 	return (
 		<Link
 			className='flex flex-row space-x-4 bottomDivider py-4'
-			href={window.location.href}
+			href={routeUrl ?? '/'}
 		>
 			<img
 				src={`${profileData?.profileImageUrl ?? frogImage.src}`}
