@@ -73,7 +73,10 @@ const TicketPage = () => {
 									<QRCode
 										size={256}
 										style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
-										value={wallets?.[0]?.address}
+										value={JSON.stringify({
+											address: wallets?.[0]?.address,
+											poolId: poolId,
+										})}
 										viewBox={`0 0 256 256`}
 									/>
 								)}

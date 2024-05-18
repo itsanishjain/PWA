@@ -33,6 +33,7 @@ import WinnerRow from '@/components/winnerRow'
 import { dictionaryToArray, dictionaryToNestedArray } from '@/lib/utils'
 import { ethers } from 'ethers'
 import { toast } from '@/components/ui/use-toast'
+import Link from 'next/link'
 
 const ManageParticipantsPage = () => {
 	const router = useRouter()
@@ -213,9 +214,10 @@ const ManageParticipantsPage = () => {
 							<span className='w-4 h-full absolute left-4 flex items-center'>
 								<img className='flex' src={searchIcon.src} />
 							</span>
-							<button
+							<Link
+								href={`${parentRoute}/checkin-scan`}
 								className='w-6 h-10 absolute right-0 flex items-center'
-								onClick={onQrButtonClicked}
+								// onClick={onQrButtonClicked}
 							>
 								<span className='w-full h-full flex items-center'>
 									<svg
@@ -231,7 +233,7 @@ const ManageParticipantsPage = () => {
 										/>
 									</svg>
 								</span>
-							</button>
+							</Link>
 
 							<Input
 								placeholder='Search'

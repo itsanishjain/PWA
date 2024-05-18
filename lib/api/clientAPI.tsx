@@ -18,6 +18,7 @@ import {
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
 import { ConnectedWallet } from '@privy-io/react-auth'
+import * as lodash from 'lodash'
 
 export interface writeTestObject {
 	address: string
@@ -404,7 +405,8 @@ export const fetchAllPoolDataFromDB = async ({
 	console.log('fetchPoolDataFromDB: Fetching Pool Image Url')
 
 	let poolImageUrl = null
-	if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
+	console.log('pool_image_url', data[0].pool_image_url)
+	if (!lodash.isEmpty(data[0].pool_image_url)) {
 		const { data: storageData } = supabaseBrowserClient.storage
 			.from('pool')
 			.getPublicUrl(data[0].pool_image_url)
@@ -938,6 +940,39 @@ export const handleDeleteSavedPayouts = async ({
 		})
 		if (!response.ok) {
 			throw new Error('Network response was not ok')
+		}
+		const data = await response.json()
+		return data
+	} catch (error) {
+		console.error('There was a problem with the post operation:', error)
+	}
+}
+
+export const handleCheckIn = async ({
+	data,
+	jwt,
+}: {
+	data: string
+	jwt: string
+}) => {
+	// const [poolId, address, jwt] = params
+	let qrDataObj: any = JSON.parse(data)
+	let dataObj = {
+		poolId: qrDataObj?.poolId,
+		address: qrDataObj?.address,
+		jwtString: jwt,
+	}
+	try {
+		const response = await fetch('/api/check_in', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(dataObj),
+		})
+		if (!response.ok) {
+			throw new Error('Network response was not ok')
+			return
 		}
 		const data = await response.json()
 		return data
