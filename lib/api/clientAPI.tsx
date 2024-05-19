@@ -849,6 +849,22 @@ export const fetchWinnersDetailsFromSC = async ({
 	return winnersDetails
 }
 
+export const fetchClaimablePoolsFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, address] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const claimablePools = await contract.getClaimablePools(address)
+	return claimablePools
+}
+
 export const fetchSavedPayoutsFromServer = async ({
 	queryKey,
 }: {
@@ -993,6 +1009,49 @@ export const handleClaimWinning = async ({
 	let claimWinningDataString = poolIFace.encodeFunctionData('claimWinning', [
 		poolId,
 		walletAddress,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: claimWinningDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
+
+export const handleClaimWinnings = async ({
+	params,
+}: {
+	params: [string[], ConnectedWallet[]]
+}) => {
+	const [poolIds, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	const walletAddresses = poolIds.map((poolId) => walletAddress)
+	let claimWinningDataString = poolIFace.encodeFunctionData('claimWinnings', [
+		poolIds,
+		walletAddresses,
 	])
 
 	try {

@@ -123,3 +123,7 @@ export function getRowsByColumnValue(arr2D: any, columnIndex: any, value: any) {
 export function getValuesFromIndices(arr: any, indices: any) {
 	return indices?.map((index: any) => arr[index])
 }
+
+export function formatAddress(address: string) {
+	return `${address?.slice(0, 6)}...${address?.slice(-4)}`
+}
