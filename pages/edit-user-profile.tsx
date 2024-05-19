@@ -30,6 +30,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import * as _ from 'lodash'
 import { useToast } from '@/components/ui/use-toast'
+import { formatAddress } from '@/lib/utils'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -191,7 +192,7 @@ const EditUserProfile = () => {
 							/>
 						</div>
 
-						<div className='flex w-full justify-center'>
+						<div className='flex w-full justify-center flex-col items-center'>
 							<button
 								onClick={triggerFileInput}
 								className='relative rounded-full m-8 w-40 aspect-square '
@@ -209,6 +210,9 @@ const EditUserProfile = () => {
 									/>
 								</div>
 							</button>
+							<h3 className='font-medium'>
+								{formatAddress(wallets?.[0]?.address)}
+							</h3>
 						</div>
 
 						<div className={`border-t-4 ${styles.divider}`}></div>
