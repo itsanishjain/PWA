@@ -300,7 +300,11 @@ const PoolPage = () => {
 						>
 							<div className='relative rounded-3xl overflow-hidden'>
 								<img
-									src={`${poolImageUrl ?? defaultPoolImage.src}`}
+									src={`${
+										_.isEmpty(poolImageUrl)
+											? defaultPoolImage.src
+											: poolImageUrl
+									}`}
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
 								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
