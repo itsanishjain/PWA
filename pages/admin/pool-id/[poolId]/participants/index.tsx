@@ -32,6 +32,7 @@ import { dictionaryToArray, dictionaryToNestedArray } from '@/lib/utils'
 import { ethers } from 'ethers'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
+import Divider from '@/components/divider'
 
 const ManageParticipantsPage = () => {
 	const router = useRouter()
@@ -239,7 +240,7 @@ const ManageParticipantsPage = () => {
 							/>
 						</div>
 						<Tabs defaultValue='registered' className='w-full'>
-							<TabsList className='w-full flex justify-start p-0 space-x-0 md:space-x-8 rounded-none'>
+							<TabsList className='w-full flex justify-start p-0 space-x-0 md:space-x-8 rounded-none z-10'>
 								<TabsTrigger value='registered'>Registered</TabsTrigger>
 								<TabsTrigger value='checkedIn'>Checked in</TabsTrigger>
 								<TabsTrigger value='winners'>Winners</TabsTrigger>
