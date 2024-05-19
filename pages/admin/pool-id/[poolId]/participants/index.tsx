@@ -6,8 +6,6 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import Appbar from '@/components/appbar'
 
-import QRCode from 'react-qr-code'
-
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 
 import {
@@ -215,7 +213,7 @@ const ManageParticipantsPage = () => {
 								<img className='flex' src={searchIcon.src} />
 							</span>
 							<Link
-								href={`${parentRoute}/checkin-scan`}
+								href={`${pageUrl}/payout-scan`}
 								className='w-6 h-10 absolute right-0 flex items-center'
 								// onClick={onQrButtonClicked}
 							>

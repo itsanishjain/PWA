@@ -18,20 +18,17 @@ const ScanQR: React.FC = () => {
 	const handleScan = async (data: string | null) => {
 		if (data) {
 			setQRData(data)
-			const dataObj = JSON.parse(data)
-			// Send data to server for updating database
-			const result = await handleCheckIn({ data: data, jwt: currentJwt ?? '' })
-			console.log('checkin result', result)
-			if (result.message == 'Success') {
-				toast({
-					title: 'Success',
-					description: `Checked In ${dataObj?.address}`,
-				})
-			} else {
-				toast({
-					title: 'Failure',
-					description: `Something went wrong. Please try again later.`,
-				})
+			console.log('data', data)
+
+			try {
+				const dataObj = JSON.parse(data)
+				console.log('data', data)
+				// console.log('parentRoute', parentRoute)
+				router.push(
+					`/admin/pool-id/${dataObj?.poolId}/participants/${dataObj?.address}`,
+				)
+			} catch (error) {
+				console.error(error)
 			}
 		}
 	}
@@ -44,11 +41,12 @@ const ScanQR: React.FC = () => {
 		const paths = router?.asPath.split('/')
 		paths.pop() // Remove the last sub-route
 		setParentRoute(paths.join('/'))
+		// console.log('parentRoute', parentRoute)
 	}, [router])
 
 	return (
 		<Page>
-			<Appbar backRoute={`${parentRoute}`} pageTitle='Check In' />
+			<Appbar backRoute={`${parentRoute}`} pageTitle='Scan to Payout' />
 			<Section>
 				<div className='h-full w-full relative flex flex-col'>
 					<QrReader
