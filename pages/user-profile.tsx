@@ -154,7 +154,7 @@ const UserProfile = () => {
 							</Link>
 						</div>
 						<div
-							className={`flex flex-col rounded-3xl cardBackground w-full p-4 md:p-10 md:space-y-10`}
+							className={`flex flex-col rounded-3xl cardBackground w-full p-6 md:p-10 md:space-y-10`}
 						>
 							<h2 className='font-medium'>Claimable</h2>
 							<Divider />
