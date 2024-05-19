@@ -47,7 +47,7 @@ const Authenticate = () => {
 			nonce: result.nonce,
 		})
 		console.log('tokenResult', tokenResult)
-		saveJwt(tokenResult.token)
+		saveJwt(tokenResult?.token)
 		console.log('current Jwt', currentJwt)
 		// testWrite()
 	}

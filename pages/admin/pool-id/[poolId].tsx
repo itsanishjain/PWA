@@ -56,6 +56,7 @@ import {
 	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
+	handleEnableDeposit,
 	handleEndPool,
 	handleRegister,
 	handleRegisterServer,
@@ -76,6 +77,7 @@ import PoolStatus from '@/components/poolStatus'
 import { Progress } from '@/components/ui/progress'
 import MyProgressBar from '@/components/myProgressBar'
 import ShareDialog from '@/components/shareDialog'
+import Link from 'next/link'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -187,6 +189,19 @@ const AdminPoolPage = () => {
 		router.push(`${currentRoute}/participants`)
 	}
 
+	const enableDepositMutation = useMutation({
+		mutationFn: handleEnableDeposit,
+		onSuccess: () => {
+			console.log('startPool Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
+			})
+		},
+		onError: () => {
+			console.log('enableDepositMutation Error')
+		},
+	})
+
 	const startPoolMutation = useMutation({
 		mutationFn: handleStartPool,
 		onSuccess: () => {
@@ -212,6 +227,16 @@ const AdminPoolPage = () => {
 			console.log('endPoolMutation Error')
 		},
 	})
+
+	const onEnableDepositButtonClicked = () => {
+		toast({
+			title: 'Requesting Transaction',
+			description: 'Enable Deposit',
+		})
+		enableDepositMutation.mutate({
+			params: [poolId.toString(), wallets],
+		})
+	}
 
 	const onStartPoolButtonClicked = () => {
 		toast({
@@ -253,7 +278,11 @@ const AdminPoolPage = () => {
 						>
 							<div className='relative rounded-3xl overflow-hidden'>
 								<img
-									src={`${poolImageUrl ?? defaultPoolImage.src}`}
+									src={`${
+										_.isEmpty(poolImageUrl)
+											? defaultPoolImage.src
+											: poolImageUrl
+									}`}
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
 								<div className='w-full h-full bg-black absolute bottom-0 backdrop-filter backdrop-blur-sm bg-opacity-60 flex flex-col items-center justify-center space-y-3 md:space-y-6 text-white'>
@@ -267,9 +296,12 @@ const AdminPoolPage = () => {
 									)}
 								</div>
 								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
-									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
+									<Link
+										href={`${pageUrl}/checkin-scan`}
+										className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'
+									>
 										<img className='w-full h-full flex' src={qrCodeIcon.src} />
-									</button>
+									</Link>
 									<ShareDialog />
 
 									<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
@@ -306,15 +338,15 @@ const AdminPoolPage = () => {
 										</span>
 										<span>Participants</span>
 									</p>
-									<button
+									<Link
 										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
-										onClick={viewParticipantsClicked}
+										href={`${window.location.href}/participants`}
 									>
 										<span>View all</span>
 										<span>
 											<img src={`${rightArrow.src}`}></img>
 										</span>
-									</button>
+									</Link>
 								</div>
 								<Progress value={participantPercent} />
 							</div>
@@ -339,13 +371,23 @@ const AdminPoolPage = () => {
 							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									onClick={onEnableDepositButtonClicked}
+								>
+									Enable Deposit
+								</button>
+							</div>
+						)}
+						{poolSCStatus == 1 && (
+							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<button
+									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
 									onClick={onStartPoolButtonClicked}
 								>
 									Start Pool
 								</button>
 							</div>
 						)}
-						{poolSCStatus == 1 && (
+						{poolSCStatus == 2 && (
 							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
 									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}

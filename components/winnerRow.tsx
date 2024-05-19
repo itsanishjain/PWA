@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import rightArrow from '@/public/images/right_arrow.svg'
 import frogImage from '@/public/images/frog.png'
+import circleTick from '@/public/images/circle-tick.svg'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -10,21 +11,29 @@ import {
 import router from 'next/router'
 import * as _ from 'lodash'
 import Link from 'next/link'
+import { ParticipantStatus } from './participantRow'
+import { ethers } from 'ethers'
 
-interface ParticipantRowProps {
-	name: string
-	imageUrl: string
+interface WinnerRowProps {
+	name?: string
+	imageUrl?: string
 	participantStatus: number
 	address: string
 	routeUrl?: string
+	hasClaimed?: boolean
+	prizeAmount?: string
+	setWinner: boolean
 }
 
-const ParticipantRow: React.FC<ParticipantRowProps> = ({
+const WinnerRow: React.FC<WinnerRowProps> = ({
 	name,
 	imageUrl,
 	participantStatus,
 	address,
 	routeUrl,
+	hasClaimed,
+	prizeAmount,
+	setWinner,
 }) => {
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', address],
@@ -35,7 +44,7 @@ const ParticipantRow: React.FC<ParticipantRowProps> = ({
 	return (
 		<Link
 			className='flex flex-row space-x-4 bottomDivider py-4'
-			href={routeUrl ?? window.location.href}
+			href={routeUrl ?? '/'}
 		>
 			<img
 				src={`${profileData?.profileImageUrl ?? frogImage.src}`}
@@ -55,14 +64,24 @@ const ParticipantRow: React.FC<ParticipantRowProps> = ({
 					{ParticipantStatus[participantStatus]}
 				</p>
 			</div>
+			{setWinner ? (
+				<div className='flex flex-row items-center justify-center space-x-2'>
+					<div>
+						<img className='w-6 h-6' src={circleTick.src} />
+					</div>
+					<div className='rounded-2xl paidBackground px-6 py-4 fontCheckedIn font-medium'>
+						{ethers.formatEther(prizeAmount ?? 0).toString()} USD
+					</div>
+				</div>
+			) : (
+				<div className='flex flex-row items-center justify-center space-x-2'>
+					<div className='rounded-2xl px-6 py-4 fontUnpaid backgroundUnpaid font-medium'>
+						{ethers.formatEther(prizeAmount ?? 0).toString()} USD
+					</div>
+				</div>
+			)}
 		</Link>
 	)
 }
 
-export default ParticipantRow
-
-export enum ParticipantStatus {
-	Unregistered = 0,
-	Registered = 1,
-	'Checked In' = 2,
-}
+export default WinnerRow

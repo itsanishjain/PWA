@@ -300,7 +300,11 @@ const PoolPage = () => {
 						>
 							<div className='relative rounded-3xl overflow-hidden'>
 								<img
-									src={`${poolImageUrl ?? defaultPoolImage.src}`}
+									src={`${
+										_.isEmpty(poolImageUrl)
+											? defaultPoolImage.src
+											: poolImageUrl
+									}`}
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
 								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
@@ -384,14 +388,16 @@ const PoolPage = () => {
 								</button>
 							</div>
 						) : (
-							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
-								<button
-									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={onRegisterButtonClicked}
-								>
-									Register
-								</button>
-							</div>
+							poolSCStatus == 1 && (
+								<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+									<button
+										className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+										onClick={onRegisterButtonClicked}
+									>
+										Register
+									</button>
+								</div>
+							)
 						)}
 					</div>
 					{wallets?.[0]?.connectorType != 'embedded' && (
