@@ -44,9 +44,15 @@ import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
 import { Tables, Database } from '@/types/supabase'
 import {
+	dictionaryToArray,
+	dictionaryToNestedArray,
 	formatCountdownTime,
 	formatEventDateTime,
 	formatTimeDiff,
+	getAllIndicesMatching,
+	getRowIndicesByColumnValue,
+	getRowsByColumnValue,
+	getValuesFromIndices,
 } from '@/lib/utils'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
@@ -56,6 +62,8 @@ import {
 	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
+	fetchWinnersDetailsFromSC,
+	handleClaimWinning,
 	handleRegister,
 	handleRegisterServer,
 	handleUnregister,
@@ -67,6 +75,8 @@ import { Button } from '@/components/ui/button'
 
 import LoadingAnimation from '@/components/loadingAnimation'
 import TransactionDialog from '@/components/transactionDialog'
+import circleTick from '@/public/images/circle-tick.svg'
+
 import { useToast } from '@/components/ui/use-toast'
 
 import * as _ from 'lodash'
@@ -88,6 +98,9 @@ const PoolPage = () => {
 
 	const [poolBalance, setPoolBalance] = useState<number>(0)
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
+
+	const [winnerAddresses, setWinnerAddresses] = useState<string[]>([])
+	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
 
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | null | undefined>()
@@ -144,6 +157,10 @@ const PoolPage = () => {
 	const poolSCToken = poolSCInfo?.[4]
 	let poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
+
+	const isWinner =
+		winnerAddresses?.indexOf(wallets[0]?.address?.toLowerCase()) != -1
+
 	const isRegisteredOnSC =
 		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
 
@@ -153,6 +170,26 @@ const PoolPage = () => {
 		enabled: !_.isEmpty(poolSCToken),
 	})
 
+	const { data: poolWinnersDetails } = useQuery({
+		queryKey: ['fetchWinnersDetailsFromSC', poolId?.toString() ?? ' '],
+		queryFn: fetchWinnersDetailsFromSC,
+		enabled: !!poolId,
+	})
+
+	const matchingAddressIndices = getAllIndicesMatching(
+		poolWinnersDetails?.[0],
+		wallets[0]?.address,
+	)
+	const userWonDetails = getValuesFromIndices(
+		poolWinnersDetails?.[1],
+		matchingAddressIndices,
+	)
+
+	const claimableDetails = getRowsByColumnValue(userWonDetails, 3, false)
+	const totalWinningAmount = userWonDetails?.reduce(
+		(acc: number, curr: any) => acc + curr[0],
+		BigInt(0),
+	)
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
@@ -164,10 +201,18 @@ const PoolPage = () => {
 		setPoolDbData(poolDBInfo?.poolDBInfo)
 		setCohostDbData(poolDBInfo?.cohostUserDisplayData ?? [])
 		setPoolImageUrl(poolDBInfo?.poolImageUrl)
+		// setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
+		setWinnerAddresses(poolWinnersDetails?.[0])
 
+		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
 		console.log('poolDBInfo', poolDBInfo)
+		console.log('poolSCWinners', poolSCWinners)
+		console.log('winnerAddresses', winnerAddresses)
+		console.log('poolWinnersDetails', poolWinnersDetails?.[0][0])
+		console.log('userWonDetails', userWonDetails)
+
 		setPageUrl(window?.location.href)
-	}, [ready, authenticated, poolSCInfo, poolDBInfo])
+	}, [ready, authenticated, poolSCInfo, poolDBInfo, poolWinnersDetails])
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
@@ -196,7 +241,7 @@ const PoolPage = () => {
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 			registerServerMutation.mutate({
-				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
+				params: [poolId.toString(), wallets[0]?.address, currentJwt ?? ' '],
 			})
 		},
 		onError: () => {
@@ -229,8 +274,25 @@ const PoolPage = () => {
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 			unregisterServerMutation.mutate({
-				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
+				params: [poolId.toString(), wallets[0]?.address, currentJwt ?? ' '],
 			})
+		},
+	})
+
+	const claimMutation = useMutation({
+		mutationFn: handleClaimWinning,
+		onSuccess: () => {
+			toast({
+				title: 'Transaction Suceess',
+				description: 'You have claimed your winnings.',
+			})
+			console.log('registerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchWinnersDetailsFromSC', poolId?.toString() ?? ' '],
+			})
+		},
+		onError: () => {
+			console.log('claimMutation Error')
 		},
 	})
 	// const percentFunded = poolDbData?.price
@@ -277,6 +339,19 @@ const PoolPage = () => {
 		})
 
 		unregisterMutation.mutate({
+			params: [poolId.toString(), wallets],
+		})
+	}
+
+	const onClaimButtonClicked = (e: any) => {
+		console.log('onClaimButtonClicked')
+		const connectorType = wallets[0].connectorType
+		console.log('connectorType', connectorType)
+		toast({
+			title: 'Requesting Transaction/s',
+			description: 'Approve claiming prize',
+		})
+		claimMutation.mutate({
 			params: [poolId.toString(), wallets],
 		})
 	}
@@ -353,6 +428,32 @@ const PoolPage = () => {
 								<Progress value={participantPercent} />
 							</div>
 						</div>
+						{userWonDetails?.length > 0 && (
+							<div
+								className={`flex flex-col rounded-3xl mt-2 md:mt-4 cardBackground w-full px-4 md:px-10 py-4 md:py-8 space-y-4`}
+							>
+								<div className='flex flex-row items-center justify-between'>
+									<div className=' flex flex-row space-x-2'>
+										<span className='flex items-center'>
+											<img className='w-5 h-5' src={circleTick.src} />
+										</span>
+										<span className='font-semibold'>Winner</span>
+									</div>
+									<div>
+										${ethers.formatEther(totalWinningAmount?.toString())}
+									</div>
+								</div>
+
+								{claimableDetails?.length > 0 && (
+									<button
+										className='text-white rounded-full barForeground py-3 font-medium'
+										onClick={onClaimButtonClicked}
+									>
+										Claim
+									</button>
+								)}
+							</div>
+						)}
 
 						<div
 							className={`flex flex-col rounded-3xl mt-2 md:mt-4 cardBackground w-full px-4 md:px-10 py-4 md:py-8 `}
