@@ -208,7 +208,6 @@ const PoolPage = () => {
 		console.log('poolDBInfo', poolDBInfo)
 		console.log('poolSCWinners', poolSCWinners)
 		console.log('winnerAddresses', winnerAddresses)
-		console.log('poolWinnersDetails', poolWinnersDetails?.[0][0])
 		console.log('userWonDetails', userWonDetails)
 
 		setPageUrl(window?.location.href)

@@ -47,12 +47,13 @@ const PoolRow: React.FC<PoolRowProps> = ({
 	useEffect(() => {
 		console.log('poolImagePath', poolImagePath)
 		loadPoolImage()
-		// console.log('poolroute', `${currentRoute}/pool-id/${poolId}`)
 	}, [poolImagePath])
 
+	const trailingSlash =
+		window?.location?.href[window?.location?.href.length - 1] == '/' ? '' : '/'
 	return (
 		<Link
-			href={`${window.location.href}/pool-id/${poolId}`}
+			href={`${window.location.href}${trailingSlash}pool-id/${poolId}`}
 			className='flex flex-row space-x-4'
 		>
 			<div className='relative w-20 h-20 rounded-2xl overflow-hidden bg-red-500'>

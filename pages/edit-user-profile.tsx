@@ -211,7 +211,8 @@ const EditUserProfile = () => {
 								</div>
 							</button>
 							<h3 className='font-medium'>
-								{formatAddress(wallets?.[0]?.address)}
+								{!_.isEmpty(wallets?.[0]?.address) &&
+									formatAddress(wallets?.[0]?.address)}
 							</h3>
 						</div>
 

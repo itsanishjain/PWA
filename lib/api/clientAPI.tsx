@@ -82,29 +82,6 @@ export async function fetchToken(backendLoginObj: backendLoginObject) {
 	}
 }
 
-export async function writeTest(address: writeTestObject) {
-	const token = Cookies.get('token')
-
-	try {
-		const response = await fetch('/api/test_write', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`,
-			},
-			credentials: 'include',
-			body: JSON.stringify(address),
-		})
-		if (!response.ok) {
-			throw new Error('Network response was not ok')
-		}
-		const data = await response.json()
-		return data
-	} catch (error) {
-		console.error('There was a problem with the fetch operation:', error)
-	}
-}
-
 export const uploadProfileImage = async (
 	fileBlob: any,
 	selectedFile: any,
@@ -863,6 +840,23 @@ export const fetchClaimablePoolsFromSC = async ({
 
 	const claimablePools = await contract.getClaimablePools(address)
 	return claimablePools
+}
+
+export const fetchPoolBalanceFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const poolBalance = await contract.poolBalance(poolId)
+	console.log('winnersDetails', poolBalance)
+	return poolBalance
 }
 
 export const fetchSavedPayoutsFromServer = async ({
