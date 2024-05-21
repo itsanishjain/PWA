@@ -4,9 +4,8 @@ import Image from 'next/image'
 import poolImage from '@/public/images/pool.png'
 import { useRouter } from 'next/router'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
-import { chain } from '@/constants/constant'
 import React, { useState, useEffect } from 'react'
-import { fetchNonce, fetchToken, writeTest } from '@/lib/api/clientAPI'
+import { fetchNonce, fetchToken } from '@/lib/api/clientAPI'
 
 import { useCookie } from '@/hooks/cookie'
 import jwt from 'jsonwebtoken'
@@ -50,14 +49,6 @@ const Authenticate = () => {
 		saveJwt(tokenResult?.token)
 		console.log('current Jwt', currentJwt)
 		// testWrite()
-	}
-
-	const testWrite = async () => {
-		console.log('handleTestWrite')
-		let result = await writeTest({
-			address: user?.wallet?.address!,
-			jwt: currentJwt,
-		})
 	}
 
 	// let showAuthenticateBackendButton = false
