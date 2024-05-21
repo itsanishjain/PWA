@@ -85,7 +85,7 @@ const Authenticate = () => {
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
 						<h2 className='text-xl font-bold text-zinc-800 tagline-text text-center align-top w-full mt-28'>
-							Terms
+							Terms (Important*)
 						</h2>
 						<p
 							className={`text-base  text-center align-top w-full tagline-text mt-4`}
@@ -96,12 +96,12 @@ const Authenticate = () => {
 						</p>
 
 						{!isJwtValid && (
-							<div className='flex justify-center items-center h-full w-full mt-4'>
+							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 								<button
-									className='rounded-full gradient-background px-28 py-3'
+									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
 									onClick={handleBackendLogin}
 								>
-									Accept
+									Continue
 								</button>
 							</div>
 						)}
