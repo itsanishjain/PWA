@@ -204,6 +204,12 @@ const PoolPage = () => {
 		BigInt(0),
 	)
 
+	const { data: adminData } = useQuery({
+		queryKey: ['loadProfileImage', poolSCAdmin?.[0]?.toString() ?? ' '],
+		queryFn: fetchUserDisplayForAddress,
+		enabled: !_.isEmpty(poolSCAdmin?.[0]?.toString()),
+	})
+
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
@@ -223,7 +229,7 @@ const PoolPage = () => {
 		console.log('poolSCWinners', poolSCWinners)
 		console.log('winnerAddresses', winnerAddresses)
 		console.log('userWonDetails', userWonDetails)
-
+		console.log('cohostDbData', cohostDbData)
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo, poolWinnersDetails])
 
@@ -408,7 +414,25 @@ const PoolPage = () => {
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
 									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
-										Hosted by {cohostNames}
+										Hosted by
+										<ul className='flex flex-col space-y-2 mt-4'>
+											<li className='flex flex-row space-x-4 items-center font-medium'>
+												<div className='w-12 h-12'>
+													<AvatarImage address={poolSCAdmin?.[0]?.toString()} />
+												</div>
+												<span>{adminData?.userDisplayData?.display_name}</span>
+											</li>
+											{cohostDbData?.map((data: any) => {
+												return (
+													<li className='flex flex-row space-x-4 items-center font-medium'>
+														<div className='w-12 h-12'>
+															<AvatarImage address={data?.address} />
+														</div>
+														<span>{data?.display_name}</span>
+													</li>
+												)
+											})}
+										</ul>
 									</p>
 								</div>
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
