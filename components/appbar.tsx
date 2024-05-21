@@ -5,12 +5,7 @@ import {
 	usePrivy,
 	useWallets,
 } from '@privy-io/react-auth'
-import {
-	getTokenCookie,
-	setTokenCookie,
-	removeTokenCookie,
-	useCookie,
-} from '@/hooks/cookie'
+import { removeTokenCookie, useCookie } from '@/hooks/cookie'
 
 import leftArrowImage from '@/public/images/left_arrow.svg'
 
@@ -61,6 +56,18 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 		queryFn: fetchUserDisplayForAddress,
 		enabled: wallets.length > 0,
 	})
+
+	useEffect(() => {
+		if (ready && !authenticated) {
+			router.push('/login')
+		}
+
+		if (ready && authenticated && wallets?.length == 0) {
+			handleSignOut()
+		}
+
+		console.log('displayName', profileData)
+	}, [profileData, ready, authenticated, router])
 
 	return (
 		<header className='fixed top-0 left-0 z-20 w-full pt-safe bg-white'>

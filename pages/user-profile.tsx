@@ -112,10 +112,6 @@ const UserProfile = () => {
 			router.push('/login')
 		}
 
-		if (wallets.length > 0) {
-			console.log(`Wallet Length: ${wallets.length}`)
-			// console.log(`Wallet Address: ${wallets[0].address}`)
-		}
 		for (var i = 0; i < wallets.length; i++) {
 			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
@@ -140,10 +136,11 @@ const UserProfile = () => {
 								className='rounded-full w-40 aspect-square center object-cover z-0'
 								src={profileImageUrl}
 							/>
-
-							<h3 className='font-medium'>
-								{formatAddress(wallets?.[0]?.address)}
-							</h3>
+							{!_.isEmpty(wallets?.[0]?.address) && (
+								<h3 className='font-medium'>
+									{formatAddress(wallets?.[0]?.address)}
+								</h3>
+							)}
 						</div>
 						<div className='flex justify-center'>
 							<Link
