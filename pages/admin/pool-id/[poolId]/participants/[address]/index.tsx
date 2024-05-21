@@ -180,16 +180,21 @@ const UserProfile = () => {
 							<p>Checked in</p>
 						</div>
 						<div className='flex flex-row justify-center h-16 mt-2 '>
-							<Input
-								className='justify-center border-none text-center text-6xl font-bold h-16'
-								placeholder=''
-								autoFocus={true}
-								value={inputValue}
-								type='number'
-								onChange={handleInputChange}
-								ref={inputRef}
-								inputMode='numeric'
-							/>
+							<div className='flex relative justify-center '>
+								<Input
+									className='border-none text-center text-6xl font-bold h-16 w-auto'
+									placeholder=''
+									autoFocus={true}
+									value={inputValue}
+									type='number'
+									onChange={handleInputChange}
+									ref={inputRef}
+									inputMode='numeric'
+								/>
+								{/* <span className='absolute left-0 flex-row text-sm h-16 justify-center py-2'>
+									$
+								</span> */}
+							</div>
 						</div>
 						<div className='flex flex-col w-full items-center justify-center mt-8 space-y-2'>
 							<button
