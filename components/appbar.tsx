@@ -11,19 +11,12 @@ import leftArrowImage from '@/public/images/left_arrow.svg'
 
 import { Comfortaa } from 'next/font/google'
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
 import frogImage from '@/public/images/frog.png'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { fetchUserDisplayForAddress } from '@/lib/api/clientAPI'
 
 const comfortaa = Comfortaa({ subsets: ['latin'] })
-
-const links = [
-	{ label: 'Login', href: '/login' },
-	{ label: 'Story', href: '/story' },
-	{ label: 'Recipes', href: '/recipes' },
-]
 
 interface AppBarProps {
 	backRoute?: string // Required color property
@@ -33,10 +26,9 @@ interface AppBarProps {
 const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 	const router = useRouter()
 	const { currentJwt } = useCookie()
-	const { wallets } = useWallets()
+	const { wallets, ready: walletsReady } = useWallets()
 
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated, logout } = usePrivy()
 
 	const handleAccountClick = (e: any) => {
 		router.push('/user-profile')
@@ -62,7 +54,7 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 			router.push('/login')
 		}
 
-		if (ready && authenticated && wallets?.length == 0) {
+		if (ready && authenticated && walletsReady && wallets?.length == 0) {
 			handleSignOut()
 		}
 
