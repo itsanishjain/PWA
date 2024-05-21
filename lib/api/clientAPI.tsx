@@ -842,6 +842,23 @@ export const fetchClaimablePoolsFromSC = async ({
 	return claimablePools
 }
 
+export const fetchPoolBalanceFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const poolBalance = await contract.poolBalance(poolId)
+	console.log('winnersDetails', poolBalance)
+	return poolBalance
+}
+
 export const fetchSavedPayoutsFromServer = async ({
 	queryKey,
 }: {

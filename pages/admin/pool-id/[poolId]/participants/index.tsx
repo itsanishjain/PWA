@@ -12,6 +12,7 @@ import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
 	fetchParticipantsDataFromServer,
+	fetchPoolBalanceFromSC,
 	fetchSavedPayoutsFromServer,
 	fetchWinnersDetailsFromSC,
 	handleDeleteSavedPayouts,
@@ -33,6 +34,7 @@ import { ethers } from 'ethers'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import Divider from '@/components/divider'
+import { Progress } from '@/components/ui/progress'
 
 const ManageParticipantsPage = () => {
 	const router = useRouter()
@@ -63,6 +65,12 @@ const ManageParticipantsPage = () => {
 	const { data: poolWinnersDetails } = useQuery({
 		queryKey: ['fetchWinnersDetailsFromSC', poolId?.toString() ?? ' '],
 		queryFn: fetchWinnersDetailsFromSC,
+		enabled: !!poolId,
+	})
+
+	const { data: poolBalance } = useQuery({
+		queryKey: ['fetchPoolBalanceFromSC', poolId?.toString() ?? ' '],
+		queryFn: fetchPoolBalanceFromSC,
 		enabled: !!poolId,
 	})
 
@@ -202,6 +210,10 @@ const ManageParticipantsPage = () => {
 		return paths.join('/')
 	}, [router.asPath])
 
+	const poolPercentage =
+		(BigInt(poolBalance?.[3] ?? 0) * BigInt(100)) /
+		BigInt(poolBalance?.[0] ?? 100)
+
 	return (
 		<Page>
 			<Appbar backRoute={`${parentRoute}`} pageTitle='Manage Participants' />
@@ -275,50 +287,75 @@ const ManageParticipantsPage = () => {
 								))}
 							</TabsContent>
 							<TabsContent value='winners'>
-								{winnerDetails?.map((participant, index) => (
-									<WinnerRow
-										key={`${participantsInfoDict?.[winnerAddresses[index]]
-											?.id}_${index}`}
-										name={
-											participantsInfoDict?.[winnerAddresses[index]]
-												?.display_name
-										}
-										participantStatus={
-											participantsInfoDict?.[winnerAddresses[index]]
-												?.participationData?.[0]?.status
-										}
-										imageUrl={
-											participantsInfoDict?.[winnerAddresses[index]]?.avatar_url
-										}
-										address={winnerAddresses[index]}
-										routeUrl={`${pageUrl}/${winnerAddresses[index]}`}
-										prizeAmount={participant?.[0]}
-										setWinner={true}
-									/>
-								))}
-								{savedPayoutsInfo?.map((participant, index) => (
-									<WinnerRow
-										key={participant?.id}
-										name={
-											participantsInfoDict?.[participant?.address]?.display_name
-										}
-										participantStatus={
-											participantsInfoDict?.[participant?.address]
-												?.participationData?.[0]?.status
-										}
-										address={participant?.address}
-										routeUrl={`${pageUrl}/${participant?.address}`}
-										prizeAmount={participant?.payout_amount ?? 0}
-										setWinner={false}
-									/>
-								))}
-								<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
-									<button
-										className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-										onClick={onPayoutButtonClicked}
-									>
-										Payout
-									</button>
+								<div>
+									<div className='flex flex-col space-y-2 my-4'>
+										<div className='flex flex-row justify-between'>
+											<span>
+												<span className='font-bold'>
+													${ethers.formatEther(poolBalance?.[3] ?? 0)}
+												</span>
+												{` `}
+												USDC
+											</span>
+											<span>
+												{poolBalance &&
+													(
+														(BigInt(poolBalance?.[3]) * BigInt(100)) /
+														BigInt(poolBalance?.[0])
+													).toString()}
+												% Remaining of $
+												{ethers.formatEther(poolBalance?.[0] ?? 0)} Prize Pool
+											</span>
+										</div>
+										{poolBalance && <Progress value={Number(poolPercentage)} />}
+									</div>
+									{winnerDetails?.map((participant, index) => (
+										<WinnerRow
+											key={`${participantsInfoDict?.[winnerAddresses[index]]
+												?.id}_${index}`}
+											name={
+												participantsInfoDict?.[winnerAddresses[index]]
+													?.display_name
+											}
+											participantStatus={
+												participantsInfoDict?.[winnerAddresses[index]]
+													?.participationData?.[0]?.status
+											}
+											imageUrl={
+												participantsInfoDict?.[winnerAddresses[index]]
+													?.avatar_url
+											}
+											address={winnerAddresses[index]}
+											routeUrl={`${pageUrl}/${winnerAddresses[index]}`}
+											prizeAmount={participant?.[0]}
+											setWinner={true}
+										/>
+									))}
+									{savedPayoutsInfo?.map((participant, index) => (
+										<WinnerRow
+											key={participant?.id}
+											name={
+												participantsInfoDict?.[participant?.address]
+													?.display_name
+											}
+											participantStatus={
+												participantsInfoDict?.[participant?.address]
+													?.participationData?.[0]?.status
+											}
+											address={participant?.address}
+											routeUrl={`${pageUrl}/${participant?.address}`}
+											prizeAmount={participant?.payout_amount ?? 0}
+											setWinner={false}
+										/>
+									))}
+									<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+										<button
+											className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+											onClick={onPayoutButtonClicked}
+										>
+											Payout
+										</button>
+									</div>
 								</div>
 							</TabsContent>
 							<TabsContent value='refunded'>Refunded</TabsContent>
