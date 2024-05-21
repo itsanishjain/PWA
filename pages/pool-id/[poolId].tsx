@@ -39,6 +39,7 @@ import qrCodeIcon from '@/public/images/qr_code_icon.svg'
 import shareIcon from '@/public/images/share_icon.svg'
 import editIcon from '@/public/images/edit_icon.svg'
 import tripleDotsIcon from '@/public/images/tripleDots.svg'
+import userUnregisterIcon from '@/public/images/user_delete.svg'
 
 import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
@@ -84,6 +85,15 @@ import PoolStatus from '@/components/poolStatus'
 import { Progress } from '@/components/ui/progress'
 import MyProgressBar from '@/components/myProgressBar'
 import ShareDialog from '@/components/shareDialog'
+
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -477,15 +487,30 @@ const PoolPage = () => {
 								>
 									View My Ticket
 								</button>
-								<button
-									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={onUnregisterButtonClicked}
-								>
-									<img
-										className='flex w-full h-full'
-										src={tripleDotsIcon.src}
-									></img>
-								</button>
+
+								<DropdownMenu>
+									<DropdownMenuTrigger>
+										<div className='w-12 h-12 p-3 bg-black rounded-full'>
+											<img
+												className='flex w-full h-full'
+												src={tripleDotsIcon.src}
+											></img>
+										</div>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent sideOffset={16}>
+										<DropdownMenuItem onClick={onUnregisterButtonClicked}>
+											<div className='flex flex-row space-x-2'>
+												<span>
+													<img
+														className='flex w-full h-full'
+														src={userUnregisterIcon.src}
+													></img>
+												</span>
+												<span>Unregister from Pool</span>
+											</div>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 						) : (
 							poolSCStatus == 1 && (
