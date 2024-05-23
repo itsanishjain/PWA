@@ -413,7 +413,7 @@ const PoolPage = () => {
 										{poolSCName}
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
-									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
+									<div className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
 										Hosted by
 										<ul className='flex flex-col space-y-2 mt-4'>
 											<li className='flex flex-row space-x-4 items-center font-medium'>
@@ -424,7 +424,10 @@ const PoolPage = () => {
 											</li>
 											{cohostDbData?.map((data: any) => {
 												return (
-													<li className='flex flex-row space-x-4 items-center font-medium'>
+													<li
+														className='flex flex-row space-x-4 items-center font-medium'
+														key={data?.address}
+													>
 														<div className='w-12 h-12'>
 															<AvatarImage address={data?.address} />
 														</div>
@@ -433,7 +436,7 @@ const PoolPage = () => {
 												)
 											})}
 										</ul>
-									</p>
+									</div>
 								</div>
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
 									<div className='flex flex-rol justify-between'>
