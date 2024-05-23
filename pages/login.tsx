@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react'
 import { fetchNonce, fetchToken } from '@/lib/api/clientAPI'
 
 import { getTokenCookie, setTokenCookie } from '@/hooks/cookie'
+import Link from 'next/link'
 
 const LoginPage = () => {
 	const router = useRouter()
@@ -69,7 +70,7 @@ const LoginPage = () => {
 	return (
 		<Page>
 			<Section>
-				<div className='flex justify-center h-full w-full items-center'>
+				<div className='flex justify-center h-full w-full items-center relative'>
 					<div className='flex flex-col w-96 h-96'>
 						<div className='flex row items-center w-full'>
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
@@ -105,6 +106,14 @@ const LoginPage = () => {
 								</button>
 							</div>
 						)} */}
+					</div>
+					<div className=' absolute bottom-0 w-full flex flex-row justify-between text-black'>
+						<Link className=' text-black' href={'/terms'}>
+							Terms and Conditions
+						</Link>
+						<Link className='' href={'/privacy'}>
+							Privacy Policy
+						</Link>
 					</div>
 				</div>
 			</Section>
