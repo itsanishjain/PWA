@@ -42,7 +42,7 @@ const Terms = () => {
 					available to individuals or entities subject to sanctions or residing
 					in restricted jurisdictions.
 					<h3 className='text-2xl font-bold'>User Accounts</h3>
-					You must create an account to use the website's services. You are
+					You must create an account to use the website&apos;s services. You are
 					responsible for maintaining the confidentiality of your account
 					credentials and for all activities that occur under your account.
 					Pooling and Escrow Users can contribute cryptocurrency to designated
@@ -66,10 +66,10 @@ const Terms = () => {
 					laws. Users may not reproduce, distribute, or modify any part of the
 					website or its content without prior written consent.
 					<h3 className='text-2xl font-bold'>Privacy and Data Protection </h3>
-					The website's Privacy Policy governs the collection, use, and
-					protection of users' personal information. By using the website, users
-					consent to the processing of their personal data as described in the
-					Privacy Policy.
+					The website&apos;s Privacy Policy governs the collection, use, and
+					protection of users&apos; personal information. By using the website,
+					users consent to the processing of their personal data as described in
+					the Privacy Policy.
 					<h3 className='text-2xl font-bold'>Limitation of Liability </h3>
 					The website, its owners, and affiliates shall not be liable for any
 					direct, indirect, incidental, consequential, or punitive damages
@@ -79,8 +79,8 @@ const Terms = () => {
 					affiliates harmless from any claims, damages, or expenses arising from
 					their use of the website or violation of these Terms and Conditions.
 					Termination The website reserves the right to terminate or suspend
-					user accounts and access to the website's services at any time, with
-					or without notice, for any reason.
+					user accounts and access to the website&apos;s services at any time,
+					with or without notice, for any reason.
 					<h3 className='text-2xl font-bold'>
 						Governing Law and Jurisdiction{' '}
 					</h3>
