@@ -325,7 +325,7 @@ const ManageParticipantsPage = () => {
 								<TabsTrigger value='registered'>Registered</TabsTrigger>
 								<TabsTrigger value='checkedIn'>Checked in</TabsTrigger>
 								<TabsTrigger value='winners'>Winners</TabsTrigger>
-								<TabsTrigger value='refunded'>Refunded</TabsTrigger>
+								{/* <TabsTrigger value='refunded'>Refunded</TabsTrigger> */}
 							</TabsList>
 							<TabsContent value='registered'>
 								{filteredParticipantsInfo?.map((participant) => (
@@ -427,7 +427,7 @@ const ManageParticipantsPage = () => {
 									</div>
 								</div>
 							</TabsContent>
-							<TabsContent value='refunded'>Refunded</TabsContent>
+							{/* <TabsContent value='refunded'>Refunded</TabsContent> */}
 						</Tabs>
 					</div>
 				</div>
