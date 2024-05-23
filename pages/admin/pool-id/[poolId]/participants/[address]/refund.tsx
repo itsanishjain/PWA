@@ -18,10 +18,6 @@ import {
 	fetchUserDisplayForAddress,
 	handleDeleteParticipant,
 	handleRefundParticipant,
-	handleSavePayout,
-	handleSetWinner,
-	updateUserDisplayData,
-	uploadProfileImage,
 } from '@/lib/api/clientAPI'
 import { removeTokenCookie, useCookie } from '@/hooks/cookie'
 import { JwtPayload, decode } from 'jsonwebtoken'
@@ -98,6 +94,7 @@ const RefundUser = () => {
 				title: 'Transaction Successful',
 				description: 'Refunded User',
 			})
+			setInputValue('0')
 			// deleteParticipantMutation.mutate({
 			// 	params: [
 			// 		poolId?.toString() ?? '0',

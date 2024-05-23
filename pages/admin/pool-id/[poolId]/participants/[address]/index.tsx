@@ -89,7 +89,12 @@ const UserProfile = () => {
 	const savePayoutMutation = useMutation({
 		mutationFn: handleSavePayout,
 		onSuccess: () => {
-			console.log('endPool Success')
+			console.log('savePayout Success')
+			toast({
+				title: 'Success',
+				description: 'Saved Payout',
+			})
+			setInputValue('0')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
