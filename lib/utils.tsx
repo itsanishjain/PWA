@@ -18,9 +18,9 @@ export const formatTimeDiff = (diffInMs: number) => {
 	return { days, hours, minutes, seconds }
 }
 
-export const formatEventDateTime = (startTime: string): string => {
+export const formatEventDateTime = (startTime: number): string => {
 	const currentTimestamp: Date = new Date()
-	const startDateObject: Date = new Date(startTime)
+	const startDateObject: Date = new Date(startTime * 1000)
 	const timeLeft = startDateObject.getTime() - currentTimestamp.getTime()
 	console.log('currentTimeStamp', currentTimestamp.getTime())
 	console.log('startDateTimeStamp', startDateObject.getTime())

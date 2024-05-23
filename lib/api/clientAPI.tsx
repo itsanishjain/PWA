@@ -810,6 +810,49 @@ export const handleSavePayout = async ({
 	}
 }
 
+export const handleRefundParticipant = async ({
+	params,
+}: {
+	params: [string, string, string, ConnectedWallet[]]
+}) => {
+	const [poolId, winnerAddress, amount, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	let setWinnerDataString = poolIFace.encodeFunctionData('refundParticipant', [
+		poolId,
+		winnerAddress,
+		ethers.parseEther(amount),
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: setWinnerDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
+
 export const fetchWinnersDetailsFromSC = async ({
 	queryKey,
 }: {
@@ -943,6 +986,32 @@ export const handleDeleteSavedPayouts = async ({
 	let dataObj = { poolId, winnerAddresses, amounts, jwtString: jwt }
 	try {
 		const response = await fetch('/api/delete_payout', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(dataObj),
+		})
+		if (!response.ok) {
+			throw new Error('Network response was not ok')
+		}
+		const data = await response.json()
+		return data
+	} catch (error) {
+		console.error('There was a problem with the post operation:', error)
+	}
+}
+
+export const handleDeleteParticipant = async ({
+	params,
+}: {
+	params: [string, string, string]
+}) => {
+	const [poolId, address, jwt] = params
+
+	let dataObj = { poolId, address, jwtString: jwt }
+	try {
+		const response = await fetch('/api/delete_participant', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

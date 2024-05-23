@@ -5,6 +5,8 @@ import { usePrivy, useWallets } from '@privy-io/react-auth'
 
 import React, { useState, useEffect } from 'react'
 import { Inter } from 'next/font/google'
+import Link from 'next/link'
+import leftArrowImage from '@/public/images/left_arrow.svg'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,6 +20,11 @@ const Privacy = () => {
 	return (
 		<Page>
 			<Section>
+				<div className='flex flex-row'>
+					<Link href={'/login'}>
+						<img src={leftArrowImage.src} alt='Back' />
+					</Link>
+				</div>
 				<div className='flex flex-col justify-center w-full py-20 leading-loose space-y-4'>
 					<h1 className='font-bold text-4xl'>Privacy Policy</h1>
 					<p>Last updated: May 23, 2024</p>
