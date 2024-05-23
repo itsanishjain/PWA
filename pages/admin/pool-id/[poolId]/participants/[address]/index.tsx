@@ -10,7 +10,7 @@ import {
 
 import React, { useState, useEffect, ChangeEvent, useMemo, useRef } from 'react'
 
-import Appbar from '@/components/appbar'
+import Appbar, { RightMenu } from '@/components/appbar'
 
 import { Inter } from 'next/font/google'
 
@@ -158,7 +158,11 @@ const UserProfile = () => {
 
 	return (
 		<Page>
-			<Appbar backRoute={parentRoute} pageTitle='User Profile' />
+			<Appbar
+				backRoute={parentRoute}
+				pageTitle='User Profile'
+				rightMenu={RightMenu.RefundMenu}
+			/>
 			<Section>
 				<div
 					className={`flex justify-center w-full mt-20 min-h-screen ${inter.className}`}
