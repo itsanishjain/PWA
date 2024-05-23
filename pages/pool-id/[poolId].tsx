@@ -39,6 +39,7 @@ import qrCodeIcon from '@/public/images/qr_code_icon.svg'
 import shareIcon from '@/public/images/share_icon.svg'
 import editIcon from '@/public/images/edit_icon.svg'
 import tripleDotsIcon from '@/public/images/tripleDots.svg'
+import userUnregisterIcon from '@/public/images/user_delete.svg'
 
 import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
@@ -59,6 +60,7 @@ import CountdownTimer from '@/components/countdown'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
+	fetchParticipantsDataFromServer,
 	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
@@ -84,6 +86,17 @@ import PoolStatus from '@/components/poolStatus'
 import { Progress } from '@/components/ui/progress'
 import MyProgressBar from '@/components/myProgressBar'
 import ShareDialog from '@/components/shareDialog'
+
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import AvatarImage from '@/components/avatarImage'
+import Link from 'next/link'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -190,6 +203,13 @@ const PoolPage = () => {
 		(acc: number, curr: any) => acc + curr[0],
 		BigInt(0),
 	)
+
+	const { data: adminData } = useQuery({
+		queryKey: ['loadProfileImage', poolSCAdmin?.[0]?.toString() ?? ' '],
+		queryFn: fetchUserDisplayForAddress,
+		enabled: !_.isEmpty(poolSCAdmin?.[0]?.toString()),
+	})
+
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
@@ -209,7 +229,7 @@ const PoolPage = () => {
 		console.log('poolSCWinners', poolSCWinners)
 		console.log('winnerAddresses', winnerAddresses)
 		console.log('userWonDetails', userWonDetails)
-
+		console.log('cohostDbData', cohostDbData)
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo, poolWinnersDetails])
 
@@ -393,9 +413,30 @@ const PoolPage = () => {
 										{poolSCName}
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
-									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
-										Hosted by {cohostNames}
-									</p>
+									<div className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
+										Hosted by
+										<ul className='flex flex-col space-y-2 mt-4'>
+											<li className='flex flex-row space-x-4 items-center font-medium'>
+												<div className='w-12 h-12'>
+													<AvatarImage address={poolSCAdmin?.[0]?.toString()} />
+												</div>
+												<span>{adminData?.userDisplayData?.display_name}</span>
+											</li>
+											{cohostDbData?.map((data: any) => {
+												return (
+													<li
+														className='flex flex-row space-x-4 items-center font-medium'
+														key={data?.address}
+													>
+														<div className='w-12 h-12'>
+															<AvatarImage address={data?.address} />
+														</div>
+														<span>{data?.display_name}</span>
+													</li>
+												)
+											})}
+										</ul>
+									</div>
 								</div>
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
 									<div className='flex flex-rol justify-between'>
@@ -407,24 +448,80 @@ const PoolPage = () => {
 									</div>
 									<Progress value={participantPercent} />
 								</div>
-								<div className='flex text-sm md:text-3xl justify-between'>
+								<div className='flex text-sm md:text-3xl flex-col space-y-4'>
 									<p className='flex flex-row space-x-2'>
-										<span className='font-bold'>
-											{poolSCParticipants?.length}
-										</span>
 										<span>Participants</span>
 									</p>
-									<button
-										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
-										onClick={viewParticipantsClicked}
+
+									<Link
+										href={`${router?.asPath}/participants`}
+										className='flex flex-row justify-between'
 									>
-										<span>View all</span>
-										<span>
-											<img src={`${rightArrow.src}`}></img>
-										</span>
-									</button>
+										<div>
+											{poolSCParticipants?.length ?? 0 <= 5 ? (
+												<div className='flex flex-row relative w-full h-12 md:h-14'>
+													{poolSCParticipants?.map(
+														(address: any, index: number) => {
+															return (
+																<div
+																	className={`rounded-full w-12 h-12 bg-white p-0.5 absolute  md:h-14 md:w-14`}
+																	style={{
+																		zIndex: index + 1,
+																		left: index * 36,
+																	}}
+																	key={address}
+																>
+																	<AvatarImage address={address} />
+																</div>
+															)
+														},
+													)}
+												</div>
+											) : (
+												<div className='flex flex-row relative w-full h-12'>
+													{poolSCParticipants?.map(
+														(address: string, index: number) => {
+															if (index >= 4) {
+																return <></>
+															}
+															return (
+																<div
+																	className={`rounded-full w-12 h-12 bg-white p-0.5 absolute md:w-14 md:h-14 `}
+																	style={{
+																		zIndex: index + 1,
+																		left: index * 36,
+																	}}
+																	key={address}
+																>
+																	<AvatarImage address={address} />
+																</div>
+															)
+														},
+													)}
+													<div
+														className={`rounded-full w-12 h-12 bg-white p-0.5 absolute   md:w-14 md:h-14`}
+														style={{ zIndex: 5, left: 4 * 36 }}
+													>
+														<div className='text-white numParticipantBackground'>{`+ ${
+															poolSCParticipants?.length - 4
+														}`}</div>
+													</div>
+												</div>
+											)}
+										</div>
+										<div className='flex flex-row items-center'>
+											{/* <button
+												className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
+												onClick={viewParticipantsClicked}
+											> */}
+											{/* <span>View all</span> */}
+											<span>
+												<img src={`${rightArrow.src}`}></img>
+											</span>
+											{/* </button> */}
+										</div>
+									</Link>
 								</div>
-								<Progress value={participantPercent} />
 							</div>
 						</div>
 						{userWonDetails?.length > 0 && (
@@ -470,26 +567,41 @@ const PoolPage = () => {
 							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
 						</div>
 						{isRegisteredOnSC ? (
-							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6 z-50'>
 								<button
 									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
 									onClick={viewTicketClicked}
 								>
 									View My Ticket
 								</button>
-								<button
-									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={onUnregisterButtonClicked}
-								>
-									<img
-										className='flex w-full h-full'
-										src={tripleDotsIcon.src}
-									></img>
-								</button>
+
+								<DropdownMenu>
+									<DropdownMenuTrigger>
+										<div className='w-12 h-12 p-3 bg-black rounded-full'>
+											<img
+												className='flex w-full h-full'
+												src={tripleDotsIcon.src}
+											></img>
+										</div>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent sideOffset={16}>
+										<DropdownMenuItem onClick={onUnregisterButtonClicked}>
+											<div className='flex flex-row space-x-2'>
+												<span>
+													<img
+														className='flex w-full h-full'
+														src={userUnregisterIcon.src}
+													></img>
+												</span>
+												<span>Unregister from Pool</span>
+											</div>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 						) : (
 							poolSCStatus == 1 && (
-								<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+								<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6 z-50'>
 									<button
 										className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
 										onClick={onRegisterButtonClicked}

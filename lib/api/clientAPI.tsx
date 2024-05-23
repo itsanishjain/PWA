@@ -101,7 +101,7 @@ export const uploadProfileImage = async (
 		},
 	)
 
-	const jwtObj = decode(jwt)
+	const jwtObj = decode(jwt, { json: true })
 	console.log('jwtObj', jwtObj)
 	console.log('file name', fileBlob.name)
 	console.log('selectedFile', selectedFile)
@@ -109,7 +109,7 @@ export const uploadProfileImage = async (
 	const { data, error } = await supabaseClient.storage
 		.from('profile')
 		.upload(
-			`/public/${jwtObj!.sub}/${Date.now()}-${selectedFile.name}`,
+			`/public/${jwtObj?.sub}/${Date.now()}-${selectedFile?.name}`,
 			fileBlob,
 		)
 
@@ -124,7 +124,7 @@ export const uploadProfileImage = async (
 	const { data: userData, error: userError } = await supabaseClient
 		.from('usersDisplay')
 		.upsert(
-			{ avatar_url: data.path, id: jwtObj!.sub },
+			{ avatar_url: data.path, id: jwtObj?.sub, address: jwtObj?.address },
 			{
 				onConflict: 'id',
 			},
@@ -157,9 +157,11 @@ export const updateUserDisplayData = async (
 		},
 	)
 
-	const jwtObj = decode(jwt)
+	const jwtObj = decode(jwt, { json: true })
+
 	console.log('jwtObj', jwtObj)
 
+	console.log('upload user address', address)
 	// Update user profile with image URL
 
 	const { data: userData, error: userError } = await supabaseClient
@@ -170,7 +172,7 @@ export const updateUserDisplayData = async (
 				company: company,
 				bio: bio,
 				id: jwtObj!.sub,
-				address: address?.toLowerCase(),
+				address: jwtObj!.address?.toLowerCase(),
 			},
 			{
 				onConflict: 'id',
@@ -299,7 +301,6 @@ export const fetchUserDisplayForAddress = async ({
 	const [_, address] = queryKey
 
 	const lowerAddress = address.toLowerCase()
-	console.log('123456')
 
 	console.log('lowerAddress', lowerAddress)
 

@@ -73,6 +73,10 @@ body {
 	background-color: rgba(105, 147, 255, 0.25);
 }
 
+.numParticipantBackground {
+	background-color: #5e6b80;
+}
+
 .fontRegistered {
 	color: #b2b2b2;
 }
