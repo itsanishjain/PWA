@@ -157,6 +157,10 @@ const ManageParticipantsPage = () => {
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? '0'],
 			})
+			toast({
+				title: 'Transaction Success',
+				description: 'Set Winners Successfully',
+			})
 		},
 		onError: (e) => {
 			console.log('setWinnersMutation Error', e.message)

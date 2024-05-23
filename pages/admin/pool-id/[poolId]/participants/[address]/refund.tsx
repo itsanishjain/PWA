@@ -16,10 +16,8 @@ import { Inter } from 'next/font/google'
 
 import {
 	fetchUserDisplayForAddress,
-	handleSavePayout,
-	handleSetWinner,
-	updateUserDisplayData,
-	uploadProfileImage,
+	handleDeleteParticipant,
+	handleRefundParticipant,
 } from '@/lib/api/clientAPI'
 import { removeTokenCookie, useCookie } from '@/hooks/cookie'
 import { JwtPayload, decode } from 'jsonwebtoken'
@@ -33,7 +31,7 @@ import { ethers } from 'ethers'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const UserProfile = () => {
+const RefundUser = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
@@ -73,65 +71,55 @@ const UserProfile = () => {
 
 	const queryClient = useQueryClient()
 
-	const setWinnerMutation = useMutation({
-		mutationFn: handleSetWinner,
-		onSuccess: () => {
-			console.log('setWinner Success')
-			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
-			})
-		},
-		onError: () => {
-			console.log('setWinner Error')
-		},
-	})
+	// Remove deleteParticipantMutation because might not want to delete participant
+	// const deleteParticipantMutation = useMutation({
+	// 	mutationFn: handleDeleteParticipant,
+	// 	onSuccess: () => {
+	// 		console.log('Delete Participant')
+	// 		toast({
+	// 			title: 'Transaction Successful',
+	// 			description: 'Deleted Participant',
+	// 		})
+	// 	},
+	// 	onError: () => {
+	// 		console.log('setWinner Error')
+	// 	},
+	// })
 
-	const savePayoutMutation = useMutation({
-		mutationFn: handleSavePayout,
+	const refundParticipantMutation = useMutation({
+		mutationFn: handleRefundParticipant,
 		onSuccess: () => {
-			console.log('savePayout Success')
+			console.log('refundParticipant Success')
 			toast({
-				title: 'Success',
-				description: 'Saved Payout',
+				title: 'Transaction Successful',
+				description: 'Refunded User',
 			})
 			setInputValue('0')
-			queryClient.invalidateQueries({
-				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
-			})
+			// deleteParticipantMutation.mutate({
+			// 	params: [
+			// 		poolId?.toString() ?? '0',
+			// 		participantAddress.toString(), // Fix: Convert participantAddress to string
+			// 		currentJwt ?? '',
+			// 	],
+			// })
 		},
 		onError: () => {
-			console.log('setWinner Error')
+			console.log('refundParticipant Error')
 		},
 	})
 
-	const onPayoutButtonClicked = (e: any) => {
+	const onRefundUserButtonClicked = (e: any) => {
 		toast({
 			title: 'Requesting Transaction',
-			description: 'Set Winner',
+			description: 'Refund User',
 		})
 
-		setWinnerMutation.mutate({
+		refundParticipantMutation.mutate({
 			params: [
 				poolId.toString(),
 				participantAddress.toString(),
 				inputValue,
 				wallets,
-			],
-		})
-	}
-
-	const onSavePayoutButtonClicked = (e: any) => {
-		toast({
-			title: 'Saving Payout',
-			description: 'Saving payout',
-		})
-
-		savePayoutMutation.mutate({
-			params: [
-				poolId.toString(),
-				ethers.parseEther(inputValue).toString(),
-				participantAddress.toString(),
-				currentJwt!,
 			],
 		})
 	}
@@ -163,16 +151,12 @@ const UserProfile = () => {
 
 	return (
 		<Page>
-			<Appbar
-				backRoute={parentRoute}
-				pageTitle='User Profile'
-				rightMenu={RightMenu.RefundMenu}
-			/>
+			<Appbar backRoute={parentRoute} pageTitle='Refund Player' />
 			<Section>
 				<div
 					className={`flex justify-center w-full mt-20 min-h-screen ${inter.className}`}
 				>
-					<div className='flex flex-col w-96 pb-8'>
+					<div className='flex flex-col pb-8'>
 						<div className='flex w-full justify-center'>
 							<img
 								className='rounded-full w-24 aspect-square center object-cover z-0'
@@ -192,7 +176,7 @@ const UserProfile = () => {
 							<div className='flex relative justify-center '>
 								<Input
 									className='border-none text-center text-6xl font-bold h-16 w-auto'
-									placeholder=''
+									placeholder='$0'
 									autoFocus={true}
 									value={inputValue}
 									type='number'
@@ -200,23 +184,18 @@ const UserProfile = () => {
 									ref={inputRef}
 									inputMode='numeric'
 								/>
-								{/* <span className='absolute left-0 flex-row text-sm h-16 justify-center py-2'>
-									$
-								</span> */}
 							</div>
 						</div>
-						<div className='flex flex-col w-full items-center justify-center mt-8 space-y-2'>
+						<div className='flex flex-row w-full justify-between mt-auto mb-48'>
+							<div className='font-semibold md:text-2xl'>Refund</div>
+							<div className='font-semibold md:text-2xl'>${inputValue}USD</div>
+						</div>
+						<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
 							<button
-								className='rounded-full bg-black text-white h-10 w-48 font-medium'
-								onClick={onSavePayoutButtonClicked}
+								className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+								onClick={onRefundUserButtonClicked}
 							>
-								Save
-							</button>
-							<button
-								className='rounded-full bg-black text-white h-10 w-48 font-medium'
-								onClick={onPayoutButtonClicked}
-							>
-								Payout
+								Refund
 							</button>
 						</div>
 					</div>
@@ -226,4 +205,4 @@ const UserProfile = () => {
 	)
 }
 
-export default UserProfile
+export default RefundUser

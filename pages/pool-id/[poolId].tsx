@@ -158,6 +158,7 @@ const PoolPage = () => {
 
 	const poolSCAdmin = poolSCInfo?.[0]
 	const poolSCDetail = poolSCInfo?.[1]
+
 	let poolSCBalance = poolSCInfo
 		? (BigInt(poolSCInfo?.[2][0]) / BigInt(1000000000000000000)).toString()
 		: 0
@@ -230,10 +231,14 @@ const PoolPage = () => {
 		console.log('winnerAddresses', winnerAddresses)
 		console.log('userWonDetails', userWonDetails)
 		console.log('cohostDbData', cohostDbData)
+		console.log('poolSCIfo', poolSCInfo)
+		console.log('poolSCTimeStart', poolSCTimeStart)
+
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo, poolWinnersDetails])
 
-	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
+	const poolSCTimeStart = poolSCDetail?.[0]?.toString()
+	const eventDate = formatEventDateTime(poolSCTimeStart) ?? '0'
 
 	const registerServerMutation = useMutation({
 		mutationFn: handleRegisterServer,
@@ -409,7 +414,6 @@ const PoolPage = () => {
 							<div className='flex flex-col space-y-6 md:space-y-12 '>
 								<div className='flex flex-col space-y-2 md:space-y-4 overflow-hidden'>
 									<h2 className='font-semibold text-lg md:text-4xl'>
-										{/* {poolDbData?.pool_name} */}
 										{poolSCName}
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>

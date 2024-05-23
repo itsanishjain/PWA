@@ -175,7 +175,8 @@ const AdminPoolPage = () => {
 		calculateTimeLeft(poolDBInfo?.poolDBInfo?.event_timestamp)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo])
 
-	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
+	const poolSCTimeStart = poolSCDetail?.[0]?.toString()
+	const eventDate = formatEventDateTime(poolSCTimeStart) ?? ''
 
 	// const percentFunded = poolDbData?.price
 	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
