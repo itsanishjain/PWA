@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, ChangeEvent } from 'react'
 import { useRouter } from 'next/router'
 import Image from 'next/image'
 
@@ -29,12 +29,17 @@ import ParticipantRow from '@/components/participantRow'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import WinnerRow from '@/components/winnerRow'
-import { dictionaryToArray, dictionaryToNestedArray } from '@/lib/utils'
+import {
+	dictionaryToArray,
+	dictionaryToNestedArray,
+	getAllIndicesMatching,
+} from '@/lib/utils'
 import { ethers } from 'ethers'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import Divider from '@/components/divider'
 import { Progress } from '@/components/ui/progress'
+import * as _ from 'lodash'
 
 const ManageParticipantsPage = () => {
 	const router = useRouter()
@@ -47,13 +52,27 @@ const ManageParticipantsPage = () => {
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
 
 	const [winnerAddresses, setWinnerAddresses] = useState<string[]>([])
+	const [filteredWinnerAddresses, setFilteredWinnerAddresses] =
+		useState<string[]>(winnerAddresses)
+
 	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
+	const [winnersInfo, setWinnersInfo] = useState<any>()
 
 	const [pageUrl, setPageUrl] = useState('')
 
 	const { currentJwt } = useCookie()
 
 	const poolId = router?.query?.poolId
+
+	const [query, setQuery] = useState('')
+
+	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+		console.log('Query', e.target.value)
+		setQuery(e.target.value)
+		filterParticipantsInfo(e.target.value)
+		filterCheckedInParticipantsInfo(e.target.value)
+	}
+
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
@@ -170,6 +189,42 @@ const ManageParticipantsPage = () => {
 			],
 		})
 	}
+
+	const [filteredParticipantsInfo, setFilteredParticipantsInfo] =
+		useState(participantsInfo)
+	const [
+		filteredCheckedInParticipantsInfo,
+		setFilteredCheckedInParticipantsInfo,
+	] = useState(checkedInParticipantsInfo)
+	const filterParticipantsInfo = (searchQuery: string) => {
+		const filteredData = participantsInfo?.filter(
+			(item) =>
+				item.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				item.display_name?.toLowerCase().includes(searchQuery.toLowerCase()),
+		)
+		setFilteredParticipantsInfo(filteredData)
+	}
+	const filterCheckedInParticipantsInfo = (searchQuery: string) => {
+		const filteredData = checkedInParticipantsInfo?.filter(
+			(item) =>
+				item.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				item.display_name?.toLowerCase().includes(searchQuery.toLowerCase()),
+		)
+		setFilteredCheckedInParticipantsInfo(filteredData)
+	}
+	const [filteredWinnersInfo, setFilteredWinnersInfo] = useState(winnersInfo)
+	const filterWinnersInfo = (searchQuery: string) => {
+		const filteredData = winnersInfo?.filter(
+			(item: any) =>
+				item.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				participantsInfoDict?.[item.address]
+					?.toLowerCase()
+					.display_name.toLowerCase()
+					.includes(searchQuery.toLowerCase()),
+		)
+		setFilteredWinnersInfo(filteredData)
+	}
+
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
@@ -186,6 +241,15 @@ const ManageParticipantsPage = () => {
 		console.log('poolSCInfo', poolSCInfo)
 		setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
 		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
+		// for loop to get the winner details
+		let tempWinnersInfo = []
+		for (let i = 0; i < winnerAddresses.length; i++) {
+			tempWinnersInfo.push({
+				address: winnerAddresses?.[i],
+				details: winnerDetails?.[i],
+			})
+		}
+		setWinnersInfo(tempWinnersInfo)
 		console.log('winnersDetailsAddresses', winnerAddresses)
 		console.log('winnersDetails', winnerDetails)
 
@@ -195,6 +259,8 @@ const ManageParticipantsPage = () => {
 			savedPayoutsParticipantsAddresses,
 		)
 		setPageUrl(window?.location.href)
+		setFilteredParticipantsInfo(participantsInfo)
+		setFilteredCheckedInParticipantsInfo(checkedInParticipantsInfo)
 	}, [
 		ready,
 		authenticated,
@@ -247,6 +313,9 @@ const ManageParticipantsPage = () => {
 							</Link>
 
 							<Input
+								type='text'
+								value={query}
+								onChange={handleChange}
 								placeholder='Search'
 								className='rounded-full mb-2 px-10 h-10'
 							/>
@@ -259,7 +328,7 @@ const ManageParticipantsPage = () => {
 								<TabsTrigger value='refunded'>Refunded</TabsTrigger>
 							</TabsList>
 							<TabsContent value='registered'>
-								{participantsInfo?.map((participant) => (
+								{filteredParticipantsInfo?.map((participant) => (
 									<ParticipantRow
 										key={participant?.id}
 										name={participant?.display_name}
@@ -273,7 +342,7 @@ const ManageParticipantsPage = () => {
 								))}
 							</TabsContent>
 							<TabsContent value='checkedIn'>
-								{checkedInParticipantsInfo?.map((participant) => (
+								{filteredCheckedInParticipantsInfo?.map((participant) => (
 									<ParticipantRow
 										key={participant?.id}
 										name={participant?.display_name}
