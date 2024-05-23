@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { useLogout, usePrivy, useWallets } from '@privy-io/react-auth'
 import { chain } from '@/constants/constant'
 import React, { useState, useEffect } from 'react'
-import { fetchNonce, fetchToken, writeTest } from '@/lib/api/clientAPI'
+import { fetchNonce, fetchToken } from '@/lib/api/clientAPI'
 
 import { getTokenCookie, setTokenCookie } from '@/hooks/cookie'
 
@@ -45,15 +45,6 @@ const LoginPage = () => {
 		console.log('tokenResult', tokenResult)
 		setTokenCookie(tokenResult.token)
 		console.log('cookie', getTokenCookie())
-		testWrite()
-	}
-
-	const testWrite = async () => {
-		console.log('handleTestWrite')
-		let result = await writeTest({
-			address: user?.wallet?.address!,
-			jwt: getTokenCookie(),
-		})
 	}
 
 	const showBackend = ready && authenticated
@@ -68,7 +59,6 @@ const LoginPage = () => {
 			// As an example, you might redirect them to a sign-in page
 		}
 
-		console.log('wallets', wallets)
 		if (ready && authenticated && wallets?.length > 0) {
 			// Replace this code with however you'd like to handle an authenticated user
 			router.push('/authenticate')

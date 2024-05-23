@@ -39,23 +39,33 @@ import qrCodeIcon from '@/public/images/qr_code_icon.svg'
 import shareIcon from '@/public/images/share_icon.svg'
 import editIcon from '@/public/images/edit_icon.svg'
 import tripleDotsIcon from '@/public/images/tripleDots.svg'
+import userUnregisterIcon from '@/public/images/user_delete.svg'
 
 import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
 import { Tables, Database } from '@/types/supabase'
 import {
+	dictionaryToArray,
+	dictionaryToNestedArray,
 	formatCountdownTime,
 	formatEventDateTime,
 	formatTimeDiff,
+	getAllIndicesMatching,
+	getRowIndicesByColumnValue,
+	getRowsByColumnValue,
+	getValuesFromIndices,
 } from '@/lib/utils'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
+	fetchParticipantsDataFromServer,
 	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
+	fetchWinnersDetailsFromSC,
+	handleClaimWinning,
 	handleRegister,
 	handleRegisterServer,
 	handleUnregister,
@@ -67,6 +77,8 @@ import { Button } from '@/components/ui/button'
 
 import LoadingAnimation from '@/components/loadingAnimation'
 import TransactionDialog from '@/components/transactionDialog'
+import circleTick from '@/public/images/circle-tick.svg'
+
 import { useToast } from '@/components/ui/use-toast'
 
 import * as _ from 'lodash'
@@ -74,6 +86,17 @@ import PoolStatus from '@/components/poolStatus'
 import { Progress } from '@/components/ui/progress'
 import MyProgressBar from '@/components/myProgressBar'
 import ShareDialog from '@/components/shareDialog'
+
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import AvatarImage from '@/components/avatarImage'
+import Link from 'next/link'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -88,6 +111,9 @@ const PoolPage = () => {
 
 	const [poolBalance, setPoolBalance] = useState<number>(0)
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
+
+	const [winnerAddresses, setWinnerAddresses] = useState<string[]>([])
+	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
 
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
 	const [poolImageUrl, setPoolImageUrl] = useState<String | null | undefined>()
@@ -144,6 +170,10 @@ const PoolPage = () => {
 	const poolSCToken = poolSCInfo?.[4]
 	let poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
+
+	const isWinner =
+		winnerAddresses?.indexOf(wallets[0]?.address?.toLowerCase()) != -1
+
 	const isRegisteredOnSC =
 		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
 
@@ -151,6 +181,33 @@ const PoolPage = () => {
 		queryKey: ['fetchTokenSymbol', poolSCToken],
 		queryFn: fetchTokenSymbol,
 		enabled: !_.isEmpty(poolSCToken),
+	})
+
+	const { data: poolWinnersDetails } = useQuery({
+		queryKey: ['fetchWinnersDetailsFromSC', poolId?.toString() ?? ' '],
+		queryFn: fetchWinnersDetailsFromSC,
+		enabled: !!poolId,
+	})
+
+	const matchingAddressIndices = getAllIndicesMatching(
+		poolWinnersDetails?.[0],
+		wallets[0]?.address,
+	)
+	const userWonDetails = getValuesFromIndices(
+		poolWinnersDetails?.[1],
+		matchingAddressIndices,
+	)
+
+	const claimableDetails = getRowsByColumnValue(userWonDetails, 3, false)
+	const totalWinningAmount = userWonDetails?.reduce(
+		(acc: number, curr: any) => acc + curr[0],
+		BigInt(0),
+	)
+
+	const { data: adminData } = useQuery({
+		queryKey: ['loadProfileImage', poolSCAdmin?.[0]?.toString() ?? ' '],
+		queryFn: fetchUserDisplayForAddress,
+		enabled: !_.isEmpty(poolSCAdmin?.[0]?.toString()),
 	})
 
 	useEffect(() => {
@@ -164,10 +221,17 @@ const PoolPage = () => {
 		setPoolDbData(poolDBInfo?.poolDBInfo)
 		setCohostDbData(poolDBInfo?.cohostUserDisplayData ?? [])
 		setPoolImageUrl(poolDBInfo?.poolImageUrl)
+		// setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
+		setWinnerAddresses(poolWinnersDetails?.[0])
 
+		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
 		console.log('poolDBInfo', poolDBInfo)
+		console.log('poolSCWinners', poolSCWinners)
+		console.log('winnerAddresses', winnerAddresses)
+		console.log('userWonDetails', userWonDetails)
+		console.log('cohostDbData', cohostDbData)
 		setPageUrl(window?.location.href)
-	}, [ready, authenticated, poolSCInfo, poolDBInfo])
+	}, [ready, authenticated, poolSCInfo, poolDBInfo, poolWinnersDetails])
 
 	const eventDate = formatEventDateTime(poolDbData?.event_timestamp!) ?? ''
 
@@ -196,7 +260,7 @@ const PoolPage = () => {
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 			registerServerMutation.mutate({
-				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
+				params: [poolId.toString(), wallets[0]?.address, currentJwt ?? ' '],
 			})
 		},
 		onError: () => {
@@ -229,8 +293,25 @@ const PoolPage = () => {
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 			unregisterServerMutation.mutate({
-				params: [poolId.toString(), wallets[0].address, currentJwt ?? ' '],
+				params: [poolId.toString(), wallets[0]?.address, currentJwt ?? ' '],
 			})
+		},
+	})
+
+	const claimMutation = useMutation({
+		mutationFn: handleClaimWinning,
+		onSuccess: () => {
+			toast({
+				title: 'Transaction Suceess',
+				description: 'You have claimed your winnings.',
+			})
+			console.log('registerMutation Success')
+			queryClient.invalidateQueries({
+				queryKey: ['fetchWinnersDetailsFromSC', poolId?.toString() ?? ' '],
+			})
+		},
+		onError: () => {
+			console.log('claimMutation Error')
 		},
 	})
 	// const percentFunded = poolDbData?.price
@@ -281,6 +362,19 @@ const PoolPage = () => {
 		})
 	}
 
+	const onClaimButtonClicked = (e: any) => {
+		console.log('onClaimButtonClicked')
+		const connectorType = wallets[0].connectorType
+		console.log('connectorType', connectorType)
+		toast({
+			title: 'Requesting Transaction/s',
+			description: 'Approve claiming prize',
+		})
+		claimMutation.mutate({
+			params: [poolId.toString(), wallets],
+		})
+	}
+
 	const cohostNames: string = cohostDbData
 		.map((data: any) => data.display_name)
 		.join(',')
@@ -300,7 +394,11 @@ const PoolPage = () => {
 						>
 							<div className='relative rounded-3xl overflow-hidden'>
 								<img
-									src={`${poolImageUrl ?? defaultPoolImage.src}`}
+									src={`${
+										_.isEmpty(poolImageUrl)
+											? defaultPoolImage.src
+											: poolImageUrl
+									}`}
 									className='bg-black w-full h-full object-contain object-center'
 								></img>
 								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
@@ -315,9 +413,30 @@ const PoolPage = () => {
 										{poolSCName}
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
-									<p className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
-										Hosted by {cohostNames}
-									</p>
+									<div className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
+										Hosted by
+										<ul className='flex flex-col space-y-2 mt-4'>
+											<li className='flex flex-row space-x-4 items-center font-medium'>
+												<div className='w-12 h-12'>
+													<AvatarImage address={poolSCAdmin?.[0]?.toString()} />
+												</div>
+												<span>{adminData?.userDisplayData?.display_name}</span>
+											</li>
+											{cohostDbData?.map((data: any) => {
+												return (
+													<li
+														className='flex flex-row space-x-4 items-center font-medium'
+														key={data?.address}
+													>
+														<div className='w-12 h-12'>
+															<AvatarImage address={data?.address} />
+														</div>
+														<span>{data?.display_name}</span>
+													</li>
+												)
+											})}
+										</ul>
+									</div>
 								</div>
 								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
 									<div className='flex flex-rol justify-between'>
@@ -329,26 +448,108 @@ const PoolPage = () => {
 									</div>
 									<Progress value={participantPercent} />
 								</div>
-								<div className='flex text-sm md:text-3xl justify-between'>
+								<div className='flex text-sm md:text-3xl flex-col space-y-4'>
 									<p className='flex flex-row space-x-2'>
-										<span className='font-bold'>
-											{poolSCParticipants?.length}
-										</span>
 										<span>Participants</span>
 									</p>
-									<button
-										className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
-										onClick={viewParticipantsClicked}
+
+									<Link
+										href={`${router?.asPath}/participants`}
+										className='flex flex-row justify-between'
 									>
-										<span>View all</span>
-										<span>
-											<img src={`${rightArrow.src}`}></img>
-										</span>
-									</button>
+										<div>
+											{poolSCParticipants?.length ?? 0 <= 5 ? (
+												<div className='flex flex-row relative w-full h-12 md:h-14'>
+													{poolSCParticipants?.map(
+														(address: any, index: number) => {
+															return (
+																<div
+																	className={`rounded-full w-12 h-12 bg-white p-0.5 absolute  md:h-14 md:w-14`}
+																	style={{
+																		zIndex: index + 1,
+																		left: index * 36,
+																	}}
+																	key={address}
+																>
+																	<AvatarImage address={address} />
+																</div>
+															)
+														},
+													)}
+												</div>
+											) : (
+												<div className='flex flex-row relative w-full h-12'>
+													{poolSCParticipants?.map(
+														(address: string, index: number) => {
+															if (index >= 4) {
+																return <></>
+															}
+															return (
+																<div
+																	className={`rounded-full w-12 h-12 bg-white p-0.5 absolute md:w-14 md:h-14 `}
+																	style={{
+																		zIndex: index + 1,
+																		left: index * 36,
+																	}}
+																	key={address}
+																>
+																	<AvatarImage address={address} />
+																</div>
+															)
+														},
+													)}
+													<div
+														className={`rounded-full w-12 h-12 bg-white p-0.5 absolute   md:w-14 md:h-14`}
+														style={{ zIndex: 5, left: 4 * 36 }}
+													>
+														<div className='text-white numParticipantBackground'>{`+ ${
+															poolSCParticipants?.length - 4
+														}`}</div>
+													</div>
+												</div>
+											)}
+										</div>
+										<div className='flex flex-row items-center'>
+											{/* <button
+												className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
+												onClick={viewParticipantsClicked}
+											> */}
+											{/* <span>View all</span> */}
+											<span>
+												<img src={`${rightArrow.src}`}></img>
+											</span>
+											{/* </button> */}
+										</div>
+									</Link>
 								</div>
-								<Progress value={participantPercent} />
 							</div>
 						</div>
+						{userWonDetails?.length > 0 && (
+							<div
+								className={`flex flex-col rounded-3xl mt-2 md:mt-4 cardBackground w-full px-4 md:px-10 py-4 md:py-8 space-y-4`}
+							>
+								<div className='flex flex-row items-center justify-between'>
+									<div className=' flex flex-row space-x-2'>
+										<span className='flex items-center'>
+											<img className='w-5 h-5' src={circleTick.src} />
+										</span>
+										<span className='font-semibold'>Winner</span>
+									</div>
+									<div>
+										${ethers.formatEther(totalWinningAmount?.toString())}
+									</div>
+								</div>
+
+								{claimableDetails?.length > 0 && (
+									<button
+										className='text-white rounded-full barForeground py-3 font-medium'
+										onClick={onClaimButtonClicked}
+									>
+										Claim
+									</button>
+								)}
+							</div>
+						)}
 
 						<div
 							className={`flex flex-col rounded-3xl mt-2 md:mt-4 cardBackground w-full px-4 md:px-10 py-4 md:py-8 `}
@@ -366,32 +567,49 @@ const PoolPage = () => {
 							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
 						</div>
 						{isRegisteredOnSC ? (
-							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6 z-50'>
 								<button
 									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={viewTicketClicked} //TODO: Change function
+									onClick={viewTicketClicked}
 								>
 									View My Ticket
 								</button>
-								<button
-									className={`bg-black flex w-12 h-12 items-center text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={onUnregisterButtonClicked}
-								>
-									<img
-										className='flex w-full h-full'
-										src={tripleDotsIcon.src}
-									></img>
-								</button>
+
+								<DropdownMenu>
+									<DropdownMenuTrigger>
+										<div className='w-12 h-12 p-3 bg-black rounded-full'>
+											<img
+												className='flex w-full h-full'
+												src={tripleDotsIcon.src}
+											></img>
+										</div>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent sideOffset={16}>
+										<DropdownMenuItem onClick={onUnregisterButtonClicked}>
+											<div className='flex flex-row space-x-2'>
+												<span>
+													<img
+														className='flex w-full h-full'
+														src={userUnregisterIcon.src}
+													></img>
+												</span>
+												<span>Unregister from Pool</span>
+											</div>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 						) : (
-							<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
-								<button
-									className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
-									onClick={onRegisterButtonClicked}
-								>
-									Register
-								</button>
-							</div>
+							poolSCStatus == 1 && (
+								<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6 z-50'>
+									<button
+										className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+										onClick={onRegisterButtonClicked}
+									>
+										Register
+									</button>
+								</div>
+							)
 						)}
 					</div>
 					{wallets?.[0]?.connectorType != 'embedded' && (

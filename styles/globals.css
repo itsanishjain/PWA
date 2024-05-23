@@ -69,6 +69,14 @@ body {
 	background-color: rgba(105, 147, 255, 0.2);
 }
 
+.paidBackground {
+	background-color: rgba(105, 147, 255, 0.25);
+}
+
+.numParticipantBackground {
+	background-color: #5e6b80;
+}
+
 .fontRegistered {
 	color: #b2b2b2;
 }
@@ -79,6 +87,25 @@ body {
 
 .bottomDivider {
 	border-bottom: 1px solid #e2e8f0;
+}
+
+.fontUnpaid {
+	color: #848484;
+}
+
+.backgroundUnpaid {
+	background-color: rgba(143, 145, 144, 0.2);
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	margin: 0;
+}
+input[type='number'] {
+	-moz-appearance: textfield;
 }
 
 @layer base {

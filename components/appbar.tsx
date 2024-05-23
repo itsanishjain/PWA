@@ -5,30 +5,18 @@ import {
 	usePrivy,
 	useWallets,
 } from '@privy-io/react-auth'
-import {
-	getTokenCookie,
-	setTokenCookie,
-	removeTokenCookie,
-	useCookie,
-} from '@/hooks/cookie'
+import { removeTokenCookie, useCookie } from '@/hooks/cookie'
 
 import leftArrowImage from '@/public/images/left_arrow.svg'
 
 import { Comfortaa } from 'next/font/google'
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
 import frogImage from '@/public/images/frog.png'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { fetchUserDisplayForAddress } from '@/lib/api/clientAPI'
 
 const comfortaa = Comfortaa({ subsets: ['latin'] })
-
-const links = [
-	{ label: 'Login', href: '/login' },
-	{ label: 'Story', href: '/story' },
-	{ label: 'Recipes', href: '/recipes' },
-]
 
 interface AppBarProps {
 	backRoute?: string // Required color property
@@ -38,10 +26,9 @@ interface AppBarProps {
 const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 	const router = useRouter()
 	const { currentJwt } = useCookie()
-	const { wallets } = useWallets()
+	const { wallets, ready: walletsReady } = useWallets()
 
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated, logout } = usePrivy()
 
 	const handleAccountClick = (e: any) => {
 		router.push('/user-profile')
@@ -62,11 +49,23 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 		enabled: wallets.length > 0,
 	})
 
+	useEffect(() => {
+		if (ready && !authenticated) {
+			router.push('/login')
+		}
+
+		if (ready && authenticated && walletsReady && wallets?.length == 0) {
+			handleSignOut()
+		}
+
+		console.log('displayName', profileData)
+	}, [profileData, ready, authenticated, router])
+
 	return (
 		<header className='fixed top-0 left-0 z-20 w-full pt-safe bg-white'>
 			<nav className=' px-safe '>
 				<div className='mx-auto flex h-20 max-w-screen-md items-center justify-between px-6'>
-					<div className='flex-1 flex'>
+					<div className='flex w-16'>
 						{backRoute && (
 							<Link href={backRoute ?? ''}>
 								<img className='h-10 w-10' src={`${leftArrowImage.src}`} />
@@ -75,7 +74,9 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 					</div>
 					<div className='flex flex-1 items-center'>
 						{pageTitle ? (
-							<h1 className={`text-center w-full h-full font-medium text-3xl`}>
+							<h1
+								className={`text-center w-full h-full font-medium md:text-3xl text-xl`}
+							>
 								{pageTitle}
 							</h1>
 						) : (
@@ -88,7 +89,7 @@ const Appbar = ({ backRoute, pageTitle }: AppBarProps) => {
 							</Link>
 						)}
 					</div>
-					<div className='flex justify-end space-x-6 flex-1'>
+					<div className='flex justify-end space-x-6 w-16'>
 						<div>
 							<button
 								className='flex flex-col items-center'

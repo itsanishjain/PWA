@@ -60,10 +60,12 @@ const Home = () => {
 			<Appbar />
 
 			<Section>
-				<div className='flex justify-center min-h-screen w-full mt-20'>
-					<div className='flex flex-col w-96 min-h-full'>
-						<h3 className='font-semibold'>Upcoming Pools</h3>
-						<UpcomingPoolTab />
+				<div className='flex justify-center  w-full pt-20'>
+					<div className='flex flex-col w-96 space-y-8'>
+						<div>
+							<h3 className='font-semibold'>Upcoming Pools</h3>
+							<UpcomingPoolTab />
+						</div>
 					</div>
 				</div>
 			</Section>

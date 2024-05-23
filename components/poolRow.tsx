@@ -6,6 +6,7 @@ import { formatTimeDiff } from '@/lib/utils'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import router from 'next/router'
+import * as _ from 'lodash'
 
 interface PoolRowProps {
 	title: string
@@ -34,7 +35,7 @@ const PoolRow: React.FC<PoolRowProps> = ({
 	const supabaseClient = createSupabaseBrowserClient()
 
 	const loadPoolImage = async () => {
-		if (poolImagePath == undefined || poolImagePath == null) {
+		if (_.isEmpty(poolImagePath)) {
 			return
 		}
 		const { data: storageData } = supabaseClient.storage
@@ -44,15 +45,22 @@ const PoolRow: React.FC<PoolRowProps> = ({
 	}
 
 	useEffect(() => {
+		console.log('poolImagePath', poolImagePath)
 		loadPoolImage()
-		// console.log('poolroute', `${currentRoute}/pool-id/${poolId}`)
-	}, [])
+	}, [poolImagePath])
 
+	const trailingSlash =
+		window?.location?.href[window?.location?.href.length - 1] == '/' ? '' : '/'
 	return (
-		<Link href={`/pool-id/${poolId}`} className='flex flex-row space-x-4'>
+		<Link
+			href={`${window.location.href}${trailingSlash}pool-id/${poolId}`}
+			className='flex flex-row space-x-4'
+		>
 			<div className='relative w-20 h-20 rounded-2xl overflow-hidden bg-red-500'>
 				<img
-					src={`${poolImageUrl ?? frogImage.src}`}
+					src={`
+						${_.isEmpty(poolImageUrl) ? frogImage.src : poolImageUrl}
+					`}
 					className='bg-black w-full h-full object-cover object-center'
 				></img>
 				<div className='absolute bottom-0 bg-black bg-opacity-40 text-xs w-full text-center text-white py-1'>

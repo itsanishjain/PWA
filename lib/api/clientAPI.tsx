@@ -18,6 +18,7 @@ import {
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
 import { ConnectedWallet } from '@privy-io/react-auth'
+import * as lodash from 'lodash'
 
 export interface writeTestObject {
 	address: string
@@ -81,29 +82,6 @@ export async function fetchToken(backendLoginObj: backendLoginObject) {
 	}
 }
 
-export async function writeTest(address: writeTestObject) {
-	const token = Cookies.get('token')
-
-	try {
-		const response = await fetch('/api/test_write', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`,
-			},
-			credentials: 'include',
-			body: JSON.stringify(address),
-		})
-		if (!response.ok) {
-			throw new Error('Network response was not ok')
-		}
-		const data = await response.json()
-		return data
-	} catch (error) {
-		console.error('There was a problem with the fetch operation:', error)
-	}
-}
-
 export const uploadProfileImage = async (
 	fileBlob: any,
 	selectedFile: any,
@@ -123,7 +101,7 @@ export const uploadProfileImage = async (
 		},
 	)
 
-	const jwtObj = decode(jwt)
+	const jwtObj = decode(jwt, { json: true })
 	console.log('jwtObj', jwtObj)
 	console.log('file name', fileBlob.name)
 	console.log('selectedFile', selectedFile)
@@ -131,7 +109,7 @@ export const uploadProfileImage = async (
 	const { data, error } = await supabaseClient.storage
 		.from('profile')
 		.upload(
-			`/public/${jwtObj!.sub}/${Date.now()}-${selectedFile.name}`,
+			`/public/${jwtObj?.sub}/${Date.now()}-${selectedFile?.name}`,
 			fileBlob,
 		)
 
@@ -146,7 +124,7 @@ export const uploadProfileImage = async (
 	const { data: userData, error: userError } = await supabaseClient
 		.from('usersDisplay')
 		.upsert(
-			{ avatar_url: data.path, id: jwtObj!.sub },
+			{ avatar_url: data.path, id: jwtObj?.sub, address: jwtObj?.address },
 			{
 				onConflict: 'id',
 			},
@@ -179,9 +157,11 @@ export const updateUserDisplayData = async (
 		},
 	)
 
-	const jwtObj = decode(jwt)
+	const jwtObj = decode(jwt, { json: true })
+
 	console.log('jwtObj', jwtObj)
 
+	console.log('upload user address', address)
 	// Update user profile with image URL
 
 	const { data: userData, error: userError } = await supabaseClient
@@ -192,7 +172,7 @@ export const updateUserDisplayData = async (
 				company: company,
 				bio: bio,
 				id: jwtObj!.sub,
-				address: address.toLowerCase(),
+				address: jwtObj!.address?.toLowerCase(),
 			},
 			{
 				onConflict: 'id',
@@ -248,7 +228,7 @@ export const fetchPastPools = async () => {
 
 export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 	console.log('addressList', addressList)
-	const lowerAddressList = addressList.map((address) => address.toLowerCase())
+	const lowerAddressList = addressList.map((address) => address?.toLowerCase())
 	const { data, error }: PostgrestSingleResponse<any[]> =
 		await supabaseBrowserClient
 			.from('usersDisplay')
@@ -321,7 +301,6 @@ export const fetchUserDisplayForAddress = async ({
 	const [_, address] = queryKey
 
 	const lowerAddress = address.toLowerCase()
-	console.log('123456')
 
 	console.log('lowerAddress', lowerAddress)
 
@@ -404,7 +383,8 @@ export const fetchAllPoolDataFromDB = async ({
 	console.log('fetchPoolDataFromDB: Fetching Pool Image Url')
 
 	let poolImageUrl = null
-	if (data[0].pool_image_url != null && data[0].pool_image_url != undefined) {
+	console.log('pool_image_url', data[0].pool_image_url)
+	if (!lodash.isEmpty(data[0].pool_image_url)) {
 		const { data: storageData } = supabaseBrowserClient.storage
 			.from('pool')
 			.getPublicUrl(data[0].pool_image_url)
@@ -641,7 +621,458 @@ export const fetchTokenSymbol = async ({
 	console.log('tokenSymbol', tokenSymbol)
 	return tokenSymbol
 }
-// export const testAsyncFunction = async () => {
-// 	console.log('Hello')
-// 	await 'asdf'
-// }
+
+export const handleEnableDeposit = async ({
+	params,
+}: {
+	params: [string, ConnectedWallet[]]
+}) => {
+	const [poolId, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	let enableDepositDataString = poolIFace.encodeFunctionData('enableDeposit', [
+		poolId,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: enableDepositDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
+
+export const handleStartPool = async ({
+	params,
+}: {
+	params: [string, ConnectedWallet[]]
+}) => {
+	const [poolId, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	let startPoolDataString = poolIFace.encodeFunctionData('startPool', [poolId])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: startPoolDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
+
+export const handleEndPool = async ({
+	params,
+}: {
+	params: [string, ConnectedWallet[]]
+}) => {
+	const [poolId, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	let endPoolDataString = poolIFace.encodeFunctionData('endPool', [poolId])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: endPoolDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
+
+export const handleSetWinner = async ({
+	params,
+}: {
+	params: [string, string, string, ConnectedWallet[]]
+}) => {
+	const [poolId, winnerAddress, amount, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	let setWinnerDataString = poolIFace.encodeFunctionData('setWinner', [
+		poolId,
+		winnerAddress,
+		ethers.parseEther(amount),
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: setWinnerDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
+
+export const handleSavePayout = async ({
+	params,
+}: {
+	params: [string, string, string, string]
+}) => {
+	const [poolId, amount, winnerAddress, jwt] = params
+
+	let dataObj = { poolId, winnerAddress, amount, jwtString: jwt }
+	try {
+		const response = await fetch('/api/save_payout', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(dataObj),
+		})
+		if (!response.ok) {
+			throw new Error('Network response was not ok')
+		}
+		const data = await response.json()
+		return data
+	} catch (error) {
+		console.error('There was a problem with the post operation:', error)
+	}
+}
+
+export const fetchWinnersDetailsFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const winnersDetails = await contract.getWinnersDetails(poolId)
+	console.log('winnersDetails', winnersDetails)
+	return winnersDetails
+}
+
+export const fetchClaimablePoolsFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, address] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const claimablePools = await contract.getClaimablePools(address)
+	return claimablePools
+}
+
+export const fetchPoolBalanceFromSC = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+
+	const poolBalance = await contract.poolBalance(poolId)
+	console.log('winnersDetails', poolBalance)
+	return poolBalance
+}
+
+export const fetchSavedPayoutsFromServer = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolId] = queryKey
+	const { data: savedPayouts, error }: PostgrestSingleResponse<any[]> =
+		await supabaseBrowserClient
+			.from('savedPayouts')
+			.select('*')
+			.match({ pool_id: poolId })
+	if (error) {
+		console.error('Error reading data:', error)
+		return
+	}
+
+	console.log('savedPayouts', savedPayouts)
+	return savedPayouts
+}
+
+export const handleSetWinners = async ({
+	params,
+}: {
+	params: [string, string[], string[], ConnectedWallet[]]
+}) => {
+	const [poolId, winnerAddresses, amounts, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	console.log('poolId', poolId)
+
+	console.log('winnerAddresses', winnerAddresses)
+	console.log('amounts', amounts)
+	const amountsArray = amounts.map(
+		(amount) => amount.toString(),
+
+		// Math.floor(parseFloat(ethers.formatEther(amount))).toString(),
+	)
+	console.log('amountsArray', amountsArray)
+
+	let setWinnersDataString = poolIFace.encodeFunctionData('setWinners', [
+		poolId,
+		winnerAddresses,
+		amountsArray,
+	])
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: setWinnersDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
+
+export const handleDeleteSavedPayouts = async ({
+	params,
+}: {
+	params: [string, string[], string[], string]
+}) => {
+	const [poolId, winnerAddresses, amounts, jwt] = params
+
+	let dataObj = { poolId, winnerAddresses, amounts, jwtString: jwt }
+	try {
+		const response = await fetch('/api/delete_payout', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(dataObj),
+		})
+		if (!response.ok) {
+			throw new Error('Network response was not ok')
+		}
+		const data = await response.json()
+		return data
+	} catch (error) {
+		console.error('There was a problem with the post operation:', error)
+	}
+}
+
+export const handleCheckIn = async ({
+	data,
+	jwt,
+}: {
+	data: string
+	jwt: string
+}) => {
+	// const [poolId, address, jwt] = params
+	let qrDataObj: any = JSON.parse(data)
+	let dataObj = {
+		poolId: qrDataObj?.poolId,
+		address: qrDataObj?.address,
+		jwtString: jwt,
+	}
+	try {
+		const response = await fetch('/api/check_in', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(dataObj),
+		})
+		if (!response.ok) {
+			throw new Error('Network response was not ok')
+			return
+		}
+		const data = await response.json()
+		return data
+	} catch (error) {
+		console.error('There was a problem with the post operation:', error)
+	}
+}
+
+export const handleClaimWinning = async ({
+	params,
+}: {
+	params: [string, ConnectedWallet[]]
+}) => {
+	const [poolId, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	let claimWinningDataString = poolIFace.encodeFunctionData('claimWinning', [
+		poolId,
+		walletAddress,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: claimWinningDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
+
+export const handleClaimWinnings = async ({
+	params,
+}: {
+	params: [string[], ConnectedWallet[]]
+}) => {
+	const [poolIds, wallets] = params
+
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+	const walletAddresses = poolIds.map((poolId) => walletAddress)
+	let claimWinningDataString = poolIFace.encodeFunctionData('claimWinnings', [
+		poolIds,
+		walletAddresses,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: claimWinningDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		throw new Error('User did not sign transaction')
+		return
+	}
+}
