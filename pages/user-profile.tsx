@@ -109,7 +109,7 @@ const UserProfile = () => {
 						<div className='flex w-full flex-col items-center justify-center space-y-4'>
 							{profileImageUrl && (
 								<Image
-									className='center z-0 aspect-square w-40 rounded-full object-cover'
+									className='z-0 aspect-square w-40 rounded-full object-cover'
 									src={profileImageUrl}
 									alt='profile image'
 								/>
@@ -146,7 +146,7 @@ const UserProfile = () => {
 				</div>
 				<div className='fixed bottom-5 left-1/2 w-full max-w-screen-md -translate-x-1/2 px-6 md:bottom-6'>
 					<button
-						className={`barForeground focus:shadow-outline h-12 w-full rounded-full px-4 py-2 font-bold text-white focus:outline-none md:h-16 md:text-2xl`}
+						className={`barForeground h-12 w-full rounded-full px-4 py-2 font-bold text-white focus:shadow-outline focus:outline-none md:h-16 md:text-2xl`}
 						onClick={onClaimAllButtonClicked}
 					>
 						Claim All

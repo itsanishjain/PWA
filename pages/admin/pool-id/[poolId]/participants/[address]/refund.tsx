@@ -106,11 +106,13 @@ const RefundUser = () => {
 				>
 					<div className='flex flex-col pb-8'>
 						<div className='flex w-full justify-center'>
-							<Image
-								alt='profile'
-								className='center z-0 aspect-square w-24 rounded-full object-cover'
-								src={profileImageUrl}
-							/>
+							{profileImageUrl && (
+								<Image
+									alt='profile'
+									className='z-0 aspect-square w-24 rounded-full object-cover'
+									src={profileImageUrl}
+								/>
+							)}
 						</div>
 
 						<div className='flex flex-row'>
@@ -141,7 +143,7 @@ const RefundUser = () => {
 						</div>
 						<div className='fixed bottom-5 left-1/2 flex w-full max-w-screen-md -translate-x-1/2 flex-row space-x-2 px-6 md:bottom-6'>
 							<button
-								className={`focus:shadow-outline flex h-12 flex-1 items-center justify-center rounded-full bg-black px-4 py-2 text-center font-bold text-white focus:outline-none `}
+								className={`flex h-12 flex-1 items-center justify-center rounded-full bg-black px-4 py-2 text-center font-bold text-white focus:shadow-outline focus:outline-none `}
 								onClick={onRefundUserButtonClicked}
 							>
 								Refund

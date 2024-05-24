@@ -251,7 +251,7 @@ const PoolPage = () => {
 		router.push(`${currentRoute}/ticket`)
 	}
 
-	const onRegisterButtonClicked = (e: any) => {
+	const onRegisterButtonClicked = () => {
 		toast({
 			title: 'Requesting Transaction/s',
 			description: 'Approve spending of token, followed by depositing token.',
@@ -261,7 +261,7 @@ const PoolPage = () => {
 		})
 	}
 
-	const onUnregisterButtonClicked = (e: any) => {
+	const onUnregisterButtonClicked = () => {
 		toast({
 			title: 'Requesting Transaction',
 			description: 'Withdrawing from pool',
@@ -272,7 +272,7 @@ const PoolPage = () => {
 		})
 	}
 
-	const onClaimButtonClicked = (e: any) => {
+	const onClaimButtonClicked = () => {
 		toast({
 			title: 'Requesting Transaction/s',
 			description: 'Approve claiming prize',
@@ -473,7 +473,7 @@ const PoolPage = () => {
 						{isRegisteredOnSC ? (
 							<div className='fixed bottom-5 left-1/2 z-50 flex w-full max-w-screen-md -translate-x-1/2 flex-row space-x-2 px-6 md:bottom-6'>
 								<button
-									className={`focus:shadow-outline flex h-12 flex-1 items-center justify-center rounded-full bg-black px-4 py-2 text-center font-bold text-white focus:outline-none `}
+									className={`flex h-12 flex-1 items-center justify-center rounded-full bg-black px-4 py-2 text-center font-bold text-white focus:shadow-outline focus:outline-none `}
 									onClick={viewTicketClicked}
 								>
 									View My Ticket
@@ -509,7 +509,7 @@ const PoolPage = () => {
 							poolSCStatus == 1 && (
 								<div className='fixed bottom-5 left-1/2 z-50 w-full max-w-screen-md -translate-x-1/2 px-6 md:bottom-6'>
 									<button
-										className={`focus:shadow-outline h-12 w-full rounded-full bg-black px-4 py-2 font-bold text-white focus:outline-none `}
+										className={`h-12 w-full rounded-full bg-black px-4 py-2 font-bold text-white focus:shadow-outline focus:outline-none `}
 										onClick={onRegisterButtonClicked}
 									>
 										Register

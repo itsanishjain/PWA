@@ -69,7 +69,7 @@ const EditUserProfile = () => {
 				setFileBlob(reader.result)
 				setIsImageReady(true)
 			}
-			reader.onerror = (e) => {
+			reader.onerror = () => {
 				setIsImageReady(true)
 				throw new Error('Failed to read file')
 			}
@@ -81,7 +81,7 @@ const EditUserProfile = () => {
 		}
 	}
 
-	const handleSaveButtonClicked = async (e: any) => {
+	const handleSaveButtonClicked = async () => {
 		if (fileBlob != null) {
 			await uploadProfileImage(fileBlob, selectedFile, currentJwt!)
 		}
@@ -165,7 +165,7 @@ const EditUserProfile = () => {
 								{profileImageUrl && (
 									<Image
 										alt='camera'
-										className='center z-0 aspect-square w-40 rounded-full object-cover'
+										className='z-0 aspect-square w-40 rounded-full object-cover'
 										src={profileImageUrl}
 									/>
 								)}

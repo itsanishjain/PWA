@@ -64,6 +64,16 @@ const config = {
 					foreground: 'hsl(var(--card-foreground))',
 				},
 			},
+			borderColor: {
+				destructive: 'hsl(var(--destructive))',
+			},
+			backgroundColor: {
+				destuctive: 'hsl(var(--destructive))',
+			},
+			textColor: {
+				destructive: 'hsl(var(--destructive))',
+				'destructive-foreground': 'hsl(var(--destructive-foreground))',
+			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
@@ -83,6 +93,14 @@ const config = {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 			},
+			boxShadow: {
+				outline: '0 0 0 3px rgba(66, 153, 225, 0.5)',
+			},
+		},
+	},
+	variants: {
+		extend: {
+			boxShadow: ['focus'],
 		},
 	},
 	plugins: [require('tailwindcss-animate'), require('tailwindcss-safe-area')],

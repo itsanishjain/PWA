@@ -12,7 +12,7 @@ import { ParticipantStatus } from './participantRow'
 interface WinnerRowProps {
 	name?: string
 	imageUrl?: string
-	participantStatus: number
+	participantStatus: ParticipantStatus
 	address: string
 	routeUrl?: string
 	hasClaimed?: boolean

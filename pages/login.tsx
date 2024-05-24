@@ -24,7 +24,7 @@ const LoginPage = () => {
 			<Section>
 				<div className='relative flex size-full items-center justify-center'>
 					<div className='flex size-96 flex-col'>
-						<div className='row flex w-full items-center'>
+						<div className='flex w-full flex-row items-center'>
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
 						<h2 className='tagline-text mt-28 w-full text-center align-top text-xl font-bold text-zinc-800'>

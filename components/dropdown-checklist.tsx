@@ -56,7 +56,7 @@ const DropdownChecklist = () => {
 			</div>
 
 			{isOpen && (
-				<div className='absolute right-0 mt-2 max-h-40 w-56 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5'>
+				<div className='absolute right-0 mt-2 max-h-40 w-56 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black/5'>
 					<div
 						className='py-1'
 						role='menu'

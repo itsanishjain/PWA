@@ -35,13 +35,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 
 	const { ready, authenticated, logout } = usePrivy()
 
-	const handleAccountClick = (e: any) => {
+	const handleAccountClick = () => {
 		router.push('/user-profile')
-	}
-
-	const handleSignOut = () => {
-		logout()
-		removeTokenCookie()
 	}
 
 	const { data: profileData } = useQuery({
@@ -52,15 +47,24 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 
 	useEffect(() => {
 		if (ready && !authenticated) {
-			router.push('/login')
+			router.replace('/login')
 		}
 
 		if (ready && authenticated && walletsReady && wallets?.length == 0) {
-			handleSignOut()
+			logout()
+			removeTokenCookie()
 		}
 
 		setPageUrl(window?.location.href)
-	}, [profileData, ready, authenticated, router])
+	}, [
+		profileData,
+		ready,
+		authenticated,
+		router,
+		walletsReady,
+		wallets?.length,
+		logout,
+	])
 
 	return (
 		<header className='fixed left-0 top-0 z-20 w-full bg-white pt-safe'>

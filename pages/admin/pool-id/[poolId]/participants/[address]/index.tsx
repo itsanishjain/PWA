@@ -149,7 +149,7 @@ const UserProfile = () => {
 							{profileImageUrl && (
 								<Image
 									alt='profile'
-									className='center z-0 aspect-square w-24 rounded-full object-cover'
+									className='z-0 aspect-square w-24 rounded-full object-cover'
 									src={profileImageUrl}
 								/>
 							)}

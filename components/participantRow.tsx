@@ -5,10 +5,16 @@ import * as _ from 'lodash'
 import Image from 'next/image'
 import Link from 'next/link'
 
+export enum ParticipantStatus {
+	Unregistered = 0,
+	Registered = 1,
+	'Checked In' = 2,
+}
+
 interface ParticipantRowProps {
 	name: string
 	imageUrl: string
-	participantStatus: number
+	participantStatus: ParticipantStatus
 	address: string
 	routeUrl?: string
 }
@@ -54,9 +60,3 @@ const ParticipantRow: React.FC<ParticipantRowProps> = ({
 }
 
 export default ParticipantRow
-
-export enum ParticipantStatus {
-	Unregistered = 0,
-	Registered = 1,
-	'Checked In' = 2,
-}
