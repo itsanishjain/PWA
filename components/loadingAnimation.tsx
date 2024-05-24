@@ -3,7 +3,7 @@ const LoadingAnimation = () => {
 		<div role='status' className='flex justify-center  '>
 			<svg
 				aria-hidden='true'
-				className='inline h-12 w-12 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600'
+				className='inline size-12 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600'
 				viewBox='0 0 100 101'
 				fill='none'
 				xmlns='http://www.w3.org/2000/svg'

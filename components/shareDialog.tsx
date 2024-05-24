@@ -43,8 +43,8 @@ const ShareDialog = (props: shareDialogProps) => {
 		return (
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogTrigger asChild>
-					<button className='h-8 w-8 rounded-full  bg-black bg-opacity-40 p-2 md:h-14 md:w-14 md:p-3'>
-						<img className='flex h-full w-full' src={shareIcon.src} />
+					<button className='size-8 rounded-full bg-black  bg-opacity-40 p-2 md:size-14 md:p-3'>
+						<img className='flex size-full' src={shareIcon.src} />
 					</button>
 				</DialogTrigger>
 				<DialogContent className='sm:max-w-[425px]'>
@@ -63,8 +63,8 @@ const ShareDialog = (props: shareDialogProps) => {
 	return (
 		<Drawer open={open} onOpenChange={setOpen}>
 			<DrawerTrigger asChild>
-				<button className='h-8 w-8 rounded-full  bg-black bg-opacity-40 p-2 md:h-14 md:w-14 md:p-3'>
-					<img className='flex h-full w-full' src={shareIcon.src} />
+				<button className='size-8 rounded-full bg-black  bg-opacity-40 p-2 md:size-14 md:p-3'>
+					<img className='flex size-full' src={shareIcon.src} />
 				</button>
 			</DrawerTrigger>
 			<DrawerContent>

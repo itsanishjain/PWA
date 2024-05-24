@@ -17,7 +17,7 @@ const UpcomingPoolTab: React.FC = () => {
 	}, [])
 
 	return (
-		<div className='mt-8 flex h-full w-full grow flex-col space-y-4'>
+		<div className='mt-8 flex size-full grow flex-col space-y-4'>
 			{poolsData?.map((pool) => {
 				return (
 					<PoolRow

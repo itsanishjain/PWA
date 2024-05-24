@@ -269,7 +269,7 @@ const ManageParticipantsPage = () => {
 								href={`${pageUrl}/payout-scan`}
 								className='absolute right-0 flex h-10 w-6 items-center'
 							>
-								<span className='flex h-full w-full items-center'>
+								<span className='flex size-full items-center'>
 									<svg
 										width='14'
 										height='14'

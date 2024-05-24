@@ -185,7 +185,7 @@ const EditUserProfile = () => {
 									src={profileImageUrl}
 								/>
 								<div
-									className={`absolute left-0 top-0 h-full w-full rounded-full ${styles.overlay} z-10 flex items-center justify-center`}
+									className={`absolute left-0 top-0 size-full rounded-full ${styles.overlay} z-10 flex items-center justify-center`}
 								>
 									<img
 										src={camera.src}

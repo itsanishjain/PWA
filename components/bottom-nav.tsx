@@ -12,7 +12,7 @@ const BottomNav = () => {
 						<Link
 							key={label}
 							href={href}
-							className={`flex h-full w-full flex-col items-center justify-center space-y-1 ${
+							className={`flex size-full flex-col items-center justify-center space-y-1 ${
 								router.pathname === href
 									? 'text-indigo-500 '
 									: 'text-zinc-600 hover:text-zinc-900'

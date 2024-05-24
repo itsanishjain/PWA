@@ -7,7 +7,7 @@ const PoolStatus = (poolStatus: poolStatusProps) => {
 			{poolStatus.status == 0 && (
 				<div className='flex flex-row items-center space-x-3'>
 					<div
-						className={`dotBackground h-1.5 w-1.5 rounded-full md:h-3 md:w-3`}
+						className={`dotBackground size-1.5 rounded-full md:size-3`}
 					/>
 					<div className='text-xs md:text-2xl'>Unavailable</div>
 				</div>
@@ -15,7 +15,7 @@ const PoolStatus = (poolStatus: poolStatusProps) => {
 			{poolStatus.status == 1 && (
 				<div className='flex flex-row items-center space-x-3'>
 					<div
-						className={`dotBackground h-1.5 w-1.5 rounded-full md:h-3 md:w-3`}
+						className={`dotBackground size-1.5 rounded-full md:size-3`}
 					/>
 					<div className='text-xs md:text-2xl'>Upcoming</div>
 				</div>
@@ -23,7 +23,7 @@ const PoolStatus = (poolStatus: poolStatusProps) => {
 			{poolStatus.status == 2 && (
 				<div className='flex flex-row items-center space-x-3'>
 					<div
-						className={`liveDotBackground h-1.5 w-1.5 rounded-full md:h-3 md:w-3`}
+						className={`liveDotBackground size-1.5 rounded-full md:size-3`}
 					/>
 					<div className='text-xs md:text-2xl'>Live</div>
 				</div>
@@ -31,7 +31,7 @@ const PoolStatus = (poolStatus: poolStatusProps) => {
 			{poolStatus.status == 3 && (
 				<div className='flex flex-row items-center space-x-3'>
 					<div
-						className={`dotBackground h-1.5 w-1.5 rounded-full md:h-3 md:w-3`}
+						className={`dotBackground size-1.5 rounded-full md:size-3`}
 					/>
 					<div className='text-xs md:text-2xl'>Ended</div>
 				</div>
@@ -39,7 +39,7 @@ const PoolStatus = (poolStatus: poolStatusProps) => {
 			{poolStatus.status == 4 && (
 				<div className='flex flex-row items-center space-x-3'>
 					<div
-						className={`dotBackground h-1.5 w-1.5 rounded-full md:h-3 md:w-3`}
+						className={`dotBackground size-1.5 rounded-full md:size-3`}
 					/>
 					<div className='text-xs md:text-2xl'>Deleted</div>
 				</div>

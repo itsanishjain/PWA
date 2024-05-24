@@ -40,7 +40,7 @@ const DropdownChecklist = () => {
 				>
 					Select Items
 					<svg
-						className='-mr-1 ml-2 h-5 w-5'
+						className='-mr-1 ml-2 size-5'
 						xmlns='http://www.w3.org/2000/svg'
 						viewBox='0 0 20 20'
 						fill='currentColor'
@@ -78,7 +78,7 @@ const DropdownChecklist = () => {
 								{selectedItems.includes(item) && (
 									<span className='absolute inset-y-0 right-0 flex items-center pr-4'>
 										<svg
-											className='h-5 w-5'
+											className='size-5'
 											xmlns='http://www.w3.org/2000/svg'
 											viewBox='0 0 20 20'
 											fill='currentColor'

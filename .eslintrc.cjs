@@ -34,6 +34,7 @@ module.exports = {
 		'@typescript-eslint/no-unsafe-call': 0,
 		'@typescript-eslint/no-unsafe-member-access': 0,
 		'@typescript-eslint/no-unsafe-member-return': 0,
+		'@typescript-eslint/no-unsafe-return': 0,
 
 		// additional rules to catch dead code
 		'no-console': 'warn',

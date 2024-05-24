@@ -364,7 +364,7 @@ const PoolPage = () => {
 											? defaultPoolImage.src
 											: poolImageUrl
 									}`}
-									className='h-full w-full bg-black object-contain object-center'
+									className='size-full bg-black object-contain object-center'
 								/>
 								<div className='absolute right-2 top-0 flex  h-full w-10  flex-col items-center space-y-3 py-4 text-white md:right-4 md:w-20 md:space-y-5 md:py-6'>
 									<ShareDialog />
@@ -381,7 +381,7 @@ const PoolPage = () => {
 										Hosted by
 										<ul className='mt-4 flex flex-col space-y-2'>
 											<li className='flex flex-row items-center space-x-4 font-medium'>
-												<div className='h-12 w-12'>
+												<div className='size-12'>
 													<AvatarImage address={poolSCAdmin?.[0]?.toString()} />
 												</div>
 												<span>{adminData?.userDisplayData?.display_name}</span>
@@ -392,7 +392,7 @@ const PoolPage = () => {
 														className='flex flex-row items-center space-x-4 font-medium'
 														key={data?.address}
 													>
-														<div className='h-12 w-12'>
+														<div className='size-12'>
 															<AvatarImage address={data?.address} />
 														</div>
 														<span>{data?.display_name}</span>
@@ -428,7 +428,7 @@ const PoolPage = () => {
 														(address: any, index: number) => {
 															return (
 																<div
-																	className={`absolute h-12 w-12 rounded-full bg-white p-0.5  md:h-14 md:w-14`}
+																	className={`absolute size-12 rounded-full bg-white p-0.5 md:size-14`}
 																	style={{
 																		zIndex: index + 1,
 																		left: index * 36,
@@ -450,7 +450,7 @@ const PoolPage = () => {
 															}
 															return (
 																<div
-																	className={`absolute h-12 w-12 rounded-full bg-white p-0.5 md:h-14 md:w-14 `}
+																	className={`absolute size-12 rounded-full bg-white p-0.5 md:size-14 `}
 																	style={{
 																		zIndex: index + 1,
 																		left: index * 36,
@@ -463,7 +463,7 @@ const PoolPage = () => {
 														},
 													)}
 													<div
-														className={`absolute h-12 w-12 rounded-full bg-white p-0.5   md:h-14 md:w-14`}
+														className={`absolute size-12 rounded-full bg-white p-0.5 md:size-14`}
 														style={{ zIndex: 5, left: 4 * 36 }}
 													>
 														<div className='numParticipantBackground text-white'>{`+ ${
@@ -495,7 +495,7 @@ const PoolPage = () => {
 								<div className='flex flex-row items-center justify-between'>
 									<div className=' flex flex-row space-x-2'>
 										<span className='flex items-center'>
-											<img className='h-5 w-5' src={circleTick.src} />
+											<img className='size-5' src={circleTick.src} />
 										</span>
 										<span className='font-semibold'>Winner</span>
 									</div>
@@ -541,9 +541,9 @@ const PoolPage = () => {
 
 								<DropdownMenu>
 									<DropdownMenuTrigger>
-										<div className='h-12 w-12 rounded-full bg-black p-3'>
+										<div className='size-12 rounded-full bg-black p-3'>
 											<img
-												className='flex h-full w-full'
+												className='flex size-full'
 												src={tripleDotsIcon.src}
 											/>
 										</div>
@@ -553,7 +553,7 @@ const PoolPage = () => {
 											<div className='flex flex-row space-x-2'>
 												<span>
 													<img
-														className='flex h-full w-full'
+														className='flex size-full'
 														src={userUnregisterIcon.src}
 													/>
 												</span>

@@ -41,7 +41,7 @@ const WinnerRow: React.FC<WinnerRowProps> = ({
 		>
 			<img
 				src={`${profileData?.profileImageUrl ?? frogImage.src}`}
-				className=' flex h-14 w-14 rounded-full object-cover'
+				className=' flex size-14 rounded-full object-cover'
 			/>
 			<div className='flex flex-1 flex-col '>
 				<h4 className='text-lg font-medium'>{name}</h4>
@@ -60,7 +60,7 @@ const WinnerRow: React.FC<WinnerRowProps> = ({
 			{setWinner ? (
 				<div className='flex flex-row items-center justify-center space-x-2'>
 					<div>
-						<img className='h-6 w-6' src={circleTick.src} />
+						<img className='size-6' src={circleTick.src} />
 					</div>
 					<div className='paidBackground fontCheckedIn rounded-2xl px-6 py-4 font-medium'>
 						{ethers.formatEther(prizeAmount ?? 0).toString()} USD

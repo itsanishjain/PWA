@@ -69,21 +69,21 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 					<div className='flex w-16'>
 						{backRoute && (
 							<Link href={backRoute ?? ''}>
-								<img className='h-10 w-10' src={`${leftArrowImage.src}`} />
+								<img className='size-10' src={`${leftArrowImage.src}`} />
 							</Link>
 						)}
 					</div>
 					<div className='flex flex-1 items-center'>
 						{pageTitle ? (
 							<h1
-								className={`h-full w-full text-center text-xl font-medium md:text-3xl`}
+								className={`size-full text-center text-xl font-medium md:text-3xl`}
 							>
 								{pageTitle}
 							</h1>
 						) : (
 							<Link href='/' className='w-full text-center'>
 								<h1
-									className={`h-full w-full text-center text-5xl font-bold ${comfortaa.className}`}
+									className={`size-full text-center text-5xl font-bold ${comfortaa.className}`}
 								>
 									pool
 								</h1>
@@ -100,7 +100,7 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 									>
 										<img
 											src={`${profileData?.profileImageUrl ?? frogImage.src}`}
-											className='h-9 w-9 rounded-full object-cover'
+											className='size-9 rounded-full object-cover'
 										/>
 									</button>
 								</div>
@@ -126,7 +126,7 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 								</button> */}
 								<DropdownMenu>
 									<DropdownMenuTrigger>
-										<div className='h-12 w-12 rounded-full p-3'>
+										<div className='size-12 rounded-full p-3'>
 											<svg
 												width='20'
 												height='20'
@@ -147,7 +147,7 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 												<div className='flex flex-row items-center justify-center space-x-2'>
 													<span>
 														<img
-															className='flex h-full w-full'
+															className='flex size-full'
 															src={keyboardReturnImage.src}
 														/>
 													</span>
@@ -164,7 +164,7 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 								<button className='flex flex-col items-center'>
 									<img
 										src={`${profileData?.profileImageUrl ?? frogImage.src}`}
-										className='h-9 w-9 rounded-full object-cover'
+										className='size-9 rounded-full object-cover'
 									/>
 								</button>
 							</div>

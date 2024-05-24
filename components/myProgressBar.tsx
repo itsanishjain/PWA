@@ -3,7 +3,7 @@ interface myProgressBarProps {
 }
 const MyProgressBar = (props: myProgressBarProps) => {
 	return (
-		<div className='flex h-full w-full overflow-hidden rounded-full'>
+		<div className='flex size-full overflow-hidden rounded-full'>
 			<div
 				style={{ width: `100%` }}
 				className={`barBackground flex h-3 rounded-full md:h-6`}

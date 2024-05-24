@@ -10,8 +10,8 @@ import { PostgrestSingleResponse, createClient } from '@supabase/supabase-js'
 import { ethers } from 'ethers'
 import { decode } from 'jsonwebtoken'
 
+import dropletContract from '@/SC-Output/out/Droplet.sol/Droplet.json'
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
-import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
 import { ConnectedWallet } from '@privy-io/react-auth'
 import * as lodash from 'lodash'
 
@@ -54,7 +54,9 @@ export async function fetchNonce(addressObject: addressObject) {
 		const data = await response.json()
 		return data
 	} catch (error) {
-		console.error('There was a problem with the fetch operation:', error)
+		throw new Error(
+			`There was a problem with the fetch operation: ${JSON.stringify(error)}`,
+		)
 	}
 }
 
@@ -73,14 +75,15 @@ export async function fetchToken(backendLoginObj: backendLoginObject) {
 		const data = await response.json()
 		return data
 	} catch (error) {
-		console.error('There was a problem with the fetch operation:', error)
+		throw new Error(
+			`There was a problem with the fetch operation: ${JSON.stringify(error)}`,
+		)
 	}
 }
 
 export const uploadProfileImage = async (
 	fileBlob: any,
 	selectedFile: any,
-	address: string,
 	jwt: string,
 ) => {
 	// Upload image to Supabase storage
@@ -97,9 +100,6 @@ export const uploadProfileImage = async (
 	)
 
 	const jwtObj = decode(jwt, { json: true })
-	console.log('jwtObj', jwtObj)
-	console.log('file name', fileBlob.name)
-	console.log('selectedFile', selectedFile)
 
 	const { data, error } = await supabaseClient.storage
 		.from('profile')
@@ -109,27 +109,20 @@ export const uploadProfileImage = async (
 		)
 
 	if (error) {
-		console.error('Error uploading image:', error.message)
-		return
+		throw new Error(`Error uploading file: ${error.message}`)
 	}
-	console.log('Image uploaded successfully')
 
 	// Update user profile with image URL
-
-	const { data: userData, error: userError } = await supabaseClient
-		.from('usersDisplay')
-		.upsert(
-			{ avatar_url: data.path, id: jwtObj?.sub, address: jwtObj?.address },
-			{
-				onConflict: 'id',
-			},
-		)
+	const { error: userError } = await supabaseClient.from('usersDisplay').upsert(
+		{ avatar_url: data.path, id: jwtObj?.sub, address: jwtObj?.address },
+		{
+			onConflict: 'id',
+		},
+	)
 
 	if (userError) {
-		console.error('Error updating user data:', userError.message)
+		throw new Error(`Error updating user data: ${userError.message}`)
 	}
-
-	console.log('usersDisplay updated successfully')
 }
 
 export const updateUserDisplayData = async (
@@ -137,7 +130,6 @@ export const updateUserDisplayData = async (
 	company: string,
 	bio: string,
 	jwt: string,
-	address: string,
 ) => {
 	// Upload image to Supabase storage
 	const supabaseClient = createClient(
@@ -154,11 +146,7 @@ export const updateUserDisplayData = async (
 
 	const jwtObj = decode(jwt, { json: true })
 
-	console.log('jwtObj', jwtObj)
-
-	console.log('upload user address', address)
 	// Update user profile with image URL
-
 	const { data: userData, error: userError } = await supabaseClient
 		.from('usersDisplay')
 		.upsert(
@@ -175,7 +163,7 @@ export const updateUserDisplayData = async (
 		)
 
 	if (userError) {
-		console.error('Error updating user data:', userError.message)
+		throw new Error(`Error updating user data: ${userError.message}`)
 	}
 	return { userData, userError }
 }
@@ -194,7 +182,7 @@ export const fetchUpcomingPools = async () => {
 		.filter('event_timestamp', 'gte', currentTimestamp)
 
 	if (error) {
-		console.error('Error fetching pool data:', error.message)
+		throw new Error(`Error fetching pool data: ${error.message}`)
 	} else {
 		return data
 	}
@@ -214,14 +202,13 @@ export const fetchPastPools = async () => {
 		.filter('event_timestamp', 'lt', currentTimestamp)
 
 	if (error) {
-		console.error('Error fetching pool data:', error.message)
+		throw new Error(`Error fetching pool data: ${error.message}`)
 	} else {
 		return data
 	}
 }
 
 export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
-	console.log('addressList', addressList)
 	const lowerAddressList = addressList.map((address) => address?.toLowerCase())
 	const { data, error }: PostgrestSingleResponse<any[]> =
 		await supabaseBrowserClient
@@ -230,9 +217,8 @@ export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 			.in('address', lowerAddressList)
 
 	if (error) {
-		console.error('Error reading data:', error)
+		throw new Error(`Error reading data: ${error.message}`)
 	} else {
-		console.log('fetchUserDisplayInfoFromServer data:', data)
 		return data
 	}
 }
@@ -251,11 +237,8 @@ export const fetchParticipantsDataFromServer = async ({
 			.select()
 			.in('address', lowerAddressList)
 	if (error) {
-		console.error('Error reading data:', error)
-		return
+		throw new Error(`Failed fetchParticipantsDataFromServer ${error.message}`)
 	}
-
-	console.log('usersDisplayData', data)
 
 	const {
 		data: participationData,
@@ -266,10 +249,10 @@ export const fetchParticipantsDataFromServer = async ({
 		.match({ pool_id: poolId })
 		.in('participant_address', lowerAddressList)
 	if (participationError) {
-		console.error('Error reading participation data:', error)
-		return
+		throw new Error(
+			`Failed fetchParticipantsDataFromServer ${participationError.message}`,
+		)
 	}
-	console.log('participationData', participationData)
 
 	const joinedData = data.map((row1) => {
 		const matchingRows = participationData.filter(
@@ -280,8 +263,6 @@ export const fetchParticipantsDataFromServer = async ({
 			participationData: matchingRows,
 		}
 	})
-
-	console.log('fetchUserDisplayInfoFromServer data:', joinedData)
 
 	return joinedData
 }
@@ -295,30 +276,22 @@ export const fetchUserDisplayForAddress = async ({
 
 	const lowerAddress = address.toLowerCase()
 
-	console.log('lowerAddress', lowerAddress)
-
 	const { data: userDisplayData, error } = await supabaseBrowserClient
 		.from('usersDisplay')
 		.select('*')
 		.eq('address', lowerAddress)
 		.single()
 
-	console.log('userDisplayData', userDisplayData)
-
 	if (error) {
-		console.error('address error:', lowerAddress)
-		console.error('Error reading data:', error)
-		return { userDisplayData: '', profileImageUrl: '' }
+		throw new Error('Failed fetchUserDisplayForAddress')
 	}
 	if (userDisplayData?.avatar_url) {
-		const { data: storageData } = await supabaseBrowserClient.storage
+		const { data: storageData } = supabaseBrowserClient.storage
 			.from('profile')
 			.getPublicUrl(userDisplayData?.avatar_url)
-		console.log('userDisplayData', userDisplayData)
 
 		return { userDisplayData, profileImageUrl: storageData.publicUrl }
 	}
-	console.log('userDisplayData', userDisplayData)
 	return { userDisplayData }
 }
 
@@ -336,14 +309,6 @@ export const fetchAllPoolDataFromSC = async ({
 
 	const poolSCInfo = await contract.getAllPoolInfo(poolId)
 
-	console.log('retrievedAllPoolInfo', poolSCInfo)
-	console.log('retrievedAllPoolInfo[0]', poolSCInfo[0])
-	console.log('retrievedAllPoolInfo[1]', poolSCInfo[1])
-	console.log('retrievedAllPoolInfo[2]', poolSCInfo[2])
-	console.log('retrievedAllPoolInfo[3]', poolSCInfo[3])
-	console.log('retrievedAllPoolInfo[4]', poolSCInfo[4])
-	console.log('retrievedAllPoolInfo[5]', poolSCInfo[5])
-	console.log('retrievedAllPoolInfo[6]', poolSCInfo[6])
 	return poolSCInfo
 }
 
@@ -352,7 +317,6 @@ export const fetchAllPoolDataFromDB = async ({
 }: {
 	queryKey: [string, string]
 }) => {
-	console.log('fetchPoolDataFromDB')
 	const [_, poolId] = queryKey
 	const { data, error }: PostgrestSingleResponse<any[]> =
 		await supabaseBrowserClient
@@ -361,31 +325,20 @@ export const fetchAllPoolDataFromDB = async ({
 			.eq('pool_id', poolId)
 
 	if (error) {
-		console.error('Error fetchPoolDataFromDB:', error.message)
-		return {}
+		throw new Error(`Failed fetchPoolDataFromDB ${error.message}`)
 	}
 
-	console.log('Pool data', JSON.stringify(data))
 	if (data.length == 0) {
-		console.log('No Such Pool')
-		console.error('Error fetchPoolDataFromDB:')
-
-		return {}
+		throw new Error('Pool not found')
 	}
-
-	console.log('fetchPoolDataFromDB: Fetching Pool Image Url')
 
 	let poolImageUrl = null
-	console.log('pool_image_url', data[0].pool_image_url)
 	if (!lodash.isEmpty(data[0].pool_image_url)) {
 		const { data: storageData } = supabaseBrowserClient.storage
 			.from('pool')
 			.getPublicUrl(data[0].pool_image_url)
 		poolImageUrl = storageData.publicUrl
-		console.log('poolImageUrl', storageData.publicUrl)
 	}
-
-	console.log('fetchPoolDataFromDB: Fetching cohostUserDisplayData')
 
 	let cohostUserDisplayData
 	if (data[0]?.co_host_addresses?.length > 0) {
@@ -394,7 +347,6 @@ export const fetchAllPoolDataFromDB = async ({
 		)
 		cohostUserDisplayData = cohostDisplayData
 	}
-	console.log('fetchPoolDataFromDB return')
 
 	return {
 		poolDBInfo: data[0],
@@ -416,27 +368,15 @@ export const handleRegisterServer = async ({
 		jwtString,
 	}
 	try {
-		const response = await fetch('/api/join_pool', {
+		await fetch('/api/join_pool', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify(formData),
 		})
-
-		if (response.ok) {
-			console.log('Join success')
-			const msg = await response.json()
-			console.log(msg)
-			// Handle success
-			// fetchPoolDataFromDB()
-		} else {
-			console.error('Error sending data')
-			// Handle error
-		}
 	} catch (error) {
-		console.error('Error:', error)
-		throw new Error('Failed handleRegisterServer')
+		throw new Error(`Failed handleRegisterServer ${JSON.stringify(error)}`)
 
 		// Handle error
 	}
@@ -455,27 +395,15 @@ export const handleUnregisterServer = async ({
 		jwtString,
 	}
 	try {
-		const response = await fetch('/api/unjoin_pool', {
+		await fetch('/api/unjoin_pool', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify(formData),
 		})
-
-		if (response.ok) {
-			console.log('Unjoin success')
-			const msg = await response.json()
-			console.log(msg)
-		} else {
-			console.error('Error sending data')
-			// Handle error
-		}
 	} catch (error) {
-		console.error('Error:', error)
-		throw new Error('Failed handleUnregisterServer')
-
-		// Handle error
+		throw new Error(`Failed handleUnregisterServer ${JSON.stringify(error)}`)
 	}
 }
 
@@ -513,10 +441,8 @@ export const handleRegister = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
-		throw new Error('User did not sign transaction')
+		throw new Error(`User did not sign transaction ${JSON.stringify(e)}`)
 	}
 
 	const depositDataString = poolIFace.encodeFunctionData('deposit', [
@@ -544,9 +470,8 @@ export const handleRegister = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
+		throw new Error(`User did not sign transaction ${JSON.stringify(e)}`)
 	}
 }
 
@@ -556,13 +481,8 @@ export const handleUnregister = async ({
 	params: [string, ConnectedWallet[]]
 }) => {
 	const [poolId, wallets] = params
-
-	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-
 	const address = wallet.address
-	console.log('wallet', walletAddress)
-	console.log('poolId', poolId)
 	const selfRefundDataString = poolIFace.encodeFunctionData('selfRefund', [
 		poolId,
 	])
@@ -587,9 +507,7 @@ export const handleUnregister = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }
@@ -605,11 +523,8 @@ export const fetchTokenSymbol = async ({
 		dropletContract.abi,
 		provider,
 	)
-	console.log('poolTokenAddress', poolTokenAddress)
 
 	const tokenSymbol = await contract.symbol()
-
-	console.log('tokenSymbol', tokenSymbol)
 	return tokenSymbol
 }
 
@@ -647,9 +562,7 @@ export const handleEnableDeposit = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }
@@ -687,9 +600,7 @@ export const handleStartPool = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }
@@ -725,9 +636,7 @@ export const handleEndPool = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }
@@ -767,9 +676,7 @@ export const handleSetWinner = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }
@@ -796,7 +703,9 @@ export const handleSavePayout = async ({
 		const data = await response.json()
 		return data
 	} catch (error) {
-		console.error('There was a problem with the post operation:', error)
+		throw new Error(
+			`There was a problem with the post operation ${JSON.stringify(error)}`,
+		)
 	}
 }
 
@@ -834,9 +743,7 @@ export const handleRefundParticipant = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }
@@ -854,7 +761,6 @@ export const fetchWinnersDetailsFromSC = async ({
 	)
 
 	const winnersDetails = await contract.getWinnersDetails(poolId)
-	console.log('winnersDetails', winnersDetails)
 	return winnersDetails
 }
 
@@ -887,7 +793,6 @@ export const fetchPoolBalanceFromSC = async ({
 	)
 
 	const poolBalance = await contract.poolBalance(poolId)
-	console.log('winnersDetails', poolBalance)
 	return poolBalance
 }
 
@@ -903,11 +808,9 @@ export const fetchSavedPayoutsFromServer = async ({
 			.select('*')
 			.match({ pool_id: poolId })
 	if (error) {
-		console.error('Error reading data:', error)
-		return
+		throw new Error(`Failed fetchSavedPayoutsFromServer ${error.message}`)
 	}
 
-	console.log('savedPayouts', savedPayouts)
 	return savedPayouts
 }
 
@@ -920,16 +823,11 @@ export const handleSetWinners = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	console.log('poolId', poolId)
-
-	console.log('winnerAddresses', winnerAddresses)
-	console.log('amounts', amounts)
 	const amountsArray = amounts.map(
 		(amount) => amount.toString(),
 
 		// Math.floor(parseFloat(ethers.formatEther(amount))).toString(),
 	)
-	console.log('amountsArray', amountsArray)
 
 	const setWinnersDataString = poolIFace.encodeFunctionData('setWinners', [
 		poolId,
@@ -956,9 +854,7 @@ export const handleSetWinners = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }
@@ -985,7 +881,9 @@ export const handleDeleteSavedPayouts = async ({
 		const data = await response.json()
 		return data
 	} catch (error) {
-		console.error('There was a problem with the post operation:', error)
+		throw new Error(
+			`There was a problem with the post operation ${JSON.stringify(error)}`,
+		)
 	}
 }
 
@@ -1011,7 +909,9 @@ export const handleDeleteParticipant = async ({
 		const data = await response.json()
 		return data
 	} catch (error) {
-		console.error('There was a problem with the post operation:', error)
+		throw new Error(
+			`There was a problem with the post operation ${JSON.stringify(error)}`,
+		)
 	}
 }
 
@@ -1043,7 +943,9 @@ export const handleCheckIn = async ({
 		const data = await response.json()
 		return data
 	} catch (error) {
-		console.error('There was a problem with the post operation:', error)
+		throw new Error(
+			`There was a problem with the post operation ${JSON.stringify(error)}`,
+		)
 	}
 }
 
@@ -1081,9 +983,7 @@ export const handleClaimWinning = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }
@@ -1097,7 +997,7 @@ export const handleClaimWinnings = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	const walletAddresses = poolIds.map((poolId) => walletAddress)
+	const walletAddresses = poolIds.map((_poolId) => walletAddress)
 	const claimWinningDataString = poolIFace.encodeFunctionData('claimWinnings', [
 		poolIds,
 		walletAddresses,
@@ -1123,9 +1023,7 @@ export const handleClaimWinnings = async ({
 			})
 			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
 		}
-		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
-		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
 	}
 }

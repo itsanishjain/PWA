@@ -220,9 +220,9 @@ const AdminPoolPage = () => {
 											? defaultPoolImage.src
 											: poolImageUrl
 									}`}
-									className='h-full w-full bg-black object-contain object-center'
+									className='size-full bg-black object-contain object-center'
 								/>
-								<div className='absolute bottom-0 flex h-full w-full flex-col items-center justify-center space-y-3 bg-black bg-opacity-60 text-white backdrop-blur-sm md:space-y-6'>
+								<div className='absolute bottom-0 flex size-full flex-col items-center justify-center space-y-3 bg-black bg-opacity-60 text-white backdrop-blur-sm md:space-y-6'>
 									{timeLeft != undefined && timeLeft > 0 && (
 										<div>
 											<h4 className='text-xs md:text-2xl'>Starts in</h4>
@@ -235,14 +235,14 @@ const AdminPoolPage = () => {
 								<div className='absolute right-2 top-0 flex  h-full w-10  flex-col items-center space-y-3 py-4 text-white md:right-4 md:w-20 md:space-y-5 md:py-6'>
 									<Link
 										href={`${pageUrl}/checkin-scan`}
-										className='h-8 w-8 rounded-full  bg-black bg-opacity-40 p-2 md:h-14 md:w-14 md:p-3'
+										className='size-8 rounded-full bg-black  bg-opacity-40 p-2 md:size-14 md:p-3'
 									>
-										<img className='flex h-full w-full' src={qrCodeIcon.src} />
+										<img className='flex size-full' src={qrCodeIcon.src} />
 									</Link>
 									<ShareDialog />
 
-									<button className='h-8 w-8 rounded-full  bg-black bg-opacity-40 p-2 md:h-14 md:w-14 md:p-3'>
-										<img className='flex h-full w-full' src={editIcon.src} />
+									<button className='size-8 rounded-full bg-black  bg-opacity-40 p-2 md:size-14 md:p-3'>
+										<img className='flex size-full' src={editIcon.src} />
 									</button>
 								</div>
 								<PoolStatus status={poolSCStatus} />

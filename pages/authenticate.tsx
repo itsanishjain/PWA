@@ -70,8 +70,8 @@ const Authenticate = () => {
 		<Page>
 			<Appbar />
 			<Section>
-				<div className='flex h-full w-full items-center justify-center'>
-					<div className='flex h-96 w-96 flex-col'>
+				<div className='flex size-full items-center justify-center'>
+					<div className='flex size-96 flex-col'>
 						<div className='row flex w-full items-center'>
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>

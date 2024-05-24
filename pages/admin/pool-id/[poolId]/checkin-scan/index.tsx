@@ -46,9 +46,9 @@ const ScanQR: React.FC = () => {
 		<Page>
 			<Appbar backRoute={`${parentRoute}`} pageTitle='Check In' />
 			<Section>
-				<div className='relative flex h-full w-full flex-col'>
+				<div className='relative flex size-full flex-col'>
 					<QrReader
-						className='h-full w-full'
+						className='size-full'
 						scanDelay={1000}
 						onResult={(result, error) => {
 							if (!!result) {

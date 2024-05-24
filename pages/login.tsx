@@ -11,11 +11,6 @@ import Link from 'next/link'
 const LoginPage = () => {
 	const router = useRouter()
 	const { ready, authenticated, login } = usePrivy()
-
-	const handleClick = () => {
-		login()
-	}
-
 	const { wallets } = useWallets()
 
 	useEffect(() => {
@@ -27,8 +22,8 @@ const LoginPage = () => {
 	return (
 		<Page>
 			<Section>
-				<div className='relative flex h-full w-full items-center justify-center'>
-					<div className='flex h-96 w-96 flex-col'>
+				<div className='relative flex size-full items-center justify-center'>
+					<div className='flex size-96 flex-col'>
 						<div className='row flex w-full items-center'>
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
@@ -45,10 +40,10 @@ const LoginPage = () => {
 							</span>
 						</h2>
 
-						<div className='mt-28 flex h-full w-full items-center justify-center'>
+						<div className='mt-28 flex size-full items-center justify-center'>
 							<button
 								className='gradient-background rounded-full px-28 py-3'
-								onClick={handleClick}
+								onClick={login}
 							>
 								Connect wallet
 							</button>

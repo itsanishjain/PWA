@@ -13,7 +13,7 @@ const Home = () => {
 
 	useEffect(() => {
 		if (ready && !authenticated) {
-			router.push('/login')
+			router.replace('/login')
 		}
 	}, [wallets, ready, authenticated, router])
 

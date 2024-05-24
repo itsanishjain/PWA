@@ -34,7 +34,7 @@ const ParticipantRow: React.FC<ParticipantRowProps> = ({
 		>
 			<img
 				src={`${profileData?.profileImageUrl ?? frogImage.src}`}
-				className=' flex h-14 w-14 rounded-full object-cover'
+				className=' flex size-14 rounded-full object-cover'
 			/>
 			<div className='flex flex-1 flex-col '>
 				<h4 className='text-lg font-medium'>{name}</h4>

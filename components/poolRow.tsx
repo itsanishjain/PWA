@@ -55,12 +55,12 @@ const PoolRow: React.FC<PoolRowProps> = ({
 			href={`${window.location.href}${trailingSlash}pool-id/${poolId}`}
 			className='flex flex-row space-x-4'
 		>
-			<div className='relative h-20 w-20 overflow-hidden rounded-2xl bg-red-500'>
+			<div className='relative size-20 overflow-hidden rounded-2xl bg-red-500'>
 				<img
 					src={`
 						${_.isEmpty(poolImageUrl) ? frogImage.src : poolImageUrl}
 					`}
-					className='h-full w-full bg-black object-cover object-center'
+					className='size-full bg-black object-cover object-center'
 				/>
 				<div className='absolute bottom-0 w-full bg-black bg-opacity-40 py-1 text-center text-xs text-white'>
 					Upcoming

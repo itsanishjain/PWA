@@ -54,7 +54,7 @@ const ClaimablePoolRow: React.FC<ClaimablePoolRowProps> = ({ poolId }) => {
 		<div className='flex flex-row space-x-4 py-4'>
 			<img
 				src={`${poolData?.poolImageUrl ?? frogImage.src}`}
-				className=' flex h-14 w-14 rounded-xl object-cover'
+				className=' flex size-14 rounded-xl object-cover'
 			/>
 			<div className='flex flex-1 flex-col '>
 				<h4 className='text-lg font-medium '>
@@ -65,7 +65,7 @@ const ClaimablePoolRow: React.FC<ClaimablePoolRowProps> = ({ poolId }) => {
 			{
 				<div className='flex flex-row items-center justify-center space-x-2'>
 					<div>
-						<img className='h-6 w-6' src={circleTick.src} />
+						<img className='size-6' src={circleTick.src} />
 					</div>
 					<div className='paidBackground fontCheckedIn rounded-2xl px-6 py-4 font-medium'>
 						{ethers.formatEther(totalWinningAmount ?? 0).toString()} USD
