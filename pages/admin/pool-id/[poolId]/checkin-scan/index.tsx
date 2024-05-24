@@ -5,11 +5,11 @@ import { useToast } from '@/components/ui/use-toast'
 import { useCookie } from '@/hooks/cookie'
 import { handleCheckIn } from '@/lib/api/clientAPI'
 import router from 'next/router'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { QrReader } from 'react-qr-reader'
 
 const ScanQR: React.FC = () => {
-	const [qrData, setQRData] = useState<string>('')
+	const [, setQRData] = useState<string>('')
 
 	const [parentRoute, setParentRoute] = useState<string>('')
 	const { currentJwt } = useCookie()
@@ -36,10 +36,6 @@ const ScanQR: React.FC = () => {
 		}
 	}
 
-	const handleError = (err: any) => {
-		console.error(err)
-	}
-
 	useEffect(() => {
 		const paths = router?.asPath.split('/')
 		paths.pop() // Remove the last sub-route
@@ -50,9 +46,9 @@ const ScanQR: React.FC = () => {
 		<Page>
 			<Appbar backRoute={`${parentRoute}`} pageTitle='Check In' />
 			<Section>
-				<div className='h-full w-full relative flex flex-col'>
+				<div className='relative flex h-full w-full flex-col'>
 					<QrReader
-						className='w-full h-full'
+						className='h-full w-full'
 						scanDelay={1000}
 						onResult={(result, error) => {
 							if (!!result) {
@@ -65,9 +61,7 @@ const ScanQR: React.FC = () => {
 							}
 						}}
 						constraints={{ facingMode: 'environment' }}
-					></QrReader>
-
-					{/* <p>Scanned Data: {qrData}</p> */}
+					/>
 				</div>
 			</Section>
 		</Page>

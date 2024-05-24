@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo, ChangeEvent } from 'react'
 import { useRouter } from 'next/router'
-import Image from 'next/image'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
+import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import Appbar from '@/components/appbar'
 
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 
+import { useCookie } from '@/hooks/cookie'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
@@ -19,41 +19,29 @@ import {
 	handleSetWinners,
 } from '@/lib/api/clientAPI'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCookie } from '@/hooks/cookie'
 
-import frogImage from '@/public/images/frog.png'
 import searchIcon from '@/public/images/search.svg'
-import qrIcon from '@/public/images/qr_code_icon.svg'
 
 import ParticipantRow from '@/components/participantRow'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
-import WinnerRow from '@/components/winnerRow'
-import {
-	dictionaryToArray,
-	dictionaryToNestedArray,
-	getAllIndicesMatching,
-} from '@/lib/utils'
-import { ethers } from 'ethers'
-import { toast } from '@/components/ui/use-toast'
-import Link from 'next/link'
-import Divider from '@/components/divider'
 import { Progress } from '@/components/ui/progress'
-import * as _ from 'lodash'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { toast } from '@/components/ui/use-toast'
+import WinnerRow from '@/components/winnerRow'
+import { dictionaryToArray, dictionaryToNestedArray } from '@/lib/utils'
+import { ethers } from 'ethers'
+import Link from 'next/link'
 
 const ManageParticipantsPage = () => {
 	const router = useRouter()
 
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated, user } = usePrivy()
 
 	const { wallets } = useWallets()
 
-	const [poolDbData, setPoolDbData] = useState<any | undefined>()
+	const [, setPoolDbData] = useState<any | undefined>()
 
 	const [winnerAddresses, setWinnerAddresses] = useState<string[]>([])
-	const [filteredWinnerAddresses, setFilteredWinnerAddresses] =
-		useState<string[]>(winnerAddresses)
 
 	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
 	const [winnersInfo, setWinnersInfo] = useState<any>()
@@ -99,9 +87,7 @@ const ManageParticipantsPage = () => {
 		enabled: !!poolId,
 	})
 
-	const poolSCStatus = poolSCInfo?.[3]
-
-	let poolSCParticipants = poolSCInfo?.[5]
+	const poolSCParticipants = poolSCInfo?.[5]
 
 	const { data: participantsInfo } = useQuery({
 		queryKey: [
@@ -136,10 +122,6 @@ const ManageParticipantsPage = () => {
 	const checkedInParticipantsInfo = participantsInfo?.filter(
 		(participant) => participant?.participationData?.[0]?.status == 2,
 	)
-
-	const onQrButtonClicked = () => {
-		console.log('QR Button Clicked')
-	}
 
 	const setWinnersMutation = useMutation({
 		mutationFn: handleSetWinners,
@@ -216,18 +198,6 @@ const ManageParticipantsPage = () => {
 		)
 		setFilteredCheckedInParticipantsInfo(filteredData)
 	}
-	const [filteredWinnersInfo, setFilteredWinnersInfo] = useState(winnersInfo)
-	const filterWinnersInfo = (searchQuery: string) => {
-		const filteredData = winnersInfo?.filter(
-			(item: any) =>
-				item.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				participantsInfoDict?.[item.address]
-					?.toLowerCase()
-					.display_name.toLowerCase()
-					.includes(searchQuery.toLowerCase()),
-		)
-		setFilteredWinnersInfo(filteredData)
-	}
 
 	useEffect(() => {
 		// Update the document title using the browser API
@@ -246,7 +216,7 @@ const ManageParticipantsPage = () => {
 		setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
 		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
 		// for loop to get the winner details
-		let tempWinnersInfo = []
+		const tempWinnersInfo = []
 		for (let i = 0; i < winnerAddresses.length; i++) {
 			tempWinnersInfo.push({
 				address: winnerAddresses?.[i],
@@ -289,18 +259,17 @@ const ManageParticipantsPage = () => {
 			<Appbar backRoute={`${parentRoute}`} pageTitle='Manage Participants' />
 
 			<Section>
-				<div className='flex flex-col w-full '>
-					<div className='relative flex flex-col pt-16 w-full min-h-screen space-y-0 pb-20 md:pb-24 justify-start'>
-						<div className='relative h-10 mb-2'>
-							<span className='w-4 h-full absolute left-4 flex items-center'>
+				<div className='flex w-full flex-col '>
+					<div className='relative flex min-h-screen w-full flex-col justify-start space-y-0 pb-20 pt-16 md:pb-24'>
+						<div className='relative mb-2 h-10'>
+							<span className='absolute left-4 flex h-full w-4 items-center'>
 								<img className='flex' src={searchIcon.src} />
 							</span>
 							<Link
 								href={`${pageUrl}/payout-scan`}
-								className='w-6 h-10 absolute right-0 flex items-center'
-								// onClick={onQrButtonClicked}
+								className='absolute right-0 flex h-10 w-6 items-center'
 							>
-								<span className='w-full h-full flex items-center'>
+								<span className='flex h-full w-full items-center'>
 									<svg
 										width='14'
 										height='14'
@@ -321,15 +290,14 @@ const ManageParticipantsPage = () => {
 								value={query}
 								onChange={handleChange}
 								placeholder='Search'
-								className='rounded-full mb-2 px-10 h-10'
+								className='mb-2 h-10 rounded-full px-10'
 							/>
 						</div>
 						<Tabs defaultValue='registered' className='w-full'>
-							<TabsList className='w-full flex justify-start p-0 space-x-0 md:space-x-8 rounded-none z-10'>
+							<TabsList className='z-10 flex w-full justify-start space-x-0 rounded-none p-0 md:space-x-8'>
 								<TabsTrigger value='registered'>Registered</TabsTrigger>
 								<TabsTrigger value='checkedIn'>Checked in</TabsTrigger>
 								<TabsTrigger value='winners'>Winners</TabsTrigger>
-								{/* <TabsTrigger value='refunded'>Refunded</TabsTrigger> */}
 							</TabsList>
 							<TabsContent value='registered'>
 								{filteredParticipantsInfo?.map((participant) => (
@@ -361,7 +329,7 @@ const ManageParticipantsPage = () => {
 							</TabsContent>
 							<TabsContent value='winners'>
 								<div>
-									<div className='flex flex-col space-y-2 my-4'>
+									<div className='my-4 flex flex-col space-y-2'>
 										<div className='flex flex-row justify-between'>
 											<span>
 												<span className='font-bold'>
@@ -404,7 +372,7 @@ const ManageParticipantsPage = () => {
 											setWinner={true}
 										/>
 									))}
-									{savedPayoutsInfo?.map((participant, index) => (
+									{savedPayoutsInfo?.map((participant) => (
 										<WinnerRow
 											key={participant?.id}
 											name={
@@ -421,9 +389,9 @@ const ManageParticipantsPage = () => {
 											setWinner={false}
 										/>
 									))}
-									<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+									<div className='fixed bottom-5 left-1/2 flex w-full max-w-screen-md -translate-x-1/2 flex-row space-x-2 px-6 md:bottom-6'>
 										<button
-											className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+											className={`focus:shadow-outline flex h-12 flex-1 items-center justify-center rounded-full bg-black px-4 py-2 text-center font-bold text-white focus:outline-none `}
 											onClick={onPayoutButtonClicked}
 										>
 											Payout
@@ -431,7 +399,6 @@ const ManageParticipantsPage = () => {
 									</div>
 								</div>
 							</TabsContent>
-							{/* <TabsContent value='refunded'>Refunded</TabsContent> */}
 						</Tabs>
 					</div>
 				</div>

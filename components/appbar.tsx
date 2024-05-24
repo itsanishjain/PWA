@@ -1,22 +1,17 @@
+import { removeTokenCookie } from '@/hooks/cookie'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import {
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
-import { removeTokenCookie, useCookie } from '@/hooks/cookie'
 
 import leftArrowImage from '@/public/images/left_arrow.svg'
 
-import { Comfortaa } from 'next/font/google'
-import { useEffect, useState } from 'react'
-import { JwtPayload, decode } from 'jsonwebtoken'
 import frogImage from '@/public/images/frog.png'
 import keyboardReturnImage from '@/public/images/keyboard_return.svg'
+import { Comfortaa } from 'next/font/google'
+import { useEffect, useState } from 'react'
 
-import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { fetchUserDisplayForAddress } from '@/lib/api/clientAPI'
+import { useQuery } from '@tanstack/react-query'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -34,7 +29,6 @@ interface AppBarProps {
 
 const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 	const router = useRouter()
-	const { currentJwt } = useCookie()
 	const { wallets, ready: walletsReady } = useWallets()
 	const [pageUrl, setPageUrl] = useState('')
 
@@ -48,11 +42,7 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 		logout()
 		removeTokenCookie()
 	}
-	const [profileImageUrl, setProfileImageUrl] = useState<string>(
-		`${frogImage.src}`,
-	)
 
-	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', wallets?.[0]?.address],
 		queryFn: fetchUserDisplayForAddress,
@@ -73,7 +63,7 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 	}, [profileData, ready, authenticated, router])
 
 	return (
-		<header className='fixed top-0 left-0 z-20 w-full pt-safe bg-white'>
+		<header className='fixed left-0 top-0 z-20 w-full bg-white pt-safe'>
 			<nav className=' px-safe '>
 				<div className='mx-auto flex h-20 max-w-screen-md items-center justify-between px-6'>
 					<div className='flex w-16'>
@@ -86,21 +76,21 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 					<div className='flex flex-1 items-center'>
 						{pageTitle ? (
 							<h1
-								className={`text-center w-full h-full font-medium md:text-3xl text-xl`}
+								className={`h-full w-full text-center text-xl font-medium md:text-3xl`}
 							>
 								{pageTitle}
 							</h1>
 						) : (
-							<Link href='/' className='text-center w-full'>
+							<Link href='/' className='w-full text-center'>
 								<h1
-									className={`text-center w-full h-full font-bold text-5xl ${comfortaa.className}`}
+									className={`h-full w-full text-center text-5xl font-bold ${comfortaa.className}`}
 								>
 									pool
 								</h1>
 							</Link>
 						)}
 					</div>
-					<div className='flex justify-end space-x-6 w-16'>
+					<div className='flex w-16 justify-end space-x-6'>
 						{rightMenu == RightMenu.ProfileImage ||
 							(rightMenu == undefined && (
 								<div>
@@ -110,8 +100,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 									>
 										<img
 											src={`${profileData?.profileImageUrl ?? frogImage.src}`}
-											className='rounded-full w-9 h-9 object-cover'
-										></img>
+											className='h-9 w-9 rounded-full object-cover'
+										/>
 									</button>
 								</div>
 							))}
@@ -136,7 +126,7 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 								</button> */}
 								<DropdownMenu>
 									<DropdownMenuTrigger>
-										<div className='w-12 h-12 p-3 rounded-full'>
+										<div className='h-12 w-12 rounded-full p-3'>
 											<svg
 												width='20'
 												height='20'
@@ -154,12 +144,12 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 									<DropdownMenuContent sideOffset={0}>
 										<DropdownMenuItem>
 											<Link href={`${pageUrl}/refund`}>
-												<div className='flex flex-row space-x-2 items-center justify-center'>
+												<div className='flex flex-row items-center justify-center space-x-2'>
 													<span>
 														<img
-															className='flex w-full h-full'
+															className='flex h-full w-full'
 															src={keyboardReturnImage.src}
-														></img>
+														/>
 													</span>
 													<span>Issue refund</span>
 												</div>
@@ -174,8 +164,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 								<button className='flex flex-col items-center'>
 									<img
 										src={`${profileData?.profileImageUrl ?? frogImage.src}`}
-										className='rounded-full w-9 h-9 object-cover'
-									></img>
+										className='h-9 w-9 rounded-full object-cover'
+									/>
 								</button>
 							</div>
 						)}

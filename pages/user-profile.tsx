@@ -1,53 +1,34 @@
+import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import Image from 'next/image'
-import frogImage from '@/public/images/frog.png'
-import { useRouter } from 'next/router'
-import {
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
-
-import React, { useState, useEffect, ChangeEvent } from 'react'
-
-import { ethers } from 'ethers'
-import Appbar from '@/components/appbar'
-
-import { FundWalletConfig } from '@privy-io/react-auth'
-import { provider } from '@/constants/constant'
-import { Inter } from 'next/font/google'
-import styles from './styles/user-profile.module.css'
 import {
 	fetchClaimablePoolsFromSC,
 	fetchUserDisplayForAddress,
 	handleClaimWinnings,
-	updateUserDisplayData,
-	uploadProfileImage,
 } from '@/lib/api/clientAPI'
-import { removeTokenCookie, useCookie } from '@/hooks/cookie'
-import { JwtPayload, decode } from 'jsonwebtoken'
-import camera from '@/public/images/camera.png'
+import frogImage from '@/public/images/frog.png'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Inter } from 'next/font/google'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
-import * as _ from 'lodash'
+import ClaimablePoolRow from '@/components/claimablePoolRow'
+import Divider from '@/components/divider'
 import { useToast } from '@/components/ui/use-toast'
 import {
 	formatAddress,
 	getAllIndicesMatching,
 	getValuesFromIndices,
 } from '@/lib/utils'
+import * as _ from 'lodash'
 import Link from 'next/link'
-import { Divide } from 'lucide-react'
-import Divider from '@/components/divider'
-import ClaimablePoolRow from '@/components/claimablePoolRow'
 
 const inter = Inter({ subsets: ['latin'] })
 
 const UserProfile = () => {
 	const router = useRouter()
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated } = usePrivy()
 
 	const { wallets } = useWallets()
 
@@ -56,10 +37,8 @@ const UserProfile = () => {
 	)
 
 	const queryClient = useQueryClient()
-	const { currentJwt } = useCookie()
 	const { toast } = useToast()
 
-	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', wallets?.[0]?.address],
 		queryFn: fetchUserDisplayForAddress,
@@ -112,7 +91,7 @@ const UserProfile = () => {
 			router.push('/login')
 		}
 
-		for (var i = 0; i < wallets.length; i++) {
+		for (let i = 0; i < wallets.length; i++) {
 			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
 
@@ -128,12 +107,12 @@ const UserProfile = () => {
 			<Appbar backRoute='/' pageTitle='User Profile' />
 			<Section>
 				<div
-					className={`flex justify-center w-full mt-20 min-h-screen ${inter.className}`}
+					className={`mt-20 flex min-h-screen w-full justify-center ${inter.className}`}
 				>
-					<div className='flex flex-col w-full pb-8 space-y-4'>
-						<div className='flex w-full justify-center flex-col items-center space-y-4'>
+					<div className='flex w-full flex-col space-y-4 pb-8'>
+						<div className='flex w-full flex-col items-center justify-center space-y-4'>
 							<img
-								className='rounded-full w-40 aspect-square center object-cover z-0'
+								className='center z-0 aspect-square w-40 rounded-full object-cover'
 								src={profileImageUrl}
 							/>
 							{!_.isEmpty(wallets?.[0]?.address) && (
@@ -144,14 +123,14 @@ const UserProfile = () => {
 						</div>
 						<div className='flex justify-center'>
 							<Link
-								className='bg-black rounded-full text-white  px-8 w-full py-2 text-center barForeground'
+								className='barForeground w-full rounded-full  bg-black px-8 py-2 text-center text-white'
 								href={'/edit-user-profile'}
 							>
 								Edit Profile
 							</Link>
 						</div>
 						<div
-							className={`flex flex-col rounded-3xl cardBackground w-full p-6 md:p-10 md:space-y-10`}
+							className={`cardBackground flex w-full flex-col rounded-3xl p-6 md:space-y-10 md:p-10`}
 						>
 							<h2 className='font-medium'>Claimable</h2>
 							<Divider />
@@ -166,9 +145,9 @@ const UserProfile = () => {
 						</div>
 					</div>
 				</div>
-				<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+				<div className='fixed bottom-5 left-1/2 w-full max-w-screen-md -translate-x-1/2 px-6 md:bottom-6'>
 					<button
-						className={`barForeground w-full h-12 md:h-16 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline md:text-2xl`}
+						className={`barForeground focus:shadow-outline h-12 w-full rounded-full px-4 py-2 font-bold text-white focus:outline-none md:h-16 md:text-2xl`}
 						onClick={onClaimAllButtonClicked}
 					>
 						Claim All

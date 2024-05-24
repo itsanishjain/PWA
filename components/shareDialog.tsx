@@ -1,11 +1,11 @@
 import * as React from 'react'
 
-import { cn } from '@/lib/utils'
-import useMediaQuery from '@/hooks/use-media-query'
 import { Button } from '@/components/ui/button'
+import useMediaQuery from '@/hooks/use-media-query'
+import { cn } from '@/lib/utils'
 import shareIcon from '@/public/images/share_icon.svg'
-import QRCode from 'react-qr-code'
 import * as _ from 'lodash'
+import QRCode from 'react-qr-code'
 
 import {
 	Dialog,
@@ -26,9 +26,8 @@ import {
 	DrawerTrigger,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Dispatch, SetStateAction, useState } from 'react'
 import router from 'next/router'
+import { Dispatch, SetStateAction, useState } from 'react'
 import Divider from './divider'
 import { toast } from './ui/use-toast'
 
@@ -44,8 +43,8 @@ const ShareDialog = (props: shareDialogProps) => {
 		return (
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogTrigger asChild>
-					<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-						<img className='w-full h-full flex' src={shareIcon.src} />
+					<button className='h-8 w-8 rounded-full  bg-black bg-opacity-40 p-2 md:h-14 md:w-14 md:p-3'>
+						<img className='flex h-full w-full' src={shareIcon.src} />
 					</button>
 				</DialogTrigger>
 				<DialogContent className='sm:max-w-[425px]'>
@@ -64,8 +63,8 @@ const ShareDialog = (props: shareDialogProps) => {
 	return (
 		<Drawer open={open} onOpenChange={setOpen}>
 			<DrawerTrigger asChild>
-				<button className='rounded-full w-8 h-8  md:w-14 md:h-14 md:p-3 p-2 bg-black bg-opacity-40'>
-					<img className='w-full h-full flex' src={shareIcon.src} />
+				<button className='h-8 w-8 rounded-full  bg-black bg-opacity-40 p-2 md:h-14 md:w-14 md:p-3'>
+					<img className='flex h-full w-full' src={shareIcon.src} />
 				</button>
 			</DrawerTrigger>
 			<DrawerContent>
@@ -110,7 +109,7 @@ function ShareForm({ className }: React.ComponentProps<'form'>) {
 	}
 	return (
 		<div className={cn('flex flex-col space-y-10 my-8', className)}>
-			<div className='w-full h-60 flex flex-col justify-center items-center'>
+			<div className='flex h-60 w-full flex-col items-center justify-center'>
 				{!_.isEmpty(currentRoute) && (
 					<QRCode
 						size={256}

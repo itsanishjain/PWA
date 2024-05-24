@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import rightArrow from '@/public/images/right_arrow.svg'
-import PoolRow from '../poolRow'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { fetchUpcomingPools } from '@/lib/api/clientAPI'
-import router from 'next/router'
 import { poolData } from '@/types/types'
+import React, { useEffect, useState } from 'react'
+import PoolRow from '../poolRow'
 
 const UpcomingPoolTab: React.FC = () => {
 	const [poolsData, setPoolsData] = useState<poolData[] | undefined>([])
@@ -20,7 +17,7 @@ const UpcomingPoolTab: React.FC = () => {
 	}, [])
 
 	return (
-		<div className='flex flex-col flex-grow mt-8 w-full h-full space-y-4'>
+		<div className='mt-8 flex h-full w-full grow flex-col space-y-4'>
 			{poolsData?.map((pool) => {
 				return (
 					<PoolRow

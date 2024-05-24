@@ -1,8 +1,7 @@
 import { jwtExpiryDurationInDays } from '@/constants/constant'
 import Cookies from 'js-cookie'
-import { useState } from 'react'
 import jwt from 'jsonwebtoken'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export function getTokenCookie(): string | undefined {
 	return Cookies.get('token')

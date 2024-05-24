@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
+import { useEffect, useMemo, useState } from 'react'
 
+import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import Appbar from '@/components/appbar'
 
 import QRCode from 'react-qr-code'
 
-import * as _ from 'lodash'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
+import * as _ from 'lodash'
 
-import { Tables, Database } from '@/types/supabase'
+import { Database } from '@/types/supabase'
 
 import { fetchAllPoolDataFromDB } from '@/lib/api/clientAPI'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
 export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
@@ -64,11 +64,11 @@ const TicketPage = () => {
 			<Appbar backRoute={`${parentRoute}`} pageTitle='Ticket' />
 
 			<Section>
-				<div className='flex flex-col w-full '>
-					<div className='relative flex flex-col pt-16 w-full min-h-screen space-y-0 pb-20 md:pb-24 justify-start'>
+				<div className='flex w-full flex-col '>
+					<div className='relative flex min-h-screen w-full flex-col justify-start space-y-0 pb-20 pt-16 md:pb-24'>
 						<h2 className='text-center text-2xl'>{poolDbData?.pool_name}</h2>
-						<div className='flex flex-1 flex-col w-full justify-center items-center'>
-							<div className='rounded-3xl flex w-full cardBackground p-12 max-w-lg'>
+						<div className='flex w-full flex-1 flex-col items-center justify-center'>
+							<div className='cardBackground flex w-full max-w-lg rounded-3xl p-12'>
 								{!_.isEmpty(wallets) && (
 									<QRCode
 										size={256}

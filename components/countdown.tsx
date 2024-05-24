@@ -1,30 +1,3 @@
-// import { formatCountdownTime } from '@/lib/utils'
-// import React, { useState, useEffect } from 'react'
-
-// const CountdownTimer = ({ initialTime }: { initialTime: number }) => {
-// 	const [timeRemaining, setTimeRemaining] = useState<number>(initialTime)
-
-// 	useEffect(() => {
-// 		if (initialTime === null || initialTime === undefined) {
-// 			console.log('timeleft component null')
-
-// 			return
-// 		} else {
-// 			const id = setInterval(() => {
-// 				setTimeRemaining((prevTime) => {
-// 					console.log('tick')
-// 					return prevTime - 1
-// 				})
-// 			}, 1000)
-// 			return () => clearInterval(id)
-// 		}
-// 	}, [timeRemaining, initialTime])
-
-// 	return <div>{formatCountdownTime(timeRemaining)}</div>
-// }
-
-// export default CountdownTimer
-
 import { formatCountdownTime } from '@/lib/utils'
 import React, { useEffect, useState } from 'react'
 
@@ -38,8 +11,6 @@ const CountdownTimer: React.FC<CountdownProps> = ({ timeleft }) => {
 	useEffect(() => {
 		if (timeleft === null || timeleft === undefined) {
 			console.log('timeleft component null')
-
-			return
 		} else {
 			console.log('timeleft component', timeleft)
 			setCountdown(timeleft)

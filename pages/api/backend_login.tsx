@@ -1,21 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { NextResponse } from 'next/server'
-import { hashMessage, recoverAddress, verifyMessage } from 'ethers'
-import { createBrowserClient } from '@supabase/ssr'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { createClient } from '@supabase/supabase-js'
+import { hashMessage, recoverAddress } from 'ethers'
 import jwt from 'jsonwebtoken'
-import { jwtDuration } from '@/constants/constant'
-
-type ResponseData = {
-	message: string
-}
-
-interface RequestData {
-	name: string
-	email: string
-	// Add other properties as needed
-}
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
 	req: NextApiRequest,
@@ -50,22 +36,22 @@ export default async function handler(
 			.json({ message: 'Address does not match signature address' })
 	}
 
-	const { data, error } = await supabaseAdminClient
+	const { data } = await supabaseAdminClient
 		.from('users')
 		.select('*')
 		.eq('address', addressLower)
 
 	console.log('data', data)
 
-	if (data == null || data![0].auth.genNonce != nonce) {
+	if (data == null || data[0].auth.genNonce != nonce) {
 		return res
 			.status(401)
 			.json({ message: 'Address does not match signature address' })
 	}
 
-	let userId = data![0].id
+	let userId = data[0].id
 	console.log('Retrieved userId', userId)
-	if (data![0].id == '' || data![0].id == null || data![0].id == undefined) {
+	if (data[0].id == '' || data[0].id == null || data[0].id == undefined) {
 		const { data: user, error: createUserError } =
 			await supabaseAdminClient.auth.admin.createUser({
 				email: `${addressLower}@email.com`,
@@ -94,13 +80,12 @@ export default async function handler(
 		// TODO: Should only update usersDisplayDataa when creating user?
 	}
 
-	const { data: usersDisplayData, error: updateUsersDisplayError } =
-		await supabaseAdminClient
-			.from('usersDisplay')
-			.upsert({ id: userId, address: addressLower })
-			.match({
-				id: userId,
-			})
+	const { error: updateUsersDisplayError } = await supabaseAdminClient
+		.from('usersDisplay')
+		.upsert({ id: userId, address: addressLower })
+		.match({
+			id: userId,
+		})
 
 	if (updateUsersDisplayError) {
 		console.log('updateIdError', updateUsersDisplayError.message)

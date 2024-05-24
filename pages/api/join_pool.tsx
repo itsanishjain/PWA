@@ -1,8 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { NextResponse } from 'next/server'
-import { hashMessage, recoverAddress, verifyMessage } from 'ethers'
 import { createClient } from '@supabase/supabase-js'
-import { JwtPayload, decode } from 'jsonwebtoken'
+import { decode } from 'jsonwebtoken'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 type ResponseData = {
 	message: string
@@ -117,7 +115,7 @@ export default async function handler(
 		console.log('participantCount', participantCount?.[0].participant_count)
 		console.log('poolId', poolId)
 
-		let count = participantCount?.[0].participant_count ?? 0
+		const count = participantCount?.[0].participant_count ?? 0
 		const { data: updateData, error: updateParticipantCountError } =
 			await supabaseAdminClient
 				.from('pool') // replace with your table name

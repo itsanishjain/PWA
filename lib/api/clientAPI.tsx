@@ -1,12 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
-import Cookies from 'js-cookie'
-import { ErrorInfo } from 'react'
-import { decode } from 'jsonwebtoken'
-import { PostgrestSingleResponse } from '@supabase/supabase-js'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
-import { UserDisplayRow } from '@/pages/pool-id/[poolId]'
-import { QueryFunction } from '@tanstack/react-query'
-import { ethers } from 'ethers'
 import {
 	contractAddress,
 	dropletIFace,
@@ -14,6 +5,10 @@ import {
 	provider,
 	tokenAddress,
 } from '@/constants/constant'
+import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { PostgrestSingleResponse, createClient } from '@supabase/supabase-js'
+import { ethers } from 'ethers'
+import { decode } from 'jsonwebtoken'
 
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
@@ -183,7 +178,6 @@ export const updateUserDisplayData = async (
 		console.error('Error updating user data:', userError.message)
 	}
 	return { userData, userError }
-	console.log('usersDisplay Information updated successfully')
 }
 
 export const fetchUpcomingPools = async () => {
@@ -237,7 +231,6 @@ export const fetchUserDisplayInfoFromServer = async (addressList: string[]) => {
 
 	if (error) {
 		console.error('Error reading data:', error)
-		return
 	} else {
 		console.log('fetchUserDisplayInfoFromServer data:', data)
 		return data
@@ -495,7 +488,7 @@ export const handleRegister = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	let approveDropletDataString = dropletIFace.encodeFunctionData('approve', [
+	const approveDropletDataString = dropletIFace.encodeFunctionData('approve', [
 		contractAddress,
 		deposit,
 	])
@@ -524,10 +517,9 @@ export const handleRegister = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 
-	let depositDataString = poolIFace.encodeFunctionData('deposit', [
+	const depositDataString = poolIFace.encodeFunctionData('deposit', [
 		poolId,
 		deposit,
 	])
@@ -555,7 +547,6 @@ export const handleRegister = async ({
 		console.log('Transaction confirmed!', transactionReceipt)
 	} catch (e: any) {
 		console.log('User did not sign transaction')
-		return
 	}
 }
 
@@ -572,7 +563,7 @@ export const handleUnregister = async ({
 	const address = wallet.address
 	console.log('wallet', walletAddress)
 	console.log('poolId', poolId)
-	let selfRefundDataString = poolIFace.encodeFunctionData('selfRefund', [
+	const selfRefundDataString = poolIFace.encodeFunctionData('selfRefund', [
 		poolId,
 	])
 
@@ -631,9 +622,10 @@ export const handleEnableDeposit = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	let enableDepositDataString = poolIFace.encodeFunctionData('enableDeposit', [
-		poolId,
-	])
+	const enableDepositDataString = poolIFace.encodeFunctionData(
+		'enableDeposit',
+		[poolId],
+	)
 
 	try {
 		const provider = await wallet.getEthereumProvider()
@@ -659,7 +651,6 @@ export const handleEnableDeposit = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }
 
@@ -672,7 +663,9 @@ export const handleStartPool = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	let startPoolDataString = poolIFace.encodeFunctionData('startPool', [poolId])
+	const startPoolDataString = poolIFace.encodeFunctionData('startPool', [
+		poolId,
+	])
 
 	try {
 		const provider = await wallet.getEthereumProvider()
@@ -698,7 +691,6 @@ export const handleStartPool = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }
 
@@ -711,7 +703,7 @@ export const handleEndPool = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	let endPoolDataString = poolIFace.encodeFunctionData('endPool', [poolId])
+	const endPoolDataString = poolIFace.encodeFunctionData('endPool', [poolId])
 
 	try {
 		const provider = await wallet.getEthereumProvider()
@@ -737,7 +729,6 @@ export const handleEndPool = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }
 
@@ -750,7 +741,7 @@ export const handleSetWinner = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	let setWinnerDataString = poolIFace.encodeFunctionData('setWinner', [
+	const setWinnerDataString = poolIFace.encodeFunctionData('setWinner', [
 		poolId,
 		winnerAddress,
 		ethers.parseEther(amount),
@@ -780,7 +771,6 @@ export const handleSetWinner = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }
 
@@ -791,7 +781,7 @@ export const handleSavePayout = async ({
 }) => {
 	const [poolId, amount, winnerAddress, jwt] = params
 
-	let dataObj = { poolId, winnerAddress, amount, jwtString: jwt }
+	const dataObj = { poolId, winnerAddress, amount, jwtString: jwt }
 	try {
 		const response = await fetch('/api/save_payout', {
 			method: 'POST',
@@ -819,11 +809,10 @@ export const handleRefundParticipant = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	let setWinnerDataString = poolIFace.encodeFunctionData('refundParticipant', [
-		poolId,
-		winnerAddress,
-		ethers.parseEther(amount),
-	])
+	const setWinnerDataString = poolIFace.encodeFunctionData(
+		'refundParticipant',
+		[poolId, winnerAddress, ethers.parseEther(amount)],
+	)
 
 	try {
 		const provider = await wallet.getEthereumProvider()
@@ -849,7 +838,6 @@ export const handleRefundParticipant = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }
 
@@ -943,7 +931,7 @@ export const handleSetWinners = async ({
 	)
 	console.log('amountsArray', amountsArray)
 
-	let setWinnersDataString = poolIFace.encodeFunctionData('setWinners', [
+	const setWinnersDataString = poolIFace.encodeFunctionData('setWinners', [
 		poolId,
 		winnerAddresses,
 		amountsArray,
@@ -972,7 +960,6 @@ export const handleSetWinners = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }
 
@@ -983,7 +970,7 @@ export const handleDeleteSavedPayouts = async ({
 }) => {
 	const [poolId, winnerAddresses, amounts, jwt] = params
 
-	let dataObj = { poolId, winnerAddresses, amounts, jwtString: jwt }
+	const dataObj = { poolId, winnerAddresses, amounts, jwtString: jwt }
 	try {
 		const response = await fetch('/api/delete_payout', {
 			method: 'POST',
@@ -1009,7 +996,7 @@ export const handleDeleteParticipant = async ({
 }) => {
 	const [poolId, address, jwt] = params
 
-	let dataObj = { poolId, address, jwtString: jwt }
+	const dataObj = { poolId, address, jwtString: jwt }
 	try {
 		const response = await fetch('/api/delete_participant', {
 			method: 'POST',
@@ -1036,8 +1023,8 @@ export const handleCheckIn = async ({
 	jwt: string
 }) => {
 	// const [poolId, address, jwt] = params
-	let qrDataObj: any = JSON.parse(data)
-	let dataObj = {
+	const qrDataObj: any = JSON.parse(data)
+	const dataObj = {
 		poolId: qrDataObj?.poolId,
 		address: qrDataObj?.address,
 		jwtString: jwt,
@@ -1052,7 +1039,6 @@ export const handleCheckIn = async ({
 		})
 		if (!response.ok) {
 			throw new Error('Network response was not ok')
-			return
 		}
 		const data = await response.json()
 		return data
@@ -1070,7 +1056,7 @@ export const handleClaimWinning = async ({
 
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
-	let claimWinningDataString = poolIFace.encodeFunctionData('claimWinning', [
+	const claimWinningDataString = poolIFace.encodeFunctionData('claimWinning', [
 		poolId,
 		walletAddress,
 	])
@@ -1099,7 +1085,6 @@ export const handleClaimWinning = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }
 
@@ -1113,7 +1098,7 @@ export const handleClaimWinnings = async ({
 	const walletAddress = wallets[0].address
 	const wallet = wallets[0]
 	const walletAddresses = poolIds.map((poolId) => walletAddress)
-	let claimWinningDataString = poolIFace.encodeFunctionData('claimWinnings', [
+	const claimWinningDataString = poolIFace.encodeFunctionData('claimWinnings', [
 		poolIds,
 		walletAddresses,
 	])
@@ -1142,6 +1127,5 @@ export const handleClaimWinnings = async ({
 	} catch (e: any) {
 		console.log('User did not sign transaction')
 		throw new Error('User did not sign transaction')
-		return
 	}
 }

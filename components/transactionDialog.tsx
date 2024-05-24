@@ -1,16 +1,14 @@
 import {
 	AlertDialog,
 	AlertDialogAction,
-	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Dispatch, SetStateAction } from 'react'
 import LoadingAnimation from './loadingAnimation'
-import { Dispatch, MouseEventHandler, SetStateAction } from 'react'
 
 interface transactionDialog {
 	open: boolean

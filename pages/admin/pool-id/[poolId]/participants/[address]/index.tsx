@@ -1,42 +1,27 @@
+import Appbar, { RightMenu } from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import frogImage from '@/public/images/frog.png'
-import { useRouter } from 'next/router'
-import {
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
-
-import React, { useState, useEffect, ChangeEvent, useMemo, useRef } from 'react'
-
-import Appbar, { RightMenu } from '@/components/appbar'
-
-import { Inter } from 'next/font/google'
-
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
+import { useCookie } from '@/hooks/cookie'
 import {
 	fetchUserDisplayForAddress,
 	handleSavePayout,
 	handleSetWinner,
-	updateUserDisplayData,
-	uploadProfileImage,
 } from '@/lib/api/clientAPI'
-import { removeTokenCookie, useCookie } from '@/hooks/cookie'
-import { JwtPayload, decode } from 'jsonwebtoken'
+import frogImage from '@/public/images/frog.png'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-
-import * as _ from 'lodash'
-import { useToast } from '@/components/ui/use-toast'
-import { Input } from '@/components/ui/input'
-import styles from './styles/admin.module.css'
 import { ethers } from 'ethers'
+import { Inter } from 'next/font/google'
+import { useRouter } from 'next/router'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
 const UserProfile = () => {
 	const router = useRouter()
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated } = usePrivy()
 
 	const { wallets } = useWallets()
 
@@ -49,7 +34,6 @@ const UserProfile = () => {
 
 	const [displayName, setDisplayName] = useState<string>('')
 
-	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', wallets?.[0]?.address],
 		queryFn: fetchUserDisplayForAddress,
@@ -104,7 +88,7 @@ const UserProfile = () => {
 		},
 	})
 
-	const onPayoutButtonClicked = (e: any) => {
+	const onPayoutButtonClicked = () => {
 		toast({
 			title: 'Requesting Transaction',
 			description: 'Set Winner',
@@ -120,7 +104,7 @@ const UserProfile = () => {
 		})
 	}
 
-	const onSavePayoutButtonClicked = (e: any) => {
+	const onSavePayoutButtonClicked = () => {
 		toast({
 			title: 'Saving Payout',
 			description: 'Saving payout',
@@ -138,17 +122,7 @@ const UserProfile = () => {
 
 	useEffect(() => {
 		if (ready && !authenticated) {
-			// Replace this code with however you'd like to handle an unauthenticated user
-			// As an example, you might redirect them to a sign-in page
 			router.push('/login')
-		}
-
-		if (wallets.length > 0) {
-			console.log(`Wallet Length: ${wallets.length}`)
-			// console.log(`Wallet Address: ${wallets[0].address}`)
-		}
-		for (var i = 0; i < wallets.length; i++) {
-			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
 
 		if (profileData?.profileImageUrl) {
@@ -170,28 +144,28 @@ const UserProfile = () => {
 			/>
 			<Section>
 				<div
-					className={`flex justify-center w-full mt-20 min-h-screen ${inter.className}`}
+					className={`mt-20 flex min-h-screen w-full justify-center ${inter.className}`}
 				>
-					<div className='flex flex-col w-96 pb-8'>
+					<div className='flex w-96 flex-col pb-8'>
 						<div className='flex w-full justify-center'>
 							<img
-								className='rounded-full w-24 aspect-square center object-cover z-0'
+								className='center z-0 aspect-square w-24 rounded-full object-cover'
 								src={profileImageUrl}
 							/>
 						</div>
 
 						<div className='flex flex-row'>
-							<h3 className='h-10 flex flex-row items-center justify-center flex-1 font-semibold'>
+							<h3 className='flex h-10 flex-1 flex-row items-center justify-center font-semibold'>
 								{displayName}
 							</h3>
 						</div>
 						<div className='flex flex-row justify-center'>
 							<p>Checked in</p>
 						</div>
-						<div className='flex flex-row justify-center h-16 mt-2 '>
-							<div className='flex relative justify-center '>
+						<div className='mt-2 flex h-16 flex-row justify-center '>
+							<div className='relative flex justify-center '>
 								<Input
-									className='border-none text-center text-6xl font-bold h-16 w-auto'
+									className='h-16 w-auto border-none text-center text-6xl font-bold'
 									placeholder=''
 									autoFocus={true}
 									value={inputValue}
@@ -200,20 +174,17 @@ const UserProfile = () => {
 									ref={inputRef}
 									inputMode='numeric'
 								/>
-								{/* <span className='absolute left-0 flex-row text-sm h-16 justify-center py-2'>
-									$
-								</span> */}
 							</div>
 						</div>
-						<div className='flex flex-col w-full items-center justify-center mt-8 space-y-2'>
+						<div className='mt-8 flex w-full flex-col items-center justify-center space-y-2'>
 							<button
-								className='rounded-full bg-black text-white h-10 w-48 font-medium'
+								className='h-10 w-48 rounded-full bg-black font-medium text-white'
 								onClick={onSavePayoutButtonClicked}
 							>
 								Save
 							</button>
 							<button
-								className='rounded-full bg-black text-white h-10 w-48 font-medium'
+								className='h-10 w-48 rounded-full bg-black font-medium text-white'
 								onClick={onPayoutButtonClicked}
 							>
 								Payout

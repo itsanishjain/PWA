@@ -1,23 +1,19 @@
-import React, { useEffect, useState } from 'react'
-import rightArrow from '@/public/images/right_arrow.svg'
-import frogImage from '@/public/images/frog.png'
 import circleTick from '@/public/images/circle-tick.svg'
+import frogImage from '@/public/images/frog.png'
+import React from 'react'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
 	fetchAllPoolDataFromDB,
-	fetchUserDisplayForAddress,
 	fetchWinnersDetailsFromSC,
 } from '@/lib/api/clientAPI'
-import router from 'next/router'
-import * as _ from 'lodash'
-import { ParticipantStatus } from './participantRow'
-import { ethers } from 'ethers'
 import {
 	getAllIndicesMatching,
 	getRowsByColumnValue,
 	getValuesFromIndices,
 } from '@/lib/utils'
+import { useQuery } from '@tanstack/react-query'
+import { ethers } from 'ethers'
+import * as _ from 'lodash'
 
 import { useWallets } from '@privy-io/react-auth'
 
@@ -58,10 +54,10 @@ const ClaimablePoolRow: React.FC<ClaimablePoolRowProps> = ({ poolId }) => {
 		<div className='flex flex-row space-x-4 py-4'>
 			<img
 				src={`${poolData?.poolImageUrl ?? frogImage.src}`}
-				className=' flex rounded-xl w-14 h-14 object-cover'
-			></img>
+				className=' flex h-14 w-14 rounded-xl object-cover'
+			/>
 			<div className='flex flex-1 flex-col '>
-				<h4 className='font-medium text-lg '>
+				<h4 className='text-lg font-medium '>
 					{poolData?.poolDBInfo?.['pool_name'] ?? ` Pool Id ${poolId}`}
 				</h4>
 				<p className={`fontCheckedIn font-semibold`}>Winner</p>
@@ -69,9 +65,9 @@ const ClaimablePoolRow: React.FC<ClaimablePoolRowProps> = ({ poolId }) => {
 			{
 				<div className='flex flex-row items-center justify-center space-x-2'>
 					<div>
-						<img className='w-6 h-6' src={circleTick.src} />
+						<img className='h-6 w-6' src={circleTick.src} />
 					</div>
-					<div className='rounded-2xl paidBackground px-6 py-4 fontCheckedIn font-medium'>
+					<div className='paidBackground fontCheckedIn rounded-2xl px-6 py-4 font-medium'>
 						{ethers.formatEther(totalWinningAmount ?? 0).toString()} USD
 					</div>
 				</div>

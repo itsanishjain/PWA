@@ -1,18 +1,9 @@
-import React, { useEffect, useState } from 'react'
-import rightArrow from '@/public/images/right_arrow.svg'
 import frogImage from '@/public/images/frog.png'
-import circleTick from '@/public/images/circle-tick.svg'
+import React from 'react'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-	fetchAllPoolDataFromSC,
-	fetchUserDisplayForAddress,
-} from '@/lib/api/clientAPI'
-import router from 'next/router'
+import { fetchUserDisplayForAddress } from '@/lib/api/clientAPI'
+import { useQuery } from '@tanstack/react-query'
 import * as _ from 'lodash'
-import Link from 'next/link'
-import { ParticipantStatus } from './participantRow'
-import { ethers } from 'ethers'
 
 interface AvatarImageProps {
 	address: string
@@ -28,8 +19,8 @@ const AvatarImage: React.FC<AvatarImageProps> = ({ address }) => {
 	return (
 		<img
 			src={`${profileData?.profileImageUrl ?? frogImage.src}`}
-			className=' flex rounded-full w-full h-full'
-		></img>
+			className=' flex h-full w-full rounded-full'
+		/>
 	)
 }
 

@@ -1,7 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { JwtPayload, decode } from 'jsonwebtoken'
+import { decode } from 'jsonwebtoken'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
 	req: NextApiRequest,

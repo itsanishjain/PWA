@@ -1,69 +1,25 @@
-import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
+import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import Appbar from '@/components/appbar'
 
-import {
-	TransactionReceipt,
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 
-import { useReadContract, createConfig, http } from 'wagmi'
-import { readContract, readContracts } from '@wagmi/core'
-import { foundry, hardhat, mainnet, sepolia } from 'viem/chains'
-import { Interface, ethers } from 'ethers'
-
-import {
-	chain,
-	tokenAddress,
-	contractAddress,
-	provider,
-	dropletIFace,
-	poolIFace,
-} from 'constants/constant'
-import { config } from '@/constants/config'
-
-import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
-import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
-
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
-import DropdownChecklist from '@/components/dropdown-checklist'
+import { ethers } from 'ethers'
 
 import defaultPoolImage from '@/public/images/frog.png'
-import qrCodeIcon from '@/public/images/qr_code_icon.svg'
-import shareIcon from '@/public/images/share_icon.svg'
-import editIcon from '@/public/images/edit_icon.svg'
 import tripleDotsIcon from '@/public/images/tripleDots.svg'
 import userUnregisterIcon from '@/public/images/user_delete.svg'
 
-import rightArrow from '@/public/images/right_arrow.svg'
 import Divider from '@/components/divider'
-import { Tables, Database } from '@/types/supabase'
-import {
-	dictionaryToArray,
-	dictionaryToNestedArray,
-	formatCountdownTime,
-	formatEventDateTime,
-	formatTimeDiff,
-	getAllIndicesMatching,
-	getRowIndicesByColumnValue,
-	getRowsByColumnValue,
-	getValuesFromIndices,
-} from '@/lib/utils'
-import { PostgrestSingleResponse } from '@supabase/supabase-js'
-import CountdownTimer from '@/components/countdown'
+import { useCookie } from '@/hooks/cookie'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
-	fetchParticipantsDataFromServer,
 	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
-	fetchUserDisplayInfoFromServer,
 	fetchWinnersDetailsFromSC,
 	handleClaimWinning,
 	handleRegister,
@@ -71,31 +27,35 @@ import {
 	handleUnregister,
 	handleUnregisterServer,
 } from '@/lib/api/clientAPI'
+import {
+	dictionaryToNestedArray,
+	formatEventDateTime,
+	formatTimeDiff,
+	getAllIndicesMatching,
+	getRowsByColumnValue,
+	getValuesFromIndices,
+} from '@/lib/utils'
+import rightArrow from '@/public/images/right_arrow.svg'
+import { Database } from '@/types/supabase'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCookie } from '@/hooks/cookie'
-import { Button } from '@/components/ui/button'
 
-import LoadingAnimation from '@/components/loadingAnimation'
 import TransactionDialog from '@/components/transactionDialog'
 import circleTick from '@/public/images/circle-tick.svg'
 
 import { useToast } from '@/components/ui/use-toast'
 
-import * as _ from 'lodash'
 import PoolStatus from '@/components/poolStatus'
-import { Progress } from '@/components/ui/progress'
-import MyProgressBar from '@/components/myProgressBar'
 import ShareDialog from '@/components/shareDialog'
+import { Progress } from '@/components/ui/progress'
+import * as _ from 'lodash'
 
+import AvatarImage from '@/components/avatarImage'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import AvatarImage from '@/components/avatarImage'
 import Link from 'next/link'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
@@ -116,7 +76,7 @@ const PoolPage = () => {
 	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
 
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
-	const [poolImageUrl, setPoolImageUrl] = useState<String | null | undefined>()
+	const [poolImageUrl, setPoolImageUrl] = useState<string | null | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 	const [transactionInProgress, setTransactionInProgress] =
 		useState<boolean>(false)
@@ -141,7 +101,7 @@ const PoolPage = () => {
 
 	const { toast } = useToast()
 
-	const poolId = router?.query?.poolId! ?? 0
+	const poolId = router?.query?.poolId ?? 0
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
@@ -159,7 +119,7 @@ const PoolPage = () => {
 	const poolSCAdmin = poolSCInfo?.[0]
 	const poolSCDetail = poolSCInfo?.[1]
 
-	let poolSCBalance = poolSCInfo
+	const poolSCBalance = poolSCInfo
 		? (BigInt(poolSCInfo?.[2][0]) / BigInt(1000000000000000000)).toString()
 		: 0
 	const poolSCName = poolSCInfo?.[1][2]
@@ -169,7 +129,7 @@ const PoolPage = () => {
 		: 0
 	const poolSCStatus = poolSCInfo?.[3]
 	const poolSCToken = poolSCInfo?.[4]
-	let poolSCParticipants = poolSCInfo?.[5]
+	const poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
 
 	const isWinner =
@@ -392,36 +352,36 @@ const PoolPage = () => {
 			<Appbar backRoute='/' />
 
 			<Section>
-				<div className='flex flex-col w-full justify-center items-center'>
-					<div className='relative flex flex-col pt-16 w-full min-h-screen justify-center items-center pb-20 md:pb-24'>
+				<div className='flex w-full flex-col items-center justify-center'>
+					<div className='relative flex min-h-screen w-full flex-col items-center justify-center pb-20 pt-16 md:pb-24'>
 						<div
-							className={`flex flex-col rounded-3xl cardBackground w-full p-4 md:p-10 md:space-y-10 space-y-4`}
+							className={`cardBackground flex w-full flex-col space-y-4 rounded-3xl p-4 md:space-y-10 md:p-10`}
 						>
-							<div className='relative rounded-3xl overflow-hidden'>
+							<div className='relative overflow-hidden rounded-3xl'>
 								<img
 									src={`${
 										_.isEmpty(poolImageUrl)
 											? defaultPoolImage.src
 											: poolImageUrl
 									}`}
-									className='bg-black w-full h-full object-contain object-center'
-								></img>
-								<div className='absolute top-0 md:right-4 right-2  w-10 md:w-20  h-full flex flex-col items-center space-y-3 md:space-y-5 md:py-6 py-4 text-white'>
+									className='h-full w-full bg-black object-contain object-center'
+								/>
+								<div className='absolute right-2 top-0 flex  h-full w-10  flex-col items-center space-y-3 py-4 text-white md:right-4 md:w-20 md:space-y-5 md:py-6'>
 									<ShareDialog />
 								</div>
 								<PoolStatus status={poolSCStatus} />
 							</div>
 							<div className='flex flex-col space-y-6 md:space-y-12 '>
-								<div className='flex flex-col space-y-2 md:space-y-4 overflow-hidden'>
-									<h2 className='font-semibold text-lg md:text-4xl'>
+								<div className='flex flex-col space-y-2 overflow-hidden md:space-y-4'>
+									<h2 className='text-lg font-semibold md:text-4xl'>
 										{poolSCName}
 									</h2>
 									<p className='text-sm md:text-2xl'>{eventDate}</p>
-									<div className='text-sm md:text-2xl w-full font-semibold overflow-ellipsis'>
+									<div className='w-full text-ellipsis text-sm font-semibold md:text-2xl'>
 										Hosted by
-										<ul className='flex flex-col space-y-2 mt-4'>
-											<li className='flex flex-row space-x-4 items-center font-medium'>
-												<div className='w-12 h-12'>
+										<ul className='mt-4 flex flex-col space-y-2'>
+											<li className='flex flex-row items-center space-x-4 font-medium'>
+												<div className='h-12 w-12'>
 													<AvatarImage address={poolSCAdmin?.[0]?.toString()} />
 												</div>
 												<span>{adminData?.userDisplayData?.display_name}</span>
@@ -429,10 +389,10 @@ const PoolPage = () => {
 											{cohostDbData?.map((data: any) => {
 												return (
 													<li
-														className='flex flex-row space-x-4 items-center font-medium'
+														className='flex flex-row items-center space-x-4 font-medium'
 														key={data?.address}
 													>
-														<div className='w-12 h-12'>
+														<div className='h-12 w-12'>
 															<AvatarImage address={data?.address} />
 														</div>
 														<span>{data?.display_name}</span>
@@ -442,8 +402,8 @@ const PoolPage = () => {
 										</ul>
 									</div>
 								</div>
-								<div className='text-sm md:text-3xl flex flex-col space-y-2 md:space-y-6 '>
-									<div className='flex flex-rol justify-between'>
+								<div className='flex flex-col space-y-2 text-sm md:space-y-6 md:text-3xl '>
+									<div className='flex-rol flex justify-between'>
 										<p className='max-w-sm '>
 											<span className='font-bold'>{poolSCBalance} </span>
 											{tokenSymbol} Prize Pool
@@ -452,7 +412,7 @@ const PoolPage = () => {
 									</div>
 									<Progress value={participantPercent} />
 								</div>
-								<div className='flex text-sm md:text-3xl flex-col space-y-4'>
+								<div className='flex flex-col space-y-4 text-sm md:text-3xl'>
 									<p className='flex flex-row space-x-2'>
 										<span>Participants</span>
 									</p>
@@ -463,12 +423,12 @@ const PoolPage = () => {
 									>
 										<div>
 											{poolSCParticipants?.length ?? 0 <= 5 ? (
-												<div className='flex flex-row relative w-full h-12 md:h-14'>
+												<div className='relative flex h-12 w-full flex-row md:h-14'>
 													{poolSCParticipants?.map(
 														(address: any, index: number) => {
 															return (
 																<div
-																	className={`rounded-full w-12 h-12 bg-white p-0.5 absolute  md:h-14 md:w-14`}
+																	className={`absolute h-12 w-12 rounded-full bg-white p-0.5  md:h-14 md:w-14`}
 																	style={{
 																		zIndex: index + 1,
 																		left: index * 36,
@@ -482,7 +442,7 @@ const PoolPage = () => {
 													)}
 												</div>
 											) : (
-												<div className='flex flex-row relative w-full h-12'>
+												<div className='relative flex h-12 w-full flex-row'>
 													{poolSCParticipants?.map(
 														(address: string, index: number) => {
 															if (index >= 4) {
@@ -490,7 +450,7 @@ const PoolPage = () => {
 															}
 															return (
 																<div
-																	className={`rounded-full w-12 h-12 bg-white p-0.5 absolute md:w-14 md:h-14 `}
+																	className={`absolute h-12 w-12 rounded-full bg-white p-0.5 md:h-14 md:w-14 `}
 																	style={{
 																		zIndex: index + 1,
 																		left: index * 36,
@@ -503,10 +463,10 @@ const PoolPage = () => {
 														},
 													)}
 													<div
-														className={`rounded-full w-12 h-12 bg-white p-0.5 absolute   md:w-14 md:h-14`}
+														className={`absolute h-12 w-12 rounded-full bg-white p-0.5   md:h-14 md:w-14`}
 														style={{ zIndex: 5, left: 4 * 36 }}
 													>
-														<div className='text-white numParticipantBackground'>{`+ ${
+														<div className='numParticipantBackground text-white'>{`+ ${
 															poolSCParticipants?.length - 4
 														}`}</div>
 													</div>
@@ -520,7 +480,7 @@ const PoolPage = () => {
 											> */}
 											{/* <span>View all</span> */}
 											<span>
-												<img src={`${rightArrow.src}`}></img>
+												<img src={`${rightArrow.src}`} />
 											</span>
 											{/* </button> */}
 										</div>
@@ -530,12 +490,12 @@ const PoolPage = () => {
 						</div>
 						{userWonDetails?.length > 0 && (
 							<div
-								className={`flex flex-col rounded-3xl mt-2 md:mt-4 cardBackground w-full px-4 md:px-10 py-4 md:py-8 space-y-4`}
+								className={`cardBackground mt-2 flex w-full flex-col space-y-4 rounded-3xl p-4 md:mt-4 md:px-10 md:py-8`}
 							>
 								<div className='flex flex-row items-center justify-between'>
 									<div className=' flex flex-row space-x-2'>
 										<span className='flex items-center'>
-											<img className='w-5 h-5' src={circleTick.src} />
+											<img className='h-5 w-5' src={circleTick.src} />
 										</span>
 										<span className='font-semibold'>Winner</span>
 									</div>
@@ -546,7 +506,7 @@ const PoolPage = () => {
 
 								{claimableDetails?.length > 0 && (
 									<button
-										className='text-white rounded-full barForeground py-3 font-medium'
+										className='barForeground rounded-full py-3 font-medium text-white'
 										onClick={onClaimButtonClicked}
 									>
 										Claim
@@ -556,24 +516,24 @@ const PoolPage = () => {
 						)}
 
 						<div
-							className={`flex flex-col rounded-3xl mt-2 md:mt-4 cardBackground w-full px-4 md:px-10 py-4 md:py-8 `}
+							className={`cardBackground mt-2 flex w-full flex-col rounded-3xl p-4 md:mt-4 md:px-10 md:py-8 `}
 						>
-							<h3 className='font-semibold text-sm md:text-2xl'>Description</h3>
+							<h3 className='text-sm font-semibold md:text-2xl'>Description</h3>
 							<Divider />
-							<p className='md:text-2xl text-md'>{poolDbData?.description}</p>
-							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Buy-In</h3>
+							<p className='text-md md:text-2xl'>{poolDbData?.description}</p>
+							<h3 className='mt-8 text-sm font-semibold md:text-2xl'>Buy-In</h3>
 							<Divider />
 							<p className='text-md md:text-2xl'>
 								{poolSCDepositPerPersonString} {tokenSymbol}
 							</p>
-							<h3 className='font-semibold text-sm md:text-2xl mt-8'>Terms</h3>
+							<h3 className='mt-8 text-sm font-semibold md:text-2xl'>Terms</h3>
 							<Divider />
 							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
 						</div>
 						{isRegisteredOnSC ? (
-							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6 z-50'>
+							<div className='fixed bottom-5 left-1/2 z-50 flex w-full max-w-screen-md -translate-x-1/2 flex-row space-x-2 px-6 md:bottom-6'>
 								<button
-									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									className={`focus:shadow-outline flex h-12 flex-1 items-center justify-center rounded-full bg-black px-4 py-2 text-center font-bold text-white focus:outline-none `}
 									onClick={viewTicketClicked}
 								>
 									View My Ticket
@@ -581,11 +541,11 @@ const PoolPage = () => {
 
 								<DropdownMenu>
 									<DropdownMenuTrigger>
-										<div className='w-12 h-12 p-3 bg-black rounded-full'>
+										<div className='h-12 w-12 rounded-full bg-black p-3'>
 											<img
-												className='flex w-full h-full'
+												className='flex h-full w-full'
 												src={tripleDotsIcon.src}
-											></img>
+											/>
 										</div>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent sideOffset={16}>
@@ -593,9 +553,9 @@ const PoolPage = () => {
 											<div className='flex flex-row space-x-2'>
 												<span>
 													<img
-														className='flex w-full h-full'
+														className='flex h-full w-full'
 														src={userUnregisterIcon.src}
-													></img>
+													/>
 												</span>
 												<span>Unregister from Pool</span>
 											</div>
@@ -605,9 +565,9 @@ const PoolPage = () => {
 							</div>
 						) : (
 							poolSCStatus == 1 && (
-								<div className='fixed bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6 z-50'>
+								<div className='fixed bottom-5 left-1/2 z-50 w-full max-w-screen-md -translate-x-1/2 px-6 md:bottom-6'>
 									<button
-										className={`bg-black w-full h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+										className={`focus:shadow-outline h-12 w-full rounded-full bg-black px-4 py-2 font-bold text-white focus:outline-none `}
 										onClick={onRegisterButtonClicked}
 									>
 										Register

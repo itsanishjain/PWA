@@ -1,37 +1,22 @@
-import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import Image from 'next/image'
+import { useEffect, useMemo, useState } from 'react'
 
+import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import Appbar from '@/components/appbar'
 
-import { createBrowserClient } from '@supabase/ssr'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 
-import QRCode from 'react-qr-code'
+import { Database } from '@/types/supabase'
 
-import {
-	TransactionReceipt,
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
-
-import { Tables, Database } from '@/types/supabase'
-
+import { useCookie } from '@/hooks/cookie'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
 	fetchParticipantsDataFromServer,
-	handleRegister,
-	handleRegisterServer,
-	handleUnregister,
-	handleUnregisterServer,
 } from '@/lib/api/clientAPI'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCookie } from '@/hooks/cookie'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-import frogImage from '@/public/images/frog.png'
 import ParticipantRow from '@/components/participantRow'
 
 export type PoolRow = Database['public']['Tables']['pool']['Row']
@@ -49,7 +34,7 @@ const ParticipantsPage = () => {
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
 
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
-	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
+	const [poolImageUrl, setPoolImageUrl] = useState<string | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 
 	const [copied, setCopied] = useState(false)
@@ -75,7 +60,7 @@ const ParticipantsPage = () => {
 
 	const poolSCStatus = poolSCInfo?.[3]
 
-	let poolSCParticipants = poolSCInfo?.[5]
+	const poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
 
 	const { data: participantsInfo } = useQuery({
@@ -115,8 +100,8 @@ const ParticipantsPage = () => {
 			<Appbar backRoute={`${parentRoute}`} pageTitle='Participants' />
 
 			<Section>
-				<div className='flex flex-col w-full '>
-					<div className='relative flex flex-col pt-16 w-full min-h-screen space-y-0 pb-20 md:pb-24 justify-start'>
+				<div className='flex w-full flex-col '>
+					<div className='relative flex min-h-screen w-full flex-col justify-start space-y-0 pb-20 pt-16 md:pb-24'>
 						{participantsInfo?.map((participant) => (
 							<ParticipantRow
 								key={participant?.id}

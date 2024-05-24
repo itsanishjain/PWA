@@ -1,43 +1,29 @@
+import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import Image from 'next/image'
-import frogImage from '@/public/images/frog.png'
-import { useRouter } from 'next/router'
-import {
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
-
-import React, { useState, useEffect, ChangeEvent } from 'react'
-
-import { ethers } from 'ethers'
-import Appbar from '@/components/appbar'
-
-import { FundWalletConfig } from '@privy-io/react-auth'
-import { provider } from '@/constants/constant'
-import { Inter } from 'next/font/google'
-import styles from './styles/user-profile.module.css'
+import { useToast } from '@/components/ui/use-toast'
+import { removeTokenCookie, useCookie } from '@/hooks/cookie'
 import {
 	fetchUserDisplayForAddress,
 	updateUserDisplayData,
 	uploadProfileImage,
 } from '@/lib/api/clientAPI'
-import { removeTokenCookie, useCookie } from '@/hooks/cookie'
-import { JwtPayload, decode } from 'jsonwebtoken'
-import camera from '@/public/images/camera.png'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-
-import * as _ from 'lodash'
-import { useToast } from '@/components/ui/use-toast'
 import { formatAddress } from '@/lib/utils'
+import camera from '@/public/images/camera.png'
+import frogImage from '@/public/images/frog.png'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { useQuery } from '@tanstack/react-query'
+import * as _ from 'lodash'
+import { Inter } from 'next/font/google'
+import { useRouter } from 'next/router'
+import { ChangeEvent, useEffect, useState } from 'react'
+import styles from './styles/user-profile.module.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
 const EditUserProfile = () => {
 	const router = useRouter()
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated, logout } = usePrivy()
 
 	const { wallets } = useWallets()
 
@@ -100,13 +86,13 @@ const EditUserProfile = () => {
 	const handleSaveButtonClicked = async (e: any) => {
 		if (fileBlob != null) {
 			await uploadProfileImage(
-				fileBlob!,
+				fileBlob,
 				selectedFile,
 				wallets[0].address,
 				currentJwt!,
 			)
 		}
-		const { userData, userError } = await updateUserDisplayData(
+		const { userError } = await updateUserDisplayData(
 			displayName,
 			company,
 			bio,
@@ -152,16 +138,13 @@ const EditUserProfile = () => {
 
 	useEffect(() => {
 		if (ready && !authenticated) {
-			// Replace this code with however you'd like to handle an unauthenticated user
-			// As an example, you might redirect them to a sign-in page
 			router.push('/login')
 		}
 
 		if (wallets.length > 0) {
 			console.log(`Wallet Length: ${wallets.length}`)
-			// console.log(`Wallet Address: ${wallets[0].address}`)
 		}
-		for (var i = 0; i < wallets.length; i++) {
+		for (let i = 0; i < wallets.length; i++) {
 			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
 
@@ -179,9 +162,9 @@ const EditUserProfile = () => {
 			<Appbar backRoute='/user-profile' pageTitle='Edit User Profile' />
 			<Section>
 				<div
-					className={`flex justify-center w-full mt-20 min-h-screen ${inter.className}`}
+					className={`mt-20 flex min-h-screen w-full justify-center ${inter.className}`}
 				>
-					<div className='flex flex-col w-96 pb-8'>
+					<div className='flex w-96 flex-col pb-8'>
 						<div>
 							<input
 								type='file'
@@ -192,21 +175,21 @@ const EditUserProfile = () => {
 							/>
 						</div>
 
-						<div className='flex w-full justify-center flex-col items-center'>
+						<div className='flex w-full flex-col items-center justify-center'>
 							<button
 								onClick={triggerFileInput}
-								className='relative rounded-full m-8 w-40 aspect-square '
+								className='relative m-8 aspect-square w-40 rounded-full '
 							>
 								<img
-									className='rounded-full w-40 aspect-square center object-cover z-0'
+									className='center z-0 aspect-square w-40 rounded-full object-cover'
 									src={profileImageUrl}
 								/>
 								<div
-									className={`w-full h-full rounded-full absolute top-0 left-0 ${styles.overlay} z-10 flex items-center justify-center`}
+									className={`absolute left-0 top-0 h-full w-full rounded-full ${styles.overlay} z-10 flex items-center justify-center`}
 								>
 									<img
 										src={camera.src}
-										className='object-center   object-contain'
+										className='object-contain   object-center'
 									/>
 								</div>
 							</button>
@@ -216,9 +199,9 @@ const EditUserProfile = () => {
 							</h3>
 						</div>
 
-						<div className={`border-t-4 ${styles.divider}`}></div>
+						<div className={`border-t-4 ${styles.divider}`} />
 						<div className='flex flex-row'>
-							<div className='h-10 flex flex-row items-center flex-1 font-semibold'>
+							<div className='flex h-10 flex-1 flex-row items-center font-semibold'>
 								Display name
 							</div>
 							<input
@@ -226,10 +209,10 @@ const EditUserProfile = () => {
 								value={displayName}
 								onChange={handleDisplayNameChange}
 								placeholder='Display Name'
-								className='rounded-lg my-2 px-4 flex flex-1 bg-white text-black'
+								className='my-2 flex flex-1 rounded-lg bg-white px-4 text-black'
 							/>
 						</div>
-						<div className={`border-t-4 ${styles.divider}`}></div>
+						<div className={`border-t-4 ${styles.divider}`} />
 						<div className='flex flex-col'>
 							<div className='h-10  font-semibold'>
 								Bio
@@ -239,11 +222,11 @@ const EditUserProfile = () => {
 								value={bio}
 								onChange={handleBioChange}
 								placeholder='Write something enticing about yourself'
-								className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2 bg-white text-black'
-							></textarea>
+								className='h-24 rounded-lg bg-white p-2 text-black outline outline-1 outline-gray-100'
+							/>
 						</div>
 
-						<div className={`border-t-4 ${styles.divider}`}></div>
+						<div className={`border-t-4 ${styles.divider}`} />
 						<div className='h-10  font-semibold'>
 							Company
 							<span className='text-xs font-medium'>(optional)</span>
@@ -253,12 +236,12 @@ const EditUserProfile = () => {
 							value={company}
 							onChange={handleCompanyChange}
 							placeholder='Write something enticing about yourself'
-							className='rounded-lg outline-1 outline outline-gray-100 h-24 p-2 bg-white text-black'
-						></textarea>
-						<div className='flex justify-center mt-8'>
+							className='h-24 rounded-lg bg-white p-2 text-black outline outline-1 outline-gray-100'
+						/>
+						<div className='mt-8 flex justify-center'>
 							{isImageReady && (
 								<button
-									className='bg-black rounded-full text-white py-4 px-8 w-full mt-4'
+									className='mt-4 w-full rounded-full bg-black px-8 py-4 text-white'
 									onClick={handleSaveButtonClicked}
 								>
 									Save

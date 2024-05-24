@@ -1,19 +1,17 @@
-import React, { useState } from 'react'
-
 interface myProgressBarProps {
 	percent: number | undefined
 }
 const MyProgressBar = (props: myProgressBarProps) => {
 	return (
-		<div className='w-full h-full flex rounded-full overflow-hidden'>
+		<div className='flex h-full w-full overflow-hidden rounded-full'>
 			<div
 				style={{ width: `100%` }}
-				className={`flex h-3 md:h-6 rounded-full barBackground`}
+				className={`barBackground flex h-3 rounded-full md:h-6`}
 			>
 				<div
 					style={{ width: `${props.percent}%` }}
-					className={`flex h-3 md:h-6 rounded-full barForeground`}
-				></div>
+					className={`barForeground flex h-3 rounded-full md:h-6`}
+				/>
 			</div>
 		</div>
 	)

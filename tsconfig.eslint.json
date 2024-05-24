@@ -1,0 +1,12 @@
+{
+	"extends": "./tsconfig.json",
+	"include": [
+		".eslintrc.cjs",
+		"drizzle.config.ts",
+		"**/*.cjs",
+		"**/*.mjs",
+		"**/*.ts",
+		"**/*.tsx"
+	],
+	"exclude": ["node_modules"]
+}

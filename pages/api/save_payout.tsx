@@ -1,7 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { JwtPayload, decode } from 'jsonwebtoken'
+import { decode } from 'jsonwebtoken'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
 	req: NextApiRequest,
@@ -36,7 +35,7 @@ export default async function handler(
 		return
 	}
 
-	const { data: existingData, error: selectError } = await supabaseAdminClient
+	const { data: existingData } = await supabaseAdminClient
 		.from('pool')
 		.select('*')
 		.match({
@@ -102,7 +101,7 @@ export default async function handler(
 	}
 
 	async function deleteData() {
-		const { data: existingData, error: deleteError } = await supabaseAdminClient
+		const { error: deleteError } = await supabaseAdminClient
 			.from('savedPayouts')
 			.delete()
 			.match({

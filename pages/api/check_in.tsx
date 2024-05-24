@@ -1,7 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { JwtPayload, decode } from 'jsonwebtoken'
+import { decode } from 'jsonwebtoken'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
 	req: NextApiRequest,
@@ -36,7 +35,7 @@ export default async function handler(
 		return
 	}
 
-	const { data: existingData, error: selectError } = await supabaseAdminClient
+	const { data: existingData } = await supabaseAdminClient
 		.from('pool')
 		.select('*')
 		.match({
@@ -64,19 +63,6 @@ export default async function handler(
 
 		if (existingData?.length === 0) {
 			console.log('User not Registered previously', selectError)
-			// Insert a new row
-			// const { data: insertedData, error: insertError } =
-			// 	await supabaseAdminClient.from('participantStatus').insert({
-			// 		participant_address: walletAddressLower,
-			// 		status: 2,
-			// 		pool_id: poolId,
-			// 	})
-			// if (insertError) {
-			// 	console.log('Error inserting into participantStatus')
-			// 	res.status(500).json({ message: 'Error' })
-			// } else {
-			// 	console.log('Data inserted successfully:', insertedData)
-			// }
 			res.status(500).json({ error: 'Internal Server Error' })
 		} else {
 			// Update the existing row

@@ -1,19 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { NextResponse } from 'next/server'
-import { hashMessage, recoverAddress, verifyMessage } from 'ethers'
-import { createBrowserClient } from '@supabase/ssr'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { createClient } from '@supabase/supabase-js'
-
-type ResponseData = {
-	message: string
-}
-
-interface RequestData {
-	name: string
-	email: string
-	// Add other properties as needed
-}
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
 	req: NextApiRequest,

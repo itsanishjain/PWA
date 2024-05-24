@@ -17,7 +17,7 @@ module.exports = {
 		'plugin:tailwindcss/recommended',
 		'prettier',
 	],
-	plugins: ['@typescript-eslint', 'drizzle'],
+	plugins: ['@typescript-eslint'],
 	rules: {
 		'react/self-closing-comp': 1,
 		'@typescript-eslint/no-unused-vars': [
@@ -34,6 +34,17 @@ module.exports = {
 		'@typescript-eslint/no-unsafe-call': 0,
 		'@typescript-eslint/no-unsafe-member-access': 0,
 		'@typescript-eslint/no-unsafe-member-return': 0,
+
+		// additional rules to catch dead code
+		'no-console': 'warn',
+		'no-unreachable': 'error',
+		'no-unused-expressions': 'warn',
+		'no-unreachable-loop': 'error',
+		'no-empty-function': 'warn',
+		'no-self-assign': 'warn',
+		'no-self-compare': 'warn',
+		'no-useless-concat': 'warn',
+		'no-useless-return': 'warn',
 	},
 	overrides: [
 		{
@@ -53,5 +64,6 @@ module.exports = {
 		'public/**',
 		'LICENSE',
 		'pnpm-lock.yaml',
+		'types/supabase.ts',
 	],
 }

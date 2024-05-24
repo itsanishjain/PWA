@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 const DropdownChecklist = () => {
 	const [isOpen, setIsOpen] = useState(false)
@@ -36,7 +36,7 @@ const DropdownChecklist = () => {
 				<button
 					type='button'
 					onClick={toggleDropdown}
-					className='inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500'
+					className='inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100'
 				>
 					Select Items
 					<svg
@@ -56,7 +56,7 @@ const DropdownChecklist = () => {
 			</div>
 
 			{isOpen && (
-				<div className='origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 overflow-y-auto max-h-40'>
+				<div className='absolute right-0 mt-2 max-h-40 w-56 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5'>
 					<div
 						className='py-1'
 						role='menu'
@@ -71,7 +71,7 @@ const DropdownChecklist = () => {
 									selectedItems.includes(item)
 										? 'bg-indigo-600 text-white'
 										: 'text-gray-900'
-								} cursor-pointer select-none relative py-2 pl-3 pr-9`}
+								} relative cursor-pointer select-none py-2 pl-3 pr-9`}
 								role='menuitem'
 							>
 								<span className='block truncate'>{item}</span>

@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import rightArrow from '@/public/images/right_arrow.svg'
 import frogImage from '@/public/images/frog.png'
+import rightArrow from '@/public/images/right_arrow.svg'
+import React, { useEffect, useState } from 'react'
 
 import { formatTimeDiff } from '@/lib/utils'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
-import Link from 'next/link'
-import router from 'next/router'
 import * as _ from 'lodash'
+import Link from 'next/link'
 
 interface PoolRowProps {
 	title: string
@@ -30,7 +29,7 @@ const PoolRow: React.FC<PoolRowProps> = ({
 	const timeLeft = startDateObject.getTime() - currentTimestamp.getTime()
 	const { days: daysLeft } = formatTimeDiff(timeLeft)
 
-	const [poolImageUrl, setPoolImageUrl] = useState<String | undefined>()
+	const [poolImageUrl, setPoolImageUrl] = useState<string | undefined>()
 
 	const supabaseClient = createSupabaseBrowserClient()
 
@@ -56,18 +55,18 @@ const PoolRow: React.FC<PoolRowProps> = ({
 			href={`${window.location.href}${trailingSlash}pool-id/${poolId}`}
 			className='flex flex-row space-x-4'
 		>
-			<div className='relative w-20 h-20 rounded-2xl overflow-hidden bg-red-500'>
+			<div className='relative h-20 w-20 overflow-hidden rounded-2xl bg-red-500'>
 				<img
 					src={`
 						${_.isEmpty(poolImageUrl) ? frogImage.src : poolImageUrl}
 					`}
-					className='bg-black w-full h-full object-cover object-center'
-				></img>
-				<div className='absolute bottom-0 bg-black bg-opacity-40 text-xs w-full text-center text-white py-1'>
+					className='h-full w-full bg-black object-cover object-center'
+				/>
+				<div className='absolute bottom-0 w-full bg-black bg-opacity-40 py-1 text-center text-xs text-white'>
 					Upcoming
 				</div>
 			</div>
-			<div className='flex flex-grow flex-col justify-evenly py-1'>
+			<div className='flex grow flex-col justify-evenly py-1'>
 				<h3 className='font-semibold'>{title}</h3>
 				<p className='text-sm'>
 					{registered}/{capacity} registered
@@ -79,7 +78,7 @@ const PoolRow: React.FC<PoolRowProps> = ({
 				)}
 			</div>
 			<div className=' flex flex-col items-center justify-center'>
-				<img src={`${rightArrow.src}`}></img>
+				<img src={`${rightArrow.src}`} />
 			</div>
 		</Link>
 	)

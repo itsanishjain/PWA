@@ -1,40 +1,24 @@
+import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import frogImage from '@/public/images/frog.png'
-import { useRouter } from 'next/router'
-import {
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
-
-import React, { useState, useEffect, ChangeEvent, useMemo, useRef } from 'react'
-
-import Appbar, { RightMenu } from '@/components/appbar'
-
-import { Inter } from 'next/font/google'
-
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
 import {
 	fetchUserDisplayForAddress,
-	handleDeleteParticipant,
 	handleRefundParticipant,
 } from '@/lib/api/clientAPI'
-import { removeTokenCookie, useCookie } from '@/hooks/cookie'
-import { JwtPayload, decode } from 'jsonwebtoken'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-
-import * as _ from 'lodash'
-import { useToast } from '@/components/ui/use-toast'
-import { Input } from '@/components/ui/input'
-import styles from './styles/admin.module.css'
-import { ethers } from 'ethers'
+import frogImage from '@/public/images/frog.png'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { Inter } from 'next/font/google'
+import { useRouter } from 'next/router'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
 const RefundUser = () => {
 	const router = useRouter()
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated } = usePrivy()
 
 	const { wallets } = useWallets()
 
@@ -42,12 +26,10 @@ const RefundUser = () => {
 		`${frogImage.src}`,
 	)
 
-	const { currentJwt } = useCookie()
 	const { toast } = useToast()
 
 	const [displayName, setDisplayName] = useState<string>('')
 
-	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', wallets?.[0]?.address],
 		queryFn: fetchUserDisplayForAddress,
@@ -69,23 +51,6 @@ const RefundUser = () => {
 	const poolId = router?.query?.poolId! ?? 0
 	const participantAddress = router?.query?.address! ?? '0x'
 
-	const queryClient = useQueryClient()
-
-	// Remove deleteParticipantMutation because might not want to delete participant
-	// const deleteParticipantMutation = useMutation({
-	// 	mutationFn: handleDeleteParticipant,
-	// 	onSuccess: () => {
-	// 		console.log('Delete Participant')
-	// 		toast({
-	// 			title: 'Transaction Successful',
-	// 			description: 'Deleted Participant',
-	// 		})
-	// 	},
-	// 	onError: () => {
-	// 		console.log('setWinner Error')
-	// 	},
-	// })
-
 	const refundParticipantMutation = useMutation({
 		mutationFn: handleRefundParticipant,
 		onSuccess: () => {
@@ -95,20 +60,13 @@ const RefundUser = () => {
 				description: 'Refunded User',
 			})
 			setInputValue('0')
-			// deleteParticipantMutation.mutate({
-			// 	params: [
-			// 		poolId?.toString() ?? '0',
-			// 		participantAddress.toString(), // Fix: Convert participantAddress to string
-			// 		currentJwt ?? '',
-			// 	],
-			// })
 		},
 		onError: () => {
 			console.log('refundParticipant Error')
 		},
 	})
 
-	const onRefundUserButtonClicked = (e: any) => {
+	const onRefundUserButtonClicked = () => {
 		toast({
 			title: 'Requesting Transaction',
 			description: 'Refund User',
@@ -126,16 +84,13 @@ const RefundUser = () => {
 
 	useEffect(() => {
 		if (ready && !authenticated) {
-			// Replace this code with however you'd like to handle an unauthenticated user
-			// As an example, you might redirect them to a sign-in page
 			router.push('/login')
 		}
 
 		if (wallets.length > 0) {
 			console.log(`Wallet Length: ${wallets.length}`)
-			// console.log(`Wallet Address: ${wallets[0].address}`)
 		}
-		for (var i = 0; i < wallets.length; i++) {
+		for (let i = 0; i < wallets.length; i++) {
 			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
 
@@ -154,28 +109,28 @@ const RefundUser = () => {
 			<Appbar backRoute={parentRoute} pageTitle='Refund Player' />
 			<Section>
 				<div
-					className={`flex justify-center w-full mt-20 min-h-screen ${inter.className}`}
+					className={`mt-20 flex min-h-screen w-full justify-center ${inter.className}`}
 				>
 					<div className='flex flex-col pb-8'>
 						<div className='flex w-full justify-center'>
 							<img
-								className='rounded-full w-24 aspect-square center object-cover z-0'
+								className='center z-0 aspect-square w-24 rounded-full object-cover'
 								src={profileImageUrl}
 							/>
 						</div>
 
 						<div className='flex flex-row'>
-							<h3 className='h-10 flex flex-row items-center justify-center flex-1 font-semibold'>
+							<h3 className='flex h-10 flex-1 flex-row items-center justify-center font-semibold'>
 								{displayName}
 							</h3>
 						</div>
 						<div className='flex flex-row justify-center'>
 							<p>Checked in</p>
 						</div>
-						<div className='flex flex-row justify-center h-16 mt-2 '>
-							<div className='flex relative justify-center '>
+						<div className='mt-2 flex h-16 flex-row justify-center '>
+							<div className='relative flex justify-center '>
 								<Input
-									className='border-none text-center text-6xl font-bold h-16 w-auto'
+									className='h-16 w-auto border-none text-center text-6xl font-bold'
 									placeholder='$0'
 									autoFocus={true}
 									value={inputValue}
@@ -186,13 +141,13 @@ const RefundUser = () => {
 								/>
 							</div>
 						</div>
-						<div className='flex flex-row w-full justify-between mt-auto mb-48'>
+						<div className='mb-48 mt-auto flex w-full flex-row justify-between'>
 							<div className='font-semibold md:text-2xl'>Refund</div>
 							<div className='font-semibold md:text-2xl'>${inputValue}USD</div>
 						</div>
-						<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+						<div className='fixed bottom-5 left-1/2 flex w-full max-w-screen-md -translate-x-1/2 flex-row space-x-2 px-6 md:bottom-6'>
 							<button
-								className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+								className={`focus:shadow-outline flex h-12 flex-1 items-center justify-center rounded-full bg-black px-4 py-2 text-center font-bold text-white focus:outline-none `}
 								onClick={onRefundUserButtonClicked}
 							>
 								Refund

@@ -1,25 +1,28 @@
 import Page from '@/components/page'
 import Section from '@/components/section'
-import Image from 'next/image'
-import poolImage from '@/public/images/pool.png'
-import { useRouter } from 'next/router'
-import { usePrivy, useWallets } from '@privy-io/react-auth'
-import React, { useState, useEffect } from 'react'
 import { fetchNonce, fetchToken } from '@/lib/api/clientAPI'
+import poolImage from '@/public/images/pool.png'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 
-import { useCookie } from '@/hooks/cookie'
-import jwt from 'jsonwebtoken'
 import Appbar from '@/components/appbar'
+import { useCookie } from '@/hooks/cookie'
 
 const Authenticate = () => {
 	const router = useRouter()
-	const { ready, authenticated, user, signMessage, login } = usePrivy()
+	const { ready, authenticated, user } = usePrivy()
 	const { currentJwt, saveJwt, isJwtValid } = useCookie()
 	const { wallets } = useWallets()
 
 	const handleBackendLogin = async () => {
 		console.log('handleBackendLogin')
-		let result = await fetchNonce({ address: user?.wallet?.address! })
+		if (!user?.wallet?.address || !wallets.length) {
+			console.log('No wallet found')
+			return
+		}
+		const result = await fetchNonce({ address: user?.wallet?.address })
 		console.log('nonce', result)
 
 		const message =
@@ -39,8 +42,8 @@ const Authenticate = () => {
 			return
 		}
 
-		let tokenResult = await fetchToken({
-			address: user?.wallet?.address!,
+		const tokenResult = await fetchToken({
+			address: user?.wallet?.address,
 			message,
 			signedMessage,
 			nonce: result.nonce,
@@ -48,17 +51,11 @@ const Authenticate = () => {
 		console.log('tokenResult', tokenResult)
 		saveJwt(tokenResult?.token)
 		console.log('current Jwt', currentJwt)
-		// testWrite()
 	}
-
-	// let showAuthenticateBackendButton = false
 
 	useEffect(() => {
 		if (ready && !authenticated) {
 			console.log('authenticated: ', authenticated)
-
-			// Replace this code with however you'd like to handle an unauthenticated user
-			// As an example, you might redirect them to a sign-in page
 			router.push('/login')
 		}
 
@@ -67,38 +64,32 @@ const Authenticate = () => {
 			console.log('ready and authenticated')
 			router.push('/')
 		}
-		// if (ready && authenticated) {
-		// 	if (!wallets?.[0]?.isConnected) {
-		// 		router.push('/login')
-		// 	}
-		// }
 	}, [ready, authenticated, isJwtValid, wallets, router])
 
 	return (
 		<Page>
 			<Appbar />
-
 			<Section>
-				<div className='flex justify-center h-full w-full items-center'>
-					<div className='flex flex-col w-96 h-96'>
-						<div className='flex row items-center w-full'>
+				<div className='flex h-full w-full items-center justify-center'>
+					<div className='flex h-96 w-96 flex-col'>
+						<div className='row flex w-full items-center'>
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
-						<h2 className='text-xl font-bold text-zinc-800 tagline-text text-center align-top w-full mt-28'>
+						<h2 className='tagline-text mt-28 w-full text-center align-top text-xl font-bold text-zinc-800'>
 							Terms (Important*)
 						</h2>
 						<p
-							className={`text-base  text-center align-top w-full tagline-text mt-4`}
+							className={`tagline-text  mt-4 w-full text-center align-top text-base`}
 						>
-							<span className={`text-base text-center align-top w-full`}>
+							<span className={`w-full text-center align-top text-base`}>
 								By registering for events on Pool you are agreeing to the terms.
 							</span>
 						</p>
 
 						{!isJwtValid && (
-							<div className='fixed flex space-x-2 flex-row bottom-5 md:bottom-6 left-1/2 transform -translate-x-1/2 max-w-screen-md w-full px-6'>
+							<div className='fixed bottom-5 left-1/2 flex w-full max-w-screen-md -translate-x-1/2 flex-row space-x-2 px-6 md:bottom-6'>
 								<button
-									className={`bg-black flex text-center justify-center items-center flex-1 h-12 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline `}
+									className={`focus:shadow-outline flex h-12 flex-1 items-center justify-center rounded-full bg-black px-4 py-2 text-center font-bold text-white focus:outline-none `}
 									onClick={handleBackendLogin}
 								>
 									Continue
