@@ -10,8 +10,6 @@ export default async function handler(
 	const requestData = await req.body
 	const { poolId, winnerAddresses, amounts, jwtString } = requestData
 
-	console.log('jwt', JSON.stringify(jwtString))
-
 	// Return a response
 	const supabaseAdminClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,13 +27,12 @@ export default async function handler(
 		const jwtObj = decode(jwtString, { json: true })
 		jwtAddress = jwtObj!.address
 	} catch (error) {
-		console.error(error)
 		res.status(500).json({ error: 'Failed to decode Jwt.' })
-		return
+		throw new Error('Failed to decode Jwt.')
 	}
 
 	async function deleteData(pool_id: string, address: string, amount: number) {
-		const { data: poolData, error: poolDataError } = await supabaseAdminClient
+		const { data: poolData } = await supabaseAdminClient
 			.from('pool')
 			.select('*')
 			.match({
@@ -46,15 +43,12 @@ export default async function handler(
 			poolData?.[0]?.['host_address'] != jwtAddress &&
 			poolData?.[0]?.['co_host_addresses'].indexOf(jwtAddress) == -1
 		) {
-			console.error('Not authorised to save payouts')
 			res.status(500).json({ message: 'Error' })
-
-			return
+			throw new Error('Unauthorized')
 		}
-		console.log('Passed Delete Authorization Check')
 
 		// Use supabase to delete the data
-		const { data: deletedData, error: deleteError } = await supabaseAdminClient
+		const { error: deleteError } = await supabaseAdminClient
 			.from('savedPayouts')
 			.delete()
 			.match({
@@ -62,20 +56,14 @@ export default async function handler(
 				address: address,
 				payout_amount: amount,
 			})
-		console.log('deletedData:', deletedData)
 
 		if (deleteError) {
-			console.log('Delete error:', deleteError.message)
+			res.status(500).json({ error: deleteError.message })
+			throw new Error(deleteError.message)
 		}
 	}
 	// Write for loop
 	for (let i = 0; i < winnerAddresses.length; i++) {
-		console.log(
-			'Deleting payout for',
-			poolId,
-			winnerAddresses[i].toLowerCase(),
-			amounts[i],
-		)
 		await deleteData(poolId, winnerAddresses[i].toLowerCase(), amounts[i])
 	}
 

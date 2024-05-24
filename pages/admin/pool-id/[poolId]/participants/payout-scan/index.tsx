@@ -2,7 +2,7 @@ import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import router from 'next/router'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { QrReader } from 'react-qr-reader'
 
 const ScanQR: React.FC = () => {
@@ -10,19 +10,17 @@ const ScanQR: React.FC = () => {
 
 	const [parentRoute, setParentRoute] = useState<string>('')
 
-	const handleScan = async (data: string | null) => {
+	const handleScan = (data: string | null) => {
 		if (data) {
 			setQRData(data)
-			console.log('data', data)
 
 			try {
 				const dataObj = JSON.parse(data)
-				console.log('data', data)
 				router.push(
 					`/admin/pool-id/${dataObj?.poolId}/participants/${dataObj?.address}`,
 				)
 			} catch (error) {
-				console.error(error)
+				throw error
 			}
 		}
 	}
@@ -31,7 +29,7 @@ const ScanQR: React.FC = () => {
 		const paths = router?.asPath.split('/')
 		paths.pop() // Remove the last sub-route
 		setParentRoute(paths.join('/'))
-	}, [router])
+	}, [])
 
 	return (
 		<Page>
@@ -42,13 +40,13 @@ const ScanQR: React.FC = () => {
 						className='size-full'
 						scanDelay={1000}
 						onResult={(result, error) => {
-							if (!!result) {
-								setQRData(result?.getText())
-								handleScan(result?.getText())
+							if (result) {
+								setQRData(result.getText())
+								handleScan(result.getText())
 							}
 
-							if (!!error) {
-								console.info(error)
+							if (error) {
+								throw error
 							}
 						}}
 						constraints={{ facingMode: 'environment' }}

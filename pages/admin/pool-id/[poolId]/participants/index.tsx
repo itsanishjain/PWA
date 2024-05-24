@@ -1,9 +1,9 @@
-import { useRouter } from 'next/router'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
-
 import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 
@@ -35,16 +35,16 @@ import Link from 'next/link'
 const ManageParticipantsPage = () => {
 	const router = useRouter()
 
-	const { ready, authenticated, user } = usePrivy()
+	const { ready, authenticated } = usePrivy()
 
 	const { wallets } = useWallets()
 
-	const [, setPoolDbData] = useState<any | undefined>()
+	const [, setPoolDbData] = useState<any>()
 
 	const [winnerAddresses, setWinnerAddresses] = useState<string[]>([])
 
 	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
-	const [winnersInfo, setWinnersInfo] = useState<any>()
+	const [, setWinnersInfo] = useState<any>()
 
 	const [pageUrl, setPageUrl] = useState('')
 
@@ -55,7 +55,6 @@ const ManageParticipantsPage = () => {
 	const [query, setQuery] = useState('')
 
 	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-		console.log('Query', e.target.value)
 		setQuery(e.target.value)
 		filterParticipantsInfo(e.target.value)
 		filterCheckedInParticipantsInfo(e.target.value)
@@ -126,8 +125,6 @@ const ManageParticipantsPage = () => {
 	const setWinnersMutation = useMutation({
 		mutationFn: handleSetWinners,
 		onSuccess: () => {
-			console.log('setWinners Success')
-
 			deleteSavedPayoutsMutation.mutate({
 				params: [
 					poolId?.toString() ?? '0',
@@ -145,20 +142,19 @@ const ManageParticipantsPage = () => {
 			})
 		},
 		onError: (e) => {
-			console.log('setWinnersMutation Error', e.message)
+			throw e
 		},
 	})
 
 	const deleteSavedPayoutsMutation = useMutation({
 		mutationFn: handleDeleteSavedPayouts,
 		onSuccess: () => {
-			console.log('deleteSavedPayouts Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchSavedPayoutsFromServer', poolId?.toString() ?? '0'],
 			})
 		},
 		onError: () => {
-			console.log('setWinnersMutation Error')
+			throw new Error('Error in deleting saved payouts')
 		},
 	})
 	const onPayoutButtonClicked = () => {
@@ -200,19 +196,7 @@ const ManageParticipantsPage = () => {
 	}
 
 	useEffect(() => {
-		// Update the document title using the browser API
-		if (ready && authenticated) {
-			const walletAddress = user!.wallet!.address
-			console.log(`Wallet Address ${walletAddress}`)
-		}
-		console.log('participants', poolSCParticipants)
-
 		setPoolDbData(poolDBInfo?.poolDBInfo)
-
-		console.log('participantsInfo', JSON.stringify(participantsInfo))
-
-		console.log('poolDBInfo', poolDBInfo)
-		console.log('poolSCInfo', poolSCInfo)
 		setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
 		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
 		// for loop to get the winner details
@@ -224,14 +208,6 @@ const ManageParticipantsPage = () => {
 			})
 		}
 		setWinnersInfo(tempWinnersInfo)
-		console.log('winnersDetailsAddresses', winnerAddresses)
-		console.log('winnersDetails', winnerDetails)
-
-		console.log('savedPayoutsInfo', savedPayoutsInfo)
-		console.log(
-			'savedPayoutsParticipantsAddress',
-			savedPayoutsParticipantsAddresses,
-		)
 		setPageUrl(window?.location.href)
 		setFilteredParticipantsInfo(participantsInfo)
 		setFilteredCheckedInParticipantsInfo(checkedInParticipantsInfo)
@@ -242,6 +218,9 @@ const ManageParticipantsPage = () => {
 		poolDBInfo,
 		participantsInfo,
 		poolWinnersDetails,
+		checkedInParticipantsInfo,
+		winnerAddresses,
+		winnerDetails,
 	])
 
 	const parentRoute = useMemo(() => {
@@ -263,7 +242,11 @@ const ManageParticipantsPage = () => {
 					<div className='relative flex min-h-screen w-full flex-col justify-start space-y-0 pb-20 pt-16 md:pb-24'>
 						<div className='relative mb-2 h-10'>
 							<span className='absolute left-4 flex h-full w-4 items-center'>
-								<img className='flex' src={searchIcon.src} />
+								<Image
+									alt='search icon'
+									className='flex'
+									src={searchIcon.src}
+								/>
 							</span>
 							<Link
 								href={`${pageUrl}/payout-scan`}
@@ -352,8 +335,9 @@ const ManageParticipantsPage = () => {
 									</div>
 									{winnerDetails?.map((participant, index) => (
 										<WinnerRow
-											key={`${participantsInfoDict?.[winnerAddresses[index]]
-												?.id}_${index}`}
+											key={`${
+												participantsInfoDict?.[winnerAddresses[index]]?.id
+											}_${index}`}
 											name={
 												participantsInfoDict?.[winnerAddresses[index]]
 													?.display_name

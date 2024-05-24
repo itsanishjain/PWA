@@ -11,7 +11,6 @@ export default async function handler(
 	const { poolId, address, jwtString } = requestData
 
 	const walletAddressLower = address.toLowerCase()
-	console.log('jwt', JSON.stringify(jwtString))
 
 	// Return a response
 	const supabaseAdminClient = createClient(
@@ -30,9 +29,8 @@ export default async function handler(
 		const jwtObj = decode(jwtString, { json: true })
 		jwtAddress = jwtObj!.address
 	} catch (error) {
-		console.error(error)
 		res.status(500).json({ error: 'Failed to decode Jwt.' })
-		return
+		throw new Error('Failed to decode Jwt.')
 	}
 
 	const { data: existingData } = await supabaseAdminClient
@@ -46,14 +44,12 @@ export default async function handler(
 		existingData?.[0]?.['host_address'] != jwtAddress &&
 		existingData?.[0]?.['co_host_addresses'].indexOf(jwtAddress) == -1
 	) {
-		console.error('Not authorised to register')
 		res.status(500).json({ message: 'Error' })
-
-		return
+		throw new Error('Unauthorized')
 	}
 
 	async function upsertData() {
-		const { data: existingData, error: selectError } = await supabaseAdminClient
+		const { data: existingData } = await supabaseAdminClient
 			.from('participantStatus')
 			.select('*')
 			.match({
@@ -62,28 +58,24 @@ export default async function handler(
 			})
 
 		if (existingData?.length === 0) {
-			console.log('User not Registered previously', selectError)
 			res.status(500).json({ error: 'Internal Server Error' })
 		} else {
 			// Update the existing row
-			const { data: updatedData, error: updateError } =
-				await supabaseAdminClient
-					.from('participantStatus')
-					.update({
-						participant_address: walletAddressLower,
-						status: 2,
-						pool_id: poolId,
-					})
-					.match({
-						pool_id: poolId,
-						participant_address: walletAddressLower,
-					})
+			const { error: updateError } = await supabaseAdminClient
+				.from('participantStatus')
+				.update({
+					participant_address: walletAddressLower,
+					status: 2,
+					pool_id: poolId,
+				})
+				.match({
+					pool_id: poolId,
+					participant_address: walletAddressLower,
+				})
 
 			if (updateError) {
-				console.error('Error updating data:', updateError)
 				res.status(500).json({ error: 'Internal Server Error' })
-			} else {
-				console.log('Data updated successfully:', updatedData)
+				throw new Error(updateError.message)
 			}
 		}
 	}

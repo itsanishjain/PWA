@@ -1,5 +1,5 @@
 import { formatCountdownTime } from '@/lib/utils'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface CountdownProps {
 	timeleft: number | null | undefined
@@ -9,10 +9,7 @@ const CountdownTimer: React.FC<CountdownProps> = ({ timeleft }) => {
 	const [countdown, setCountdown] = useState<number | null>(100000)
 
 	useEffect(() => {
-		if (timeleft === null || timeleft === undefined) {
-			console.log('timeleft component null')
-		} else {
-			console.log('timeleft component', timeleft)
+		if (timeleft) {
 			setCountdown(timeleft)
 			const interval = setInterval(() => {
 				setCountdown((prevCountdown) => {

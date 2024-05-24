@@ -13,17 +13,14 @@ import { useCookie } from '@/hooks/cookie'
 const Authenticate = () => {
 	const router = useRouter()
 	const { ready, authenticated, user } = usePrivy()
-	const { currentJwt, saveJwt, isJwtValid } = useCookie()
+	const { saveJwt, isJwtValid } = useCookie()
 	const { wallets } = useWallets()
 
 	const handleBackendLogin = async () => {
-		console.log('handleBackendLogin')
 		if (!user?.wallet?.address || !wallets.length) {
-			console.log('No wallet found')
 			return
 		}
 		const result = await fetchNonce({ address: user?.wallet?.address })
-		console.log('nonce', result)
 
 		const message =
 			'This is a simple verification process that will not incur any fees.'
@@ -38,8 +35,7 @@ const Authenticate = () => {
 				params: [message, address],
 			})
 		} catch (e: any) {
-			console.log('User did not sign transaction')
-			return
+			throw new Error(e.message)
 		}
 
 		const tokenResult = await fetchToken({
@@ -48,21 +44,17 @@ const Authenticate = () => {
 			signedMessage,
 			nonce: result.nonce,
 		})
-		console.log('tokenResult', tokenResult)
 		saveJwt(tokenResult?.token)
-		console.log('current Jwt', currentJwt)
 	}
 
 	useEffect(() => {
 		if (ready && !authenticated) {
-			console.log('authenticated: ', authenticated)
-			router.push('/login')
+			router.replace('/login')
 		}
 
 		if (ready && authenticated && isJwtValid) {
 			// Replace this code with however you'd like to handle an authenticated user
-			console.log('ready and authenticated')
-			router.push('/')
+			router.replace('/')
 		}
 	}, [ready, authenticated, isJwtValid, wallets, router])
 
@@ -72,7 +64,7 @@ const Authenticate = () => {
 			<Section>
 				<div className='flex size-full items-center justify-center'>
 					<div className='flex size-96 flex-col'>
-						<div className='row flex w-full items-center'>
+						<div className='flex w-full flex-row items-center'>
 							<Image className='mx-auto' src={poolImage} alt='pool image' />
 						</div>
 						<h2 className='tagline-text mt-28 w-full text-center align-top text-xl font-bold text-zinc-800'>

@@ -7,10 +7,6 @@ import Section from '@/components/section'
 
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 
-import editIcon from '@/public/images/edit_icon.svg'
-import defaultPoolImage from '@/public/images/frog.png'
-import qrCodeIcon from '@/public/images/qr_code_icon.svg'
-
 import CountdownTimer from '@/components/countdown'
 import Divider from '@/components/divider'
 import {
@@ -21,10 +17,14 @@ import {
 	handleEndPool,
 	handleStartPool,
 } from '@/lib/api/clientAPI'
-import { formatEventDateTime, formatTimeDiff } from '@/lib/utils'
+import { formatEventDateTime } from '@/lib/utils'
+import editIcon from '@/public/images/edit_icon.svg'
+import defaultPoolImage from '@/public/images/frog.png'
+import qrCodeIcon from '@/public/images/qr_code_icon.svg'
 import rightArrow from '@/public/images/right_arrow.svg'
 import { Database } from '@/types/supabase'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import Image from 'next/image'
 
 import TransactionDialog from '@/components/transactionDialog'
 import { useToast } from '@/components/ui/use-toast'
@@ -41,11 +41,11 @@ export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 const AdminPoolPage = () => {
 	const router = useRouter()
 
-	const { ready, authenticated, user } = usePrivy()
+	const { ready, authenticated } = usePrivy()
 
 	const { wallets } = useWallets()
 
-	const [poolDbData, setPoolDbData] = useState<any | undefined>()
+	const [poolDbData, setPoolDbData] = useState<any>()
 	const [poolImageUrl, setPoolImageUrl] = useState<string | null | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 	const [transactionInProgress, setTransactionInProgress] =
@@ -58,18 +58,12 @@ const AdminPoolPage = () => {
 		const currentTimestamp: Date = new Date()
 		const startDateObject: Date = new Date(startTime)
 		const timeDiff = startDateObject.getTime() - currentTimestamp.getTime()
-		const { days, minutes, seconds } = formatTimeDiff(timeDiff)
-		console.log('days', days)
-		console.log('minutes', minutes)
-		console.log('seconds', seconds)
-		console.log('timeLeft', Math.floor(timeDiff / 1000))
-
 		setTimeLeft(timeDiff)
 	}
 
 	const { toast } = useToast()
 
-	const poolId = router?.query?.poolId! ?? 0
+	const poolId = router?.query?.poolId ?? 0
 	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
@@ -103,20 +97,11 @@ const AdminPoolPage = () => {
 	})
 
 	useEffect(() => {
-		// Update the document title using the browser API
-		if (ready && authenticated) {
-			const walletAddress = user!.wallet!.address
-			console.log(`Wallet Address ${walletAddress}`)
-		}
-		console.log('participants', poolSCParticipants)
-
 		setPoolDbData(poolDBInfo?.poolDBInfo)
 		setCohostDbData(poolDBInfo?.cohostUserDisplayData ?? [])
 		setPoolImageUrl(poolDBInfo?.poolImageUrl)
 
-		console.log('poolDBInfo', poolDBInfo)
 		setPageUrl(window?.location.href)
-		console.log('event_timestamp', poolDBInfo?.poolDBInfo?.event_timestamp)
 		calculateTimeLeft(poolDBInfo?.poolDBInfo?.event_timestamp)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo])
 
@@ -129,39 +114,36 @@ const AdminPoolPage = () => {
 	const enableDepositMutation = useMutation({
 		mutationFn: handleEnableDeposit,
 		onSuccess: () => {
-			console.log('startPool Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 		},
 		onError: () => {
-			console.log('enableDepositMutation Error')
+			throw new Error('enableDepositMutation Error')
 		},
 	})
 
 	const startPoolMutation = useMutation({
 		mutationFn: handleStartPool,
 		onSuccess: () => {
-			console.log('startPool Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 		},
 		onError: () => {
-			console.log('startPoolMutation Error')
+			throw new Error('startPoolMutation Error')
 		},
 	})
 
 	const endPoolMutation = useMutation({
 		mutationFn: handleEndPool,
 		onSuccess: () => {
-			console.log('endPool Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 		},
 		onError: () => {
-			console.log('endPoolMutation Error')
+			throw new Error('endPoolMutation Error')
 		},
 	})
 
@@ -214,7 +196,8 @@ const AdminPoolPage = () => {
 							className={`cardBackground flex w-full flex-col space-y-4 rounded-3xl p-4 md:space-y-10 md:p-10`}
 						>
 							<div className='relative overflow-hidden rounded-3xl'>
-								<img
+								<Image
+									alt='pool image'
 									src={`${
 										_.isEmpty(poolImageUrl)
 											? defaultPoolImage.src
@@ -222,7 +205,7 @@ const AdminPoolPage = () => {
 									}`}
 									className='size-full bg-black object-contain object-center'
 								/>
-								<div className='absolute bottom-0 flex size-full flex-col items-center justify-center space-y-3 bg-black bg-opacity-60 text-white backdrop-blur-sm md:space-y-6'>
+								<div className='absolute bottom-0 flex size-full flex-col items-center justify-center space-y-3 bg-black/60 text-white backdrop-blur-sm md:space-y-6'>
 									{timeLeft != undefined && timeLeft > 0 && (
 										<div>
 											<h4 className='text-xs md:text-2xl'>Starts in</h4>
@@ -235,14 +218,22 @@ const AdminPoolPage = () => {
 								<div className='absolute right-2 top-0 flex  h-full w-10  flex-col items-center space-y-3 py-4 text-white md:right-4 md:w-20 md:space-y-5 md:py-6'>
 									<Link
 										href={`${pageUrl}/checkin-scan`}
-										className='size-8 rounded-full bg-black  bg-opacity-40 p-2 md:size-14 md:p-3'
+										className='size-8 rounded-full bg-black/40 p-2 md:size-14 md:p-3'
 									>
-										<img className='flex size-full' src={qrCodeIcon.src} />
+										<Image
+											alt='qr code icon'
+											className='flex size-full'
+											src={qrCodeIcon.src}
+										/>
 									</Link>
 									<ShareDialog />
 
-									<button className='size-8 rounded-full bg-black  bg-opacity-40 p-2 md:size-14 md:p-3'>
-										<img className='flex size-full' src={editIcon.src} />
+									<button className='size-8 rounded-full bg-black/40 p-2 md:size-14 md:p-3'>
+										<Image
+											alt='edit icon'
+											className='flex size-full'
+											src={editIcon.src}
+										/>
 									</button>
 								</div>
 								<PoolStatus status={poolSCStatus} />
@@ -259,7 +250,7 @@ const AdminPoolPage = () => {
 									</p>
 								</div>
 								<div className='flex flex-col space-y-2 text-sm md:space-y-6 md:text-3xl '>
-									<div className='flex-rol flex justify-between'>
+									<div className='flex flex-col justify-between'>
 										<p className='max-w-sm '>
 											<span className='font-bold'>{poolSCBalance} </span>
 											{tokenSymbol} Prize Pool
@@ -281,7 +272,7 @@ const AdminPoolPage = () => {
 									>
 										<span>View all</span>
 										<span>
-											<img src={`${rightArrow.src}`} />
+											<Image alt='right arrow' src={`${rightArrow.src}`} />
 										</span>
 									</Link>
 								</div>
@@ -294,7 +285,7 @@ const AdminPoolPage = () => {
 						>
 							<h3 className='text-sm font-semibold md:text-2xl'>Description</h3>
 							<Divider />
-							<p className='text-md md:text-2xl'>{poolDbData?.description}</p>
+							<p className='text-base md:text-2xl'>{poolDbData?.description}</p>
 							<h3 className='mt-8 text-sm font-semibold md:text-2xl'>Buy-In</h3>
 							<Divider />
 							<p className='text-md md:text-2xl'>

@@ -1,5 +1,6 @@
 import { removeTokenCookie } from '@/hooks/cookie'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -58,7 +59,6 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 			handleSignOut()
 		}
 
-		console.log('displayName', profileData)
 		setPageUrl(window?.location.href)
 	}, [profileData, ready, authenticated, router])
 
@@ -69,7 +69,11 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 					<div className='flex w-16'>
 						{backRoute && (
 							<Link href={backRoute ?? ''}>
-								<img className='size-10' src={`${leftArrowImage.src}`} />
+								<Image
+									className='size-10'
+									src={`${leftArrowImage.src}`}
+									alt='Back'
+								/>
 							</Link>
 						)}
 					</div>
@@ -98,9 +102,10 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 										className='flex flex-col items-center'
 										onClick={handleAccountClick}
 									>
-										<img
+										<Image
 											src={`${profileData?.profileImageUrl ?? frogImage.src}`}
 											className='size-9 rounded-full object-cover'
+											alt='Profile Image'
 										/>
 									</button>
 								</div>
@@ -146,7 +151,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 											<Link href={`${pageUrl}/refund`}>
 												<div className='flex flex-row items-center justify-center space-x-2'>
 													<span>
-														<img
+														<Image
+															alt='keyboard return'
 															className='flex size-full'
 															src={keyboardReturnImage.src}
 														/>
@@ -162,7 +168,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 						{rightMenu == RightMenu.ManageParticipants && (
 							<div>
 								<button className='flex flex-col items-center'>
-									<img
+									<Image
+										alt='Profile Image'
 										src={`${profileData?.profileImageUrl ?? frogImage.src}`}
 										className='size-9 rounded-full object-cover'
 									/>

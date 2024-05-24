@@ -15,6 +15,7 @@ import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useQuery } from '@tanstack/react-query'
 import * as _ from 'lodash'
 import { Inter } from 'next/font/google'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { ChangeEvent, useEffect, useState } from 'react'
 import styles from './styles/user-profile.module.css'
@@ -56,7 +57,6 @@ const EditUserProfile = () => {
 		if (e.target.files?.length === 0) {
 			// User cancelled selection
 			setIsImageReady(true)
-			console.log('User cancelled image selection')
 		}
 		const file = e.target.files?.[0]
 		if (file) {
@@ -67,17 +67,15 @@ const EditUserProfile = () => {
 			const reader = new FileReader()
 			reader.onload = () => {
 				setFileBlob(reader.result)
-				console.log('File Loaded')
-				console.log('reader.result', reader.result)
 				setIsImageReady(true)
 			}
 			reader.onerror = (e) => {
-				console.error('Error reading file:', e)
 				setIsImageReady(true)
+				throw new Error('Failed to read file')
 			}
 			reader.onabort = () => {
-				console.error('Aborted')
 				setIsImageReady(true)
+				throw new Error('File reading aborted')
 			}
 			reader.readAsArrayBuffer(file)
 		}
@@ -85,25 +83,19 @@ const EditUserProfile = () => {
 
 	const handleSaveButtonClicked = async (e: any) => {
 		if (fileBlob != null) {
-			await uploadProfileImage(
-				fileBlob,
-				selectedFile,
-				wallets[0].address,
-				currentJwt!,
-			)
+			await uploadProfileImage(fileBlob, selectedFile, currentJwt!)
 		}
 		const { userError } = await updateUserDisplayData(
 			displayName,
 			company,
 			bio,
 			currentJwt!,
-			wallets[0].address,
 		)
 
 		if (userError) {
 			toast({
 				title: 'Error',
-				description: userError.message,
+				description: userError,
 			})
 		} else {
 			toast({
@@ -113,7 +105,6 @@ const EditUserProfile = () => {
 		}
 	}
 
-	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', wallets?.[0]?.address],
 		queryFn: fetchUserDisplayForAddress,
@@ -125,7 +116,6 @@ const EditUserProfile = () => {
 	}
 
 	const handleSignOut = async () => {
-		console.log('handleSignOut')
 		wallets?.[0]?.disconnect()
 		toast({
 			title: 'Logging Out',
@@ -138,14 +128,7 @@ const EditUserProfile = () => {
 
 	useEffect(() => {
 		if (ready && !authenticated) {
-			router.push('/login')
-		}
-
-		if (wallets.length > 0) {
-			console.log(`Wallet Length: ${wallets.length}`)
-		}
-		for (let i = 0; i < wallets.length; i++) {
-			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
+			router.replace('/login')
 		}
 
 		if (profileData?.profileImageUrl) {
@@ -154,7 +137,6 @@ const EditUserProfile = () => {
 		setBio(profileData?.userDisplayData.bio ?? '')
 		setDisplayName(profileData?.userDisplayData.display_name ?? '')
 		setCompany(profileData?.userDisplayData.company ?? '')
-		console.log('displayName', profileData)
 	}, [profileData, ready, authenticated, router])
 
 	return (
@@ -180,14 +162,18 @@ const EditUserProfile = () => {
 								onClick={triggerFileInput}
 								className='relative m-8 aspect-square w-40 rounded-full '
 							>
-								<img
-									className='center z-0 aspect-square w-40 rounded-full object-cover'
-									src={profileImageUrl}
-								/>
+								{profileImageUrl && (
+									<Image
+										alt='camera'
+										className='center z-0 aspect-square w-40 rounded-full object-cover'
+										src={profileImageUrl}
+									/>
+								)}
 								<div
 									className={`absolute left-0 top-0 size-full rounded-full ${styles.overlay} z-10 flex items-center justify-center`}
 								>
-									<img
+									<Image
+										alt='camera'
 										src={camera.src}
 										className='object-contain   object-center'
 									/>

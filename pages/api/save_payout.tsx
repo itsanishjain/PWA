@@ -11,7 +11,6 @@ export default async function handler(
 	const { poolId, winnerAddress, amount, jwtString } = requestData
 
 	const walletAddressLower = winnerAddress.toLowerCase()
-	console.log('jwt', JSON.stringify(jwtString))
 
 	// Return a response
 	const supabaseAdminClient = createClient(
@@ -30,9 +29,8 @@ export default async function handler(
 		const jwtObj = decode(jwtString, { json: true })
 		jwtAddress = jwtObj!.address
 	} catch (error) {
-		console.error(error)
 		res.status(500).json({ error: 'Failed to decode Jwt.' })
-		return
+		throw new Error('Failed to decode Jwt.')
 	}
 
 	const { data: existingData } = await supabaseAdminClient
@@ -46,14 +44,12 @@ export default async function handler(
 		existingData?.[0]?.['host_address'] != jwtAddress &&
 		existingData?.[0]?.['co_host_addresses'].indexOf(jwtAddress) == -1
 	) {
-		console.error('Not authorised to save payouts')
 		res.status(500).json({ message: 'Error' })
-
-		return
+		throw new Error('Unauthorized')
 	}
 
 	async function upsertData() {
-		const { data: existingData, error: selectError } = await supabaseAdminClient
+		const { data: existingData } = await supabaseAdminClient
 			.from('savedPayouts')
 			.select('*')
 			.match({
@@ -62,40 +58,35 @@ export default async function handler(
 			})
 
 		if (existingData?.length === 0) {
-			console.log('No previous user activity for pool', selectError)
 			// Insert a new row
-			const { data: insertedData, error: insertError } =
-				await supabaseAdminClient.from('savedPayouts').insert({
+			const { error: insertError } = await supabaseAdminClient
+				.from('savedPayouts')
+				.insert({
 					address: walletAddressLower,
 					payout_amount: amount,
 					pool_id: poolId,
 				})
 			if (insertError) {
-				console.log('Error inserting into savedPayouts')
 				res.status(500).json({ message: 'Error' })
-			} else {
-				console.log('Data inserted successfully:', insertedData)
+				throw new Error('Error inserting data')
 			}
 		} else {
 			// Update the existing row
-			const { data: updatedData, error: updateError } =
-				await supabaseAdminClient
-					.from('savedPayouts')
-					.update({
-						address: walletAddressLower,
-						payout_amount: amount,
-						pool_id: poolId,
-					})
-					.match({
-						pool_id: poolId,
-						address: walletAddressLower,
-					})
+			const { error: updateError } = await supabaseAdminClient
+				.from('savedPayouts')
+				.update({
+					address: walletAddressLower,
+					payout_amount: amount,
+					pool_id: poolId,
+				})
+				.match({
+					pool_id: poolId,
+					address: walletAddressLower,
+				})
 
 			if (updateError) {
-				console.error('Error updating data:', updateError)
 				res.status(500).json({ error: 'Internal Server Error' })
-			} else {
-				console.log('Data updated successfully:', updatedData)
+				throw new Error('Error updating data')
 			}
 		}
 	}
@@ -110,8 +101,8 @@ export default async function handler(
 			})
 
 		if (deleteError) {
-			console.error(deleteError)
 			res.status(500).json({ error: 'Internal Server Error' })
+			throw new Error(deleteError.message)
 		}
 	}
 

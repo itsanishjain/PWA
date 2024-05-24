@@ -14,8 +14,9 @@ import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ethers } from 'ethers'
 import { Inter } from 'next/font/google'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -52,28 +53,26 @@ const UserProfile = () => {
 		setInputValue(event.target.value)
 	}
 
-	const poolId = router?.query?.poolId! ?? 0
-	const participantAddress = router?.query?.address! ?? '0x'
+	const poolId = router?.query?.poolId ?? 0
+	const participantAddress = router?.query?.address ?? '0x'
 
 	const queryClient = useQueryClient()
 
 	const setWinnerMutation = useMutation({
 		mutationFn: handleSetWinner,
 		onSuccess: () => {
-			console.log('setWinner Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
 		},
 		onError: () => {
-			console.log('setWinner Error')
+			throw new Error('setWinner Error')
 		},
 	})
 
 	const savePayoutMutation = useMutation({
 		mutationFn: handleSavePayout,
 		onSuccess: () => {
-			console.log('savePayout Success')
 			toast({
 				title: 'Success',
 				description: 'Saved Payout',
@@ -84,7 +83,7 @@ const UserProfile = () => {
 			})
 		},
 		onError: () => {
-			console.log('setWinner Error')
+			throw new Error('savePayout Error')
 		},
 	})
 
@@ -129,7 +128,6 @@ const UserProfile = () => {
 			setProfileImageUrl(profileData?.profileImageUrl)
 		}
 		setDisplayName(profileData?.userDisplayData.display_name ?? '')
-		console.log('displayName', profileData)
 		if (inputRef?.current) {
 			inputRef.current.focus()
 		}
@@ -148,10 +146,13 @@ const UserProfile = () => {
 				>
 					<div className='flex w-96 flex-col pb-8'>
 						<div className='flex w-full justify-center'>
-							<img
-								className='center z-0 aspect-square w-24 rounded-full object-cover'
-								src={profileImageUrl}
-							/>
+							{profileImageUrl && (
+								<Image
+									alt='profile'
+									className='center z-0 aspect-square w-24 rounded-full object-cover'
+									src={profileImageUrl}
+								/>
+							)}
 						</div>
 
 						<div className='flex flex-row'>

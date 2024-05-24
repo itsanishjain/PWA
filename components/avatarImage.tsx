@@ -1,5 +1,5 @@
 import frogImage from '@/public/images/frog.png'
-import React from 'react'
+import Image from 'next/image'
 
 import { fetchUserDisplayForAddress } from '@/lib/api/clientAPI'
 import { useQuery } from '@tanstack/react-query'
@@ -17,7 +17,8 @@ const AvatarImage: React.FC<AvatarImageProps> = ({ address }) => {
 	})
 
 	return (
-		<img
+		<Image
+			alt='profile image'
 			src={`${profileData?.profileImageUrl ?? frogImage.src}`}
 			className=' flex size-full rounded-full'
 		/>

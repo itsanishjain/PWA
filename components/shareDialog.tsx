@@ -26,16 +26,13 @@ import {
 	DrawerTrigger,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
+import Image from 'next/image'
 import router from 'next/router'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { useState } from 'react'
 import Divider from './divider'
 import { toast } from './ui/use-toast'
 
-interface shareDialogProps {
-	open?: boolean
-	setOpen?: Dispatch<SetStateAction<boolean>>
-}
-const ShareDialog = (props: shareDialogProps) => {
+const ShareDialog = () => {
 	const [open, setOpen] = React.useState(false)
 	const isDesktop = useMediaQuery('(min-width: 768px)')
 
@@ -43,8 +40,12 @@ const ShareDialog = (props: shareDialogProps) => {
 		return (
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogTrigger asChild>
-					<button className='size-8 rounded-full bg-black  bg-opacity-40 p-2 md:size-14 md:p-3'>
-						<img className='flex size-full' src={shareIcon.src} />
+					<button className='size-8 rounded-full bg-black/40 p-2 md:size-14 md:p-3'>
+						<Image
+							alt='share icon'
+							className='flex size-full'
+							src={shareIcon.src}
+						/>
 					</button>
 				</DialogTrigger>
 				<DialogContent className='sm:max-w-[425px]'>
@@ -63,8 +64,12 @@ const ShareDialog = (props: shareDialogProps) => {
 	return (
 		<Drawer open={open} onOpenChange={setOpen}>
 			<DrawerTrigger asChild>
-				<button className='size-8 rounded-full bg-black  bg-opacity-40 p-2 md:size-14 md:p-3'>
-					<img className='flex size-full' src={shareIcon.src} />
+				<button className='size-8 rounded-full bg-black/40 p-2 md:size-14 md:p-3'>
+					<Image
+						alt='share icon'
+						className='flex size-full'
+						src={shareIcon.src}
+					/>
 				</button>
 			</DrawerTrigger>
 			<DrawerContent>
@@ -87,11 +92,9 @@ const ShareDialog = (props: shareDialogProps) => {
 
 function ShareForm({ className }: React.ComponentProps<'form'>) {
 	const currentRoute = router.asPath
-	const [copied, setCopied] = useState(false)
+	const [, setCopied] = useState(false)
 
 	const copyToClipboard = async () => {
-		console.log('copyToClipboard')
-
 		try {
 			await navigator.clipboard.writeText(window.location.href)
 			toast({
@@ -100,7 +103,6 @@ function ShareForm({ className }: React.ComponentProps<'form'>) {
 			})
 			setCopied(true)
 		} catch (error) {
-			console.error('Failed to copy:', error)
 			toast({
 				title: 'Share Link',
 				description: 'Failed to copy link to clipboard!',

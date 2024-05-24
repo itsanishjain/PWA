@@ -1,6 +1,6 @@
 import { fetchPastPools } from '@/lib/api/clientAPI'
 import { poolData } from '@/types/types'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import PoolRow from '../poolRow'
 
 const PastPoolTab: React.FC = () => {

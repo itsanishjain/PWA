@@ -5,7 +5,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { useCookie } from '@/hooks/cookie'
 import { handleCheckIn } from '@/lib/api/clientAPI'
 import router from 'next/router'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { QrReader } from 'react-qr-reader'
 
 const ScanQR: React.FC = () => {
@@ -21,7 +21,6 @@ const ScanQR: React.FC = () => {
 			const dataObj = JSON.parse(data)
 			// Send data to server for updating database
 			const result = await handleCheckIn({ data: data, jwt: currentJwt ?? '' })
-			console.log('checkin result', result)
 			if (result.message == 'Success') {
 				toast({
 					title: 'Success',
@@ -40,7 +39,7 @@ const ScanQR: React.FC = () => {
 		const paths = router?.asPath.split('/')
 		paths.pop() // Remove the last sub-route
 		setParentRoute(paths.join('/'))
-	}, [router])
+	}, [])
 
 	return (
 		<Page>
@@ -56,8 +55,8 @@ const ScanQR: React.FC = () => {
 								handleScan(result?.getText())
 							}
 
-							if (!!error) {
-								console.info(error)
+							if (error) {
+								throw error
 							}
 						}}
 						constraints={{ facingMode: 'environment' }}

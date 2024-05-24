@@ -1,9 +1,8 @@
-import frogImage from '@/public/images/frog.png'
-import React from 'react'
-
 import { fetchUserDisplayForAddress } from '@/lib/api/clientAPI'
+import frogImage from '@/public/images/frog.png'
 import { useQuery } from '@tanstack/react-query'
 import * as _ from 'lodash'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface ParticipantRowProps {
@@ -16,7 +15,6 @@ interface ParticipantRowProps {
 
 const ParticipantRow: React.FC<ParticipantRowProps> = ({
 	name,
-	imageUrl,
 	participantStatus,
 	address,
 	routeUrl,
@@ -32,7 +30,8 @@ const ParticipantRow: React.FC<ParticipantRowProps> = ({
 			className='bottomDivider flex flex-row space-x-4 py-4'
 			href={routeUrl ?? window.location.href}
 		>
-			<img
+			<Image
+				alt='profile image'
 				src={`${profileData?.profileImageUrl ?? frogImage.src}`}
 				className=' flex size-14 rounded-full object-cover'
 			/>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
+import Image from 'next/image'
 
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 
@@ -30,7 +31,6 @@ import {
 import {
 	dictionaryToNestedArray,
 	formatEventDateTime,
-	formatTimeDiff,
 	getAllIndicesMatching,
 	getRowsByColumnValue,
 	getValuesFromIndices,
@@ -64,40 +64,22 @@ export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 const PoolPage = () => {
 	const router = useRouter()
 
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated } = usePrivy()
 
 	const { wallets } = useWallets()
 
-	const [poolBalance, setPoolBalance] = useState<number>(0)
-	const [poolParticipants, setPoolParticipants] = useState<number>(0)
+	const [, setWinnerAddresses] = useState<string[]>([])
+	const [, setWinnerDetails] = useState<string[][] | null>([[]])
 
-	const [winnerAddresses, setWinnerAddresses] = useState<string[]>([])
-	const [winnerDetails, setWinnerDetails] = useState<string[][] | null>([[]])
-
-	const [poolDbData, setPoolDbData] = useState<any | undefined>()
+	const [poolDbData, setPoolDbData] = useState<any>()
 	const [poolImageUrl, setPoolImageUrl] = useState<string | null | undefined>()
 	const [cohostDbData, setCohostDbData] = useState<any[]>([])
 	const [transactionInProgress, setTransactionInProgress] =
 		useState<boolean>(false)
 
-	const [pageUrl, setPageUrl] = useState('')
-	const [timeLeft, setTimeLeft] = useState<number>()
+	const [, setPageUrl] = useState('')
 
 	const { currentJwt } = useCookie()
-
-	const calculateTimeLeft = (startTime: string) => {
-		const currentTimestamp: Date = new Date()
-		const startDateObject: Date = new Date(startTime)
-		const timeDiff = startDateObject.getTime() - currentTimestamp.getTime()
-		const { days, minutes, seconds } = formatTimeDiff(timeDiff)
-		console.log('days', days)
-		console.log('minutes', minutes)
-		console.log('seconds', seconds)
-		console.log('timeLeft', Math.floor(timeDiff / 1000))
-
-		setTimeLeft(timeDiff)
-	}
 
 	const { toast } = useToast()
 
@@ -120,20 +102,20 @@ const PoolPage = () => {
 	const poolSCDetail = poolSCInfo?.[1]
 
 	const poolSCBalance = poolSCInfo
-		? (BigInt(poolSCInfo?.[2][0]) / BigInt(1000000000000000000)).toString()
+		? (
+				BigInt(poolSCInfo?.[2][0]) / BigInt('1_000_000_000_000_000_000')
+			).toString()
 		: 0
 	const poolSCName = poolSCInfo?.[1][2]
 	const poolSCDepositPerPerson = poolSCInfo ? BigInt(poolSCInfo?.[1][3]) : 0
 	const poolSCDepositPerPersonString = poolSCInfo
-		? (BigInt(poolSCInfo?.[1][3]) / BigInt(1000000000000000000)).toString()
+		? (
+				BigInt(poolSCInfo?.[1][3]) / BigInt('1_000_000_000_000_000_000')
+			).toString()
 		: 0
 	const poolSCStatus = poolSCInfo?.[3]
 	const poolSCToken = poolSCInfo?.[4]
 	const poolSCParticipants = poolSCInfo?.[5]
-	const poolSCWinners = poolSCInfo?.[6]
-
-	const isWinner =
-		winnerAddresses?.indexOf(wallets[0]?.address?.toLowerCase()) != -1
 
 	const isRegisteredOnSC =
 		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
@@ -172,27 +154,12 @@ const PoolPage = () => {
 	})
 
 	useEffect(() => {
-		// Update the document title using the browser API
-		if (ready && authenticated) {
-			const walletAddress = user!.wallet!.address
-			console.log(`Wallet Address ${walletAddress}`)
-		}
-		console.log('participants', poolSCParticipants)
-
 		setPoolDbData(poolDBInfo?.poolDBInfo)
 		setCohostDbData(poolDBInfo?.cohostUserDisplayData ?? [])
 		setPoolImageUrl(poolDBInfo?.poolImageUrl)
-		// setWinnerAddresses(dictionaryToArray(poolWinnersDetails?.[0]))
 		setWinnerAddresses(poolWinnersDetails?.[0])
 
 		setWinnerDetails(dictionaryToNestedArray(poolWinnersDetails?.[1]))
-		console.log('poolDBInfo', poolDBInfo)
-		console.log('poolSCWinners', poolSCWinners)
-		console.log('winnerAddresses', winnerAddresses)
-		console.log('userWonDetails', userWonDetails)
-		console.log('cohostDbData', cohostDbData)
-		console.log('poolSCIfo', poolSCInfo)
-		console.log('poolSCTimeStart', poolSCTimeStart)
 
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo, poolWinnersDetails])
@@ -203,7 +170,6 @@ const PoolPage = () => {
 	const registerServerMutation = useMutation({
 		mutationFn: handleRegisterServer,
 		onSuccess: () => {
-			console.log('registerServerMutation Success')
 			toast({
 				title: 'Registration Suceessful',
 				description: 'You have joined the pool.',
@@ -220,7 +186,6 @@ const PoolPage = () => {
 	const registerMutation = useMutation({
 		mutationFn: handleRegister,
 		onSuccess: () => {
-			console.log('registerMutation Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
@@ -229,7 +194,7 @@ const PoolPage = () => {
 			})
 		},
 		onError: () => {
-			console.log('registerMutation Error')
+			throw new Error('registerMutation Error')
 		},
 	})
 
@@ -240,7 +205,6 @@ const PoolPage = () => {
 				title: 'Withdrawal Suceessful',
 				description: 'You have successfully withdrawn from the pool.',
 			})
-			console.log('unregisterServerMutation Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromDB', poolId.toString()],
 			})
@@ -253,7 +217,6 @@ const PoolPage = () => {
 	const unregisterMutation = useMutation({
 		mutationFn: handleUnregister,
 		onSuccess: () => {
-			console.log('unregisterMutation Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchAllPoolDataFromSC', poolId.toString()],
 			})
@@ -270,26 +233,18 @@ const PoolPage = () => {
 				title: 'Transaction Suceess',
 				description: 'You have claimed your winnings.',
 			})
-			console.log('registerMutation Success')
+
 			queryClient.invalidateQueries({
 				queryKey: ['fetchWinnersDetailsFromSC', poolId?.toString() ?? ' '],
 			})
 		},
 		onError: () => {
-			console.log('claimMutation Error')
+			throw new Error('claimMutation Error')
 		},
 	})
-	// const percentFunded = poolDbData?.price
-	// 	? poolBalance / (poolDbData?.soft_cap * poolDbData?.price)
-	// 	: poolParticipants / poolDbData?.soft_cap
 
 	const participantPercent =
 		(poolSCParticipants?.length / poolDbData?.soft_cap) * 100
-	const viewParticipantsClicked = () => {
-		const currentRoute = router.asPath
-
-		router.push(`${currentRoute}/participants`)
-	}
 
 	const viewTicketClicked = () => {
 		const currentRoute = router.asPath
@@ -297,11 +252,6 @@ const PoolPage = () => {
 	}
 
 	const onRegisterButtonClicked = (e: any) => {
-		// setTransactionInProgress(true)
-
-		console.log('onRegisterButtonClicked')
-		const connectorType = wallets[0].connectorType
-		console.log('connectorType', connectorType)
 		toast({
 			title: 'Requesting Transaction/s',
 			description: 'Approve spending of token, followed by depositing token.',
@@ -312,11 +262,6 @@ const PoolPage = () => {
 	}
 
 	const onUnregisterButtonClicked = (e: any) => {
-		// setTransactionInProgress(true)
-
-		console.log('onUnregisterButtonClicked')
-		const connectorType = wallets[0].connectorType
-		console.log('connectorType', connectorType)
 		toast({
 			title: 'Requesting Transaction',
 			description: 'Withdrawing from pool',
@@ -328,9 +273,6 @@ const PoolPage = () => {
 	}
 
 	const onClaimButtonClicked = (e: any) => {
-		console.log('onClaimButtonClicked')
-		const connectorType = wallets[0].connectorType
-		console.log('connectorType', connectorType)
 		toast({
 			title: 'Requesting Transaction/s',
 			description: 'Approve claiming prize',
@@ -339,10 +281,6 @@ const PoolPage = () => {
 			params: [poolId.toString(), wallets],
 		})
 	}
-
-	const cohostNames: string = cohostDbData
-		.map((data: any) => data.display_name)
-		.join(',')
 
 	if (_.isEmpty(router.query.poolId)) {
 		return <></>
@@ -358,7 +296,8 @@ const PoolPage = () => {
 							className={`cardBackground flex w-full flex-col space-y-4 rounded-3xl p-4 md:space-y-10 md:p-10`}
 						>
 							<div className='relative overflow-hidden rounded-3xl'>
-								<img
+								<Image
+									alt='pool'
 									src={`${
 										_.isEmpty(poolImageUrl)
 											? defaultPoolImage.src
@@ -403,7 +342,7 @@ const PoolPage = () => {
 									</div>
 								</div>
 								<div className='flex flex-col space-y-2 text-sm md:space-y-6 md:text-3xl '>
-									<div className='flex-rol flex justify-between'>
+									<div className='flex flex-row justify-between'>
 										<p className='max-w-sm '>
 											<span className='font-bold'>{poolSCBalance} </span>
 											{tokenSymbol} Prize Pool
@@ -474,13 +413,8 @@ const PoolPage = () => {
 											)}
 										</div>
 										<div className='flex flex-row items-center'>
-											{/* <button
-												className='flex flex-row items-center space-x-2 md:space-x-6 px-1 md:px-2'
-												onClick={viewParticipantsClicked}
-											> */}
-											{/* <span>View all</span> */}
 											<span>
-												<img src={`${rightArrow.src}`} />
+												<Image alt='right arrow' src={`${rightArrow.src}`} />
 											</span>
 											{/* </button> */}
 										</div>
@@ -495,7 +429,11 @@ const PoolPage = () => {
 								<div className='flex flex-row items-center justify-between'>
 									<div className=' flex flex-row space-x-2'>
 										<span className='flex items-center'>
-											<img className='size-5' src={circleTick.src} />
+											<Image
+												alt='circle tick'
+												className='size-5'
+												src={circleTick.src}
+											/>
 										</span>
 										<span className='font-semibold'>Winner</span>
 									</div>
@@ -520,15 +458,17 @@ const PoolPage = () => {
 						>
 							<h3 className='text-sm font-semibold md:text-2xl'>Description</h3>
 							<Divider />
-							<p className='text-md md:text-2xl'>{poolDbData?.description}</p>
+							<p className='text-base md:text-2xl'>{poolDbData?.description}</p>
 							<h3 className='mt-8 text-sm font-semibold md:text-2xl'>Buy-In</h3>
 							<Divider />
-							<p className='text-md md:text-2xl'>
+							<p className='text-base md:text-2xl'>
 								{poolSCDepositPerPersonString} {tokenSymbol}
 							</p>
 							<h3 className='mt-8 text-sm font-semibold md:text-2xl'>Terms</h3>
 							<Divider />
-							<p className='text-md md:text-2xl'>{poolDbData?.link_to_rules}</p>
+							<p className='text-base md:text-2xl'>
+								{poolDbData?.link_to_rules}
+							</p>
 						</div>
 						{isRegisteredOnSC ? (
 							<div className='fixed bottom-5 left-1/2 z-50 flex w-full max-w-screen-md -translate-x-1/2 flex-row space-x-2 px-6 md:bottom-6'>
@@ -542,7 +482,8 @@ const PoolPage = () => {
 								<DropdownMenu>
 									<DropdownMenuTrigger>
 										<div className='size-12 rounded-full bg-black p-3'>
-											<img
+											<Image
+												alt='triple dots menu'
 												className='flex size-full'
 												src={tripleDotsIcon.src}
 											/>
@@ -552,7 +493,8 @@ const PoolPage = () => {
 										<DropdownMenuItem onClick={onUnregisterButtonClicked}>
 											<div className='flex flex-row space-x-2'>
 												<span>
-													<img
+													<Image
+														alt='user unregister'
 														className='flex size-full'
 														src={userUnregisterIcon.src}
 													/>

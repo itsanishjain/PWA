@@ -20,15 +20,9 @@ export default async function handler(
 		},
 	)
 
-	console.log('message', message)
-	console.log('signedMessage', signedMessage)
-	console.log('nonce', nonce)
-	console.log('address', address)
-
 	const addressLower = address.toLowerCase()
 
 	const recoveredAddress = recoverAddress(hashMessage(message), signedMessage)
-	console.log('recoveredAddress', recoveredAddress)
 
 	if (recoveredAddress.toLowerCase() != addressLower) {
 		return res
@@ -41,8 +35,6 @@ export default async function handler(
 		.select('*')
 		.eq('address', addressLower)
 
-	console.log('data', data)
-
 	if (data == null || data[0].auth.genNonce != nonce) {
 		return res
 			.status(401)
@@ -50,7 +42,6 @@ export default async function handler(
 	}
 
 	let userId = data[0].id
-	console.log('Retrieved userId', userId)
 	if (data[0].id == '' || data[0].id == null || data[0].id == undefined) {
 		const { data: user, error: createUserError } =
 			await supabaseAdminClient.auth.admin.createUser({
@@ -60,12 +51,10 @@ export default async function handler(
 			})
 
 		if (createUserError) {
-			console.log('createUserError', createUserError.message)
 			return res.status(401).json({ message: 'Unable to create user' })
 		}
 
 		userId = user.user?.id
-		console.log('New Auth User', user)
 
 		const { error: updateIdError } = await supabaseAdminClient
 			.from('users')
@@ -73,7 +62,6 @@ export default async function handler(
 			.eq('address', addressLower)
 
 		if (updateIdError) {
-			console.log('updateIdError', updateIdError.message)
 			return res.status(401).json({ message: 'Unable to create user' })
 		}
 
@@ -88,7 +76,6 @@ export default async function handler(
 		})
 
 	if (updateUsersDisplayError) {
-		console.log('updateIdError', updateUsersDisplayError.message)
 		return res.status(401).json({ message: 'Unable to create user' })
 	}
 
@@ -108,7 +95,6 @@ export default async function handler(
 		})
 		.eq('address', addressLower) // primary key
 	if (updateUserError) {
-		console.log('updateUserError', updateUserError.message)
 		return res
 			.status(401)
 			.json({ message: 'Address does not match signature address' })
@@ -125,6 +111,5 @@ export default async function handler(
 		process.env.SUPABASE_JWT!,
 		// { expiresIn: jwtDuration },
 	)
-	console.log('Sending Token')
 	res.status(200).json({ token })
 }

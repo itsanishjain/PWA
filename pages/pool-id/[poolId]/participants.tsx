@@ -5,17 +5,16 @@ import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
 
-import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { usePrivy } from '@privy-io/react-auth'
 
 import { Database } from '@/types/supabase'
 
-import { useCookie } from '@/hooks/cookie'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
 	fetchParticipantsDataFromServer,
 } from '@/lib/api/clientAPI'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import ParticipantRow from '@/components/participantRow'
 
@@ -25,26 +24,13 @@ export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 const ParticipantsPage = () => {
 	const router = useRouter()
 
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const { ready, authenticated } = usePrivy()
 
-	const { wallets } = useWallets()
+	const [, setPoolDbData] = useState<any>()
 
-	const [poolBalance, setPoolBalance] = useState<number>(0)
-	const [poolParticipants, setPoolParticipants] = useState<number>(0)
-
-	const [poolDbData, setPoolDbData] = useState<any | undefined>()
-	const [poolImageUrl, setPoolImageUrl] = useState<string | undefined>()
-	const [cohostDbData, setCohostDbData] = useState<any[]>([])
-
-	const [copied, setCopied] = useState(false)
-
-	const [pageUrl, setPageUrl] = useState('')
-
-	const { currentJwt } = useCookie()
+	const [, setPageUrl] = useState('')
 
 	const poolId = router?.query?.poolId
-	const queryClient = useQueryClient()
 
 	const { data: poolSCInfo } = useQuery({
 		queryKey: ['fetchAllPoolDataFromSC', poolId?.toString() ?? ' '],
@@ -58,10 +44,7 @@ const ParticipantsPage = () => {
 		enabled: !!poolId,
 	})
 
-	const poolSCStatus = poolSCInfo?.[3]
-
 	const poolSCParticipants = poolSCInfo?.[5]
-	const poolSCWinners = poolSCInfo?.[6]
 
 	const { data: participantsInfo } = useQuery({
 		queryKey: [
@@ -74,18 +57,7 @@ const ParticipantsPage = () => {
 	})
 
 	useEffect(() => {
-		// Update the document title using the browser API
-		if (ready && authenticated) {
-			const walletAddress = user!.wallet!.address
-			console.log(`Wallet Address ${walletAddress}`)
-		}
-		console.log('participants', poolSCParticipants)
-
 		setPoolDbData(poolDBInfo?.poolDBInfo)
-
-		console.log('participantsInfo', JSON.stringify(participantsInfo))
-
-		console.log('poolDBInfo', poolDBInfo)
 		setPageUrl(window?.location.href)
 	}, [ready, authenticated, poolSCInfo, poolDBInfo, participantsInfo])
 

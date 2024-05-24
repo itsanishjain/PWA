@@ -1,9 +1,9 @@
 import Page from '@/components/page'
 import Section from '@/components/section'
-import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { usePrivy } from '@privy-io/react-auth'
 import { useRouter } from 'next/router'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import Appbar from '@/components/appbar'
 
@@ -18,8 +18,6 @@ const Admin = () => {
 	const router = useRouter()
 	const { ready, authenticated } = usePrivy()
 
-	const { wallets } = useWallets()
-
 	// Replace this with the message you'd like your user to sign
 
 	// Replace this with the text you'd like on your signature modal,
@@ -30,7 +28,7 @@ const Admin = () => {
 		router.push('/login')
 	}
 
-	const handleCreatePool = async () => {
+	const handleCreatePool = () => {
 		router.push('/create-pool')
 	}
 
@@ -38,14 +36,6 @@ const Admin = () => {
 	const selectTab = (tabIndex: number) => {
 		setSelectedTab(tabIndex)
 	}
-
-	useEffect(() => {
-		// Update the document title using the browser API
-		if (wallets.length > 0) {
-			console.log(`Wallet Length: ${wallets.length}`)
-			console.log(`Wallet Address: ${wallets[0].address}`)
-		}
-	}, [wallets])
 
 	return (
 		<Page>

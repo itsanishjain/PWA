@@ -10,8 +10,6 @@ export default async function handler(
 	const requestData = await req.body
 	const { poolId, address, jwtString } = requestData
 
-	console.log('jwt', JSON.stringify(jwtString))
-
 	// Return a response
 	const supabaseAdminClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,9 +27,8 @@ export default async function handler(
 		const jwtObj = decode(jwtString, { json: true })
 		jwtAddress = jwtObj!.address
 	} catch (error) {
-		console.error(error)
 		res.status(500).json({ error: 'Failed to decode Jwt.' })
-		return
+		throw error
 	}
 
 	async function deleteData(pool_id: string, address: string) {
@@ -46,26 +43,22 @@ export default async function handler(
 			poolData?.[0]?.['host_address'] != jwtAddress &&
 			poolData?.[0]?.['co_host_addresses'].indexOf(jwtAddress) == -1
 		) {
-			console.error('Not authorised to save payouts')
 			res.status(500).json({ message: 'Error' })
-
-			return
+			throw new Error('Unauthorized')
 		}
-		console.log('Passed Delete Authorization Check')
 
 		// Use supabase to delete the data
-		const { data: deletedData, error: deleteError } = await supabaseAdminClient
+		const { error: deleteError } = await supabaseAdminClient
 			.from('participantStatus')
 			.delete()
 			.match({
 				pool_id: pool_id,
 				participant_address: address,
 			})
-		console.log('deletedData:', deletedData)
 
 		if (deleteError) {
-			console.log('Delete error:', deleteError.message)
 			res.status(500).json({ message: 'Error: Failed to delete participant' })
+			throw deleteError
 		}
 	}
 	await deleteData(poolId, address.toLowerCase())

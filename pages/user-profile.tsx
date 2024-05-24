@@ -1,28 +1,28 @@
 import Appbar from '@/components/appbar'
+import ClaimablePoolRow from '@/components/claimablePoolRow'
+import Divider from '@/components/divider'
 import Page from '@/components/page'
 import Section from '@/components/section'
+import { useToast } from '@/components/ui/use-toast'
 import {
 	fetchClaimablePoolsFromSC,
 	fetchUserDisplayForAddress,
 	handleClaimWinnings,
 } from '@/lib/api/clientAPI'
-import frogImage from '@/public/images/frog.png'
-import { usePrivy, useWallets } from '@privy-io/react-auth'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Inter } from 'next/font/google'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-
-import ClaimablePoolRow from '@/components/claimablePoolRow'
-import Divider from '@/components/divider'
-import { useToast } from '@/components/ui/use-toast'
 import {
 	formatAddress,
 	getAllIndicesMatching,
 	getValuesFromIndices,
 } from '@/lib/utils'
+import frogImage from '@/public/images/frog.png'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as _ from 'lodash'
+import { Inter } from 'next/font/google'
+import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -64,13 +64,15 @@ const UserProfile = () => {
 				title: 'Transaction Suceess',
 				description: 'You have claimed your winnings.',
 			})
-			console.log('claimWinningsMutation Success')
 			queryClient.invalidateQueries({
 				queryKey: ['fetchClaimablePoolsFromSC', wallets?.[0]?.address],
 			})
 		},
 		onError: () => {
-			console.log('claimMutation Error')
+			toast({
+				title: 'Transaction Failed',
+				description: 'Failed to claim winnings.',
+			})
 		},
 	})
 
@@ -91,15 +93,9 @@ const UserProfile = () => {
 			router.push('/login')
 		}
 
-		for (let i = 0; i < wallets.length; i++) {
-			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
-		}
-
 		if (profileData?.profileImageUrl) {
 			setProfileImageUrl(profileData?.profileImageUrl)
 		}
-
-		console.log('displayName', profileData)
 	}, [profileData, ready, authenticated, router])
 
 	return (
@@ -111,10 +107,13 @@ const UserProfile = () => {
 				>
 					<div className='flex w-full flex-col space-y-4 pb-8'>
 						<div className='flex w-full flex-col items-center justify-center space-y-4'>
-							<img
-								className='center z-0 aspect-square w-40 rounded-full object-cover'
-								src={profileImageUrl}
-							/>
+							{profileImageUrl && (
+								<Image
+									className='center z-0 aspect-square w-40 rounded-full object-cover'
+									src={profileImageUrl}
+									alt='profile image'
+								/>
+							)}
 							{!_.isEmpty(wallets?.[0]?.address) && (
 								<h3 className='font-medium'>
 									{formatAddress(wallets?.[0]?.address)}

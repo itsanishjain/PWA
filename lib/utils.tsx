@@ -7,7 +7,6 @@ interface Dictionary {
 
 export const formatTimeDiff = (diffInMs: number) => {
 	const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
-	// console.log('diffInMs', diffInMs)
 
 	const hours = Math.floor(
 		(diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
@@ -22,12 +21,8 @@ export const formatEventDateTime = (startTime: number): string => {
 	const currentTimestamp: Date = new Date()
 	const startDateObject: Date = new Date(startTime * 1000)
 	const timeLeft = startDateObject.getTime() - currentTimestamp.getTime()
-	console.log('currentTimeStamp', currentTimestamp.getTime())
-	console.log('startDateTimeStamp', startDateObject.getTime())
 
-	console.log('timeLeft', timeLeft)
 	const { days } = formatTimeDiff(timeLeft)
-	console.log('days', days)
 
 	const monthYear = startDateObject.toLocaleDateString([], {
 		month: 'short',

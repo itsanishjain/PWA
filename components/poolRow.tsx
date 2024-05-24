@@ -1,11 +1,11 @@
+import { formatTimeDiff } from '@/lib/utils'
 import frogImage from '@/public/images/frog.png'
 import rightArrow from '@/public/images/right_arrow.svg'
-import React, { useEffect, useState } from 'react'
-
-import { formatTimeDiff } from '@/lib/utils'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import * as _ from 'lodash'
+import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 interface PoolRowProps {
 	title: string
@@ -33,7 +33,7 @@ const PoolRow: React.FC<PoolRowProps> = ({
 
 	const supabaseClient = createSupabaseBrowserClient()
 
-	const loadPoolImage = async () => {
+	useEffect(() => {
 		if (_.isEmpty(poolImagePath)) {
 			return
 		}
@@ -41,12 +41,7 @@ const PoolRow: React.FC<PoolRowProps> = ({
 			.from('pool')
 			.getPublicUrl(poolImagePath)
 		setPoolImageUrl(storageData.publicUrl)
-	}
-
-	useEffect(() => {
-		console.log('poolImagePath', poolImagePath)
-		loadPoolImage()
-	}, [poolImagePath])
+	}, [poolImagePath, supabaseClient.storage])
 
 	const trailingSlash =
 		window?.location?.href[window?.location?.href.length - 1] == '/' ? '' : '/'
@@ -56,13 +51,14 @@ const PoolRow: React.FC<PoolRowProps> = ({
 			className='flex flex-row space-x-4'
 		>
 			<div className='relative size-20 overflow-hidden rounded-2xl bg-red-500'>
-				<img
+				<Image
+					alt='pool image'
 					src={`
 						${_.isEmpty(poolImageUrl) ? frogImage.src : poolImageUrl}
 					`}
 					className='size-full bg-black object-cover object-center'
 				/>
-				<div className='absolute bottom-0 w-full bg-black bg-opacity-40 py-1 text-center text-xs text-white'>
+				<div className='absolute bottom-0 w-full bg-black/40 py-1 text-center text-xs text-white'>
 					Upcoming
 				</div>
 			</div>
@@ -78,7 +74,7 @@ const PoolRow: React.FC<PoolRowProps> = ({
 				)}
 			</div>
 			<div className=' flex flex-col items-center justify-center'>
-				<img src={`${rightArrow.src}`} />
+				<Image alt='right arrow' src={`${rightArrow.src}`} />
 			</div>
 		</Link>
 	)

@@ -19,10 +19,7 @@ export default async function handler(
 		},
 	)
 
-	console.log('nonce called')
-	console.log('address', addressLower)
-
-	const { status, error } = await supabaseAdminClient.from('users').upsert(
+	const { error } = await supabaseAdminClient.from('users').upsert(
 		{
 			auth: {
 				genNonce: nonce,
@@ -33,9 +30,6 @@ export default async function handler(
 		},
 		{ onConflict: 'address' },
 	)
-
-	console.log('status', status)
-	console.log('error', error?.message)
 
 	if (error) {
 		return res.status(500).json({})

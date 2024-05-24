@@ -11,8 +11,9 @@ import frogImage from '@/public/images/frog.png'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Inter } from 'next/font/google'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -48,13 +49,12 @@ const RefundUser = () => {
 		setInputValue(event.target.value)
 	}
 
-	const poolId = router?.query?.poolId! ?? 0
-	const participantAddress = router?.query?.address! ?? '0x'
+	const poolId = router?.query?.poolId ?? 0
+	const participantAddress = router?.query?.address ?? '0x'
 
 	const refundParticipantMutation = useMutation({
 		mutationFn: handleRefundParticipant,
 		onSuccess: () => {
-			console.log('refundParticipant Success')
 			toast({
 				title: 'Transaction Successful',
 				description: 'Refunded User',
@@ -62,7 +62,7 @@ const RefundUser = () => {
 			setInputValue('0')
 		},
 		onError: () => {
-			console.log('refundParticipant Error')
+			throw new Error('refundParticipant Error')
 		},
 	})
 
@@ -87,18 +87,11 @@ const RefundUser = () => {
 			router.push('/login')
 		}
 
-		if (wallets.length > 0) {
-			console.log(`Wallet Length: ${wallets.length}`)
-		}
-		for (let i = 0; i < wallets.length; i++) {
-			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
-		}
-
 		if (profileData?.profileImageUrl) {
 			setProfileImageUrl(profileData?.profileImageUrl)
 		}
 		setDisplayName(profileData?.userDisplayData.display_name ?? '')
-		console.log('displayName', profileData)
+
 		if (inputRef?.current) {
 			inputRef.current.focus()
 		}
@@ -113,7 +106,8 @@ const RefundUser = () => {
 				>
 					<div className='flex flex-col pb-8'>
 						<div className='flex w-full justify-center'>
-							<img
+							<Image
+								alt='profile'
 								className='center z-0 aspect-square w-24 rounded-full object-cover'
 								src={profileImageUrl}
 							/>

@@ -1,6 +1,7 @@
 import Page from '@/components/page'
 import Section from '@/components/section'
 import leftArrowImage from '@/public/images/left_arrow.svg'
+import Image from 'next/image'
 import Link from 'next/link'
 
 const Terms = () => {
@@ -9,7 +10,7 @@ const Terms = () => {
 			<Section>
 				<div className='flex flex-row'>
 					<Link href={'/login'}>
-						<img src={leftArrowImage.src} alt='Back' />
+						<Image src={leftArrowImage.src} alt='Back' />
 					</Link>
 				</div>
 				<div className='flex w-full flex-col justify-center space-y-4 py-20 leading-loose'>
