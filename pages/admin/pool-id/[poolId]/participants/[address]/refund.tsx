@@ -111,6 +111,8 @@ const RefundUser = () => {
 									alt='profile'
 									className='z-0 aspect-square w-24 rounded-full object-cover'
 									src={profileImageUrl}
+									width={96}
+									height={96}
 								/>
 							)}
 						</div>

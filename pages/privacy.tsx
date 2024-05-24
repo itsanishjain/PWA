@@ -10,7 +10,7 @@ const Privacy = () => {
 			<Section>
 				<div className='flex flex-row'>
 					<Link href={'/login'}>
-						<Image src={leftArrowImage.src} alt='Back' />
+						<Image src={leftArrowImage.src} alt='Back' width={40} height={40} />
 					</Link>
 				</div>
 				<div className='flex w-full flex-col justify-center space-y-4 py-20 leading-loose'>

@@ -77,6 +77,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 									className='size-10'
 									src={`${leftArrowImage.src}`}
 									alt='Back'
+									height={40}
+									width={40}
 								/>
 							</Link>
 						)}
@@ -110,6 +112,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 											src={`${profileData?.profileImageUrl ?? frogImage.src}`}
 											className='size-9 rounded-full object-cover'
 											alt='Profile Image'
+											height={36}
+											width={36}
 										/>
 									</button>
 								</div>
@@ -159,6 +163,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 															alt='keyboard return'
 															className='flex size-full'
 															src={keyboardReturnImage.src}
+															width={20}
+															height={20}
 														/>
 													</span>
 													<span>Issue refund</span>
@@ -175,6 +181,8 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 									<Image
 										alt='Profile Image'
 										src={`${profileData?.profileImageUrl ?? frogImage.src}`}
+										width={36}
+										height={36}
 										className='size-9 rounded-full object-cover'
 									/>
 								</button>

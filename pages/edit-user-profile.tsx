@@ -164,6 +164,8 @@ const EditUserProfile = () => {
 							>
 								{profileImageUrl && (
 									<Image
+										width={160}
+										height={160}
 										alt='camera'
 										className='z-0 aspect-square w-40 rounded-full object-cover'
 										src={profileImageUrl}
@@ -175,7 +177,9 @@ const EditUserProfile = () => {
 									<Image
 										alt='camera'
 										src={camera.src}
-										className='object-contain   object-center'
+										className='object-contain object-center'
+										width={40}
+										height={40}
 									/>
 								</div>
 							</button>

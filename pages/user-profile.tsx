@@ -112,6 +112,8 @@ const UserProfile = () => {
 									className='z-0 aspect-square w-40 rounded-full object-cover'
 									src={profileImageUrl}
 									alt='profile image'
+									width={160}
+									height={160}
 								/>
 							)}
 							{!_.isEmpty(wallets?.[0]?.address) && (

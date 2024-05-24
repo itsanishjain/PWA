@@ -75,9 +75,7 @@ export async function fetchToken(backendLoginObj: backendLoginObject) {
 		const data = await response.json()
 		return data
 	} catch (error) {
-		throw new Error(
-			`There was a problem with the fetch operation: ${JSON.stringify(error)}`,
-		)
+		throw error
 	}
 }
 

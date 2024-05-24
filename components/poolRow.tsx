@@ -53,6 +53,8 @@ const PoolRow: React.FC<PoolRowProps> = ({
 			<div className='relative size-20 overflow-hidden rounded-2xl bg-red-500'>
 				<Image
 					alt='pool image'
+					width={80}
+					height={80}
 					src={`
 						${_.isEmpty(poolImageUrl) ? frogImage.src : poolImageUrl}
 					`}
@@ -74,7 +76,13 @@ const PoolRow: React.FC<PoolRowProps> = ({
 				)}
 			</div>
 			<div className=' flex flex-col items-center justify-center'>
-				<Image alt='right arrow' src={`${rightArrow.src}`} />
+				<Image
+					alt='right arrow'
+					src={`${rightArrow.src}`}
+					className='size-10'
+					width={40}
+					height={40}
+				/>
 			</div>
 		</Link>
 	)

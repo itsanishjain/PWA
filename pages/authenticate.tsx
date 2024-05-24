@@ -65,7 +65,13 @@ const Authenticate = () => {
 				<div className='flex size-full items-center justify-center'>
 					<div className='flex size-96 flex-col'>
 						<div className='flex w-full flex-row items-center'>
-							<Image className='mx-auto' src={poolImage} alt='pool image' />
+							<Image
+								className='mx-auto'
+								src={poolImage}
+								alt='pool image'
+								height={384}
+								width={384}
+							/>
 						</div>
 						<h2 className='tagline-text mt-28 w-full text-center align-top text-xl font-bold text-zinc-800'>
 							Terms (Important*)

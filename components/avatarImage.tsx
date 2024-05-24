@@ -21,6 +21,8 @@ const AvatarImage: React.FC<AvatarImageProps> = ({ address }) => {
 			alt='profile image'
 			src={`${profileData?.profileImageUrl ?? frogImage.src}`}
 			className=' flex size-full rounded-full'
+			width={40}
+			height={40}
 		/>
 	)
 }

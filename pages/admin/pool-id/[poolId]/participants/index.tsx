@@ -246,6 +246,8 @@ const ManageParticipantsPage = () => {
 									alt='search icon'
 									className='flex'
 									src={searchIcon.src}
+									width={40}
+									height={40}
 								/>
 							</span>
 							<Link

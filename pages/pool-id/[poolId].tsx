@@ -303,6 +303,7 @@ const PoolPage = () => {
 											? defaultPoolImage.src
 											: poolImageUrl
 									}`}
+									fill
 									className='size-full bg-black object-contain object-center'
 								/>
 								<div className='absolute right-2 top-0 flex  h-full w-10  flex-col items-center space-y-3 py-4 text-white md:right-4 md:w-20 md:space-y-5 md:py-6'>
@@ -414,9 +415,12 @@ const PoolPage = () => {
 										</div>
 										<div className='flex flex-row items-center'>
 											<span>
-												<Image alt='right arrow' src={`${rightArrow.src}`} />
+												<Image
+													alt='right arrow'
+													src={`${rightArrow.src}`}
+													fill
+												/>
 											</span>
-											{/* </button> */}
 										</div>
 									</Link>
 								</div>
@@ -430,6 +434,8 @@ const PoolPage = () => {
 									<div className=' flex flex-row space-x-2'>
 										<span className='flex items-center'>
 											<Image
+												width={20}
+												height={20}
 												alt='circle tick'
 												className='size-5'
 												src={circleTick.src}
@@ -483,6 +489,8 @@ const PoolPage = () => {
 									<DropdownMenuTrigger>
 										<div className='size-12 rounded-full bg-black p-3'>
 											<Image
+												width={48}
+												height={48}
 												alt='triple dots menu'
 												className='flex size-full'
 												src={tripleDotsIcon.src}
@@ -497,6 +505,7 @@ const PoolPage = () => {
 														alt='user unregister'
 														className='flex size-full'
 														src={userUnregisterIcon.src}
+														fill
 													/>
 												</span>
 												<span>Unregister from Pool</span>

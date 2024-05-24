@@ -204,6 +204,7 @@ const AdminPoolPage = () => {
 											: poolImageUrl
 									}`}
 									className='size-full bg-black object-contain object-center'
+									fill
 								/>
 								<div className='absolute bottom-0 flex size-full flex-col items-center justify-center space-y-3 bg-black/60 text-white backdrop-blur-sm md:space-y-6'>
 									{timeLeft != undefined && timeLeft > 0 && (
@@ -224,6 +225,8 @@ const AdminPoolPage = () => {
 											alt='qr code icon'
 											className='flex size-full'
 											src={qrCodeIcon.src}
+											width={32}
+											height={32}
 										/>
 									</Link>
 									<ShareDialog />
@@ -233,6 +236,8 @@ const AdminPoolPage = () => {
 											alt='edit icon'
 											className='flex size-full'
 											src={editIcon.src}
+											width={32}
+											height={32}
 										/>
 									</button>
 								</div>
@@ -272,7 +277,12 @@ const AdminPoolPage = () => {
 									>
 										<span>View all</span>
 										<span>
-											<Image alt='right arrow' src={`${rightArrow.src}`} />
+											<Image
+												alt='right arrow'
+												width={40}
+												height={40}
+												src={`${rightArrow.src}`}
+											/>
 										</span>
 									</Link>
 								</div>

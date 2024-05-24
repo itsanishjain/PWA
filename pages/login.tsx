@@ -25,7 +25,13 @@ const LoginPage = () => {
 				<div className='relative flex size-full items-center justify-center'>
 					<div className='flex size-96 flex-col'>
 						<div className='flex w-full flex-row items-center'>
-							<Image className='mx-auto' src={poolImage} alt='pool image' />
+							<Image
+								className='mx-auto'
+								src={poolImage}
+								alt='pool image'
+								width={384}
+								height={384}
+							/>
 						</div>
 						<h2 className='tagline-text mt-28 w-full text-center align-top text-xl font-bold text-zinc-800'>
 							Pooling made simple.

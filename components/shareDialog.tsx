@@ -42,6 +42,8 @@ const ShareDialog = () => {
 				<DialogTrigger asChild>
 					<button className='size-8 rounded-full bg-black/40 p-2 md:size-14 md:p-3'>
 						<Image
+							width={32}
+							height={32}
 							alt='share icon'
 							className='flex size-full'
 							src={shareIcon.src}
@@ -66,6 +68,8 @@ const ShareDialog = () => {
 			<DrawerTrigger asChild>
 				<button className='size-8 rounded-full bg-black/40 p-2 md:size-14 md:p-3'>
 					<Image
+						width={32}
+						height={32}
 						alt='share icon'
 						className='flex size-full'
 						src={shareIcon.src}
