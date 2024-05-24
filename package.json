@@ -3,10 +3,12 @@
 	"version": "0.0.0",
 	"license": "MIT",
 	"scripts": {
-		"dev": "next dev",
 		"build": "next build",
-		"start": "next start",
-		"lint": "next lint"
+		"check-types": "tsc --noemit",
+		"dev": "next dev",
+		"format": "prettier -luw '**/*' '!pnpm-lock.yaml' '!supabase/.{branches,temp}'",
+		"lint": "eslint '**/*' --fix && pnpm run check-types",
+		"start": "next start"
 	},
 	"dependencies": {
 		"@privy-io/react-auth": "^1.55.2",
@@ -45,11 +47,14 @@
 		"wagmi": "^2.5.6"
 	},
 	"devDependencies": {
+		"@tanstack/eslint-plugin-query": "^5.35.6",
 		"@types/js-cookie": "^3.0.6",
 		"@types/jsonwebtoken": "^9.0.6",
 		"@types/lodash": "^4.17.0",
 		"@types/node": "^20.8.4",
 		"@types/react": "^18.2.28",
+		"@typescript-eslint/eslint-plugin": "^7.10.0",
+		"@typescript-eslint/parser": "^7.10.0",
 		"autoprefixer": "^10.4.16",
 		"eslint": "^8.51.0",
 		"eslint-config-next": "^13.5.4",
