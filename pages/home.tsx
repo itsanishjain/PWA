@@ -44,7 +44,7 @@ const Home = () => {
 							pool
 						</h1>
 					</div>
-					<p className='text-white px-12'>
+					<p className='text-white px-12 text-center'>
 						An application that allows users to pool funds together for Web3.
 					</p>
 					<Link
