@@ -40,11 +40,6 @@ const Home = () => {
 	}
 
 	useEffect(() => {
-		if (ready && !authenticated) {
-			// Replace this code with however you'd like to handle an unauthenticated user
-			// As an example, you might redirect them to a sign-in page
-			router.push('/login')
-		}
 		// Update the document title using the browser API
 		if (wallets.length > 0) {
 			console.log(`Wallet Length: ${wallets.length}`)
@@ -53,7 +48,7 @@ const Home = () => {
 		for (var i = 0; i < wallets.length; i++) {
 			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
-	}, [wallets, ready, authenticated, router])
+	}, [wallets])
 
 	return (
 		<Page>

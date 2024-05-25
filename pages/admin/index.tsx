@@ -29,16 +29,6 @@ const Admin = () => {
 
 	const { wallets } = useWallets()
 
-	// Replace this with the message you'd like your user to sign
-
-	// Replace this with the text you'd like on your signature modal,
-	// if you do not have `noPromptsOnSignature` enabled
-	if (ready && !authenticated) {
-		// Replace this code with however you'd like to handle an unauthenticated user
-		// As an example, you might redirect them to a sign-in page
-		router.push('/login')
-	}
-
 	const handleCreatePool = async () => {
 		router.push('/create-pool')
 	}
@@ -54,7 +44,10 @@ const Admin = () => {
 			console.log(`Wallet Length: ${wallets.length}`)
 			console.log(`Wallet Address: ${wallets[0].address}`)
 		}
-	}, [wallets])
+		if (ready && !authenticated) {
+			router.push('/login')
+		}
+	}, [wallets, ready, authenticated, router])
 
 	return (
 		<Page>
