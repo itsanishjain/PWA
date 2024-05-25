@@ -60,10 +60,6 @@ const Appbar = ({ backRoute, pageTitle, rightMenu }: AppBarProps) => {
 	})
 
 	useEffect(() => {
-		if (ready && !authenticated) {
-			router.push('/login')
-		}
-
 		if (ready && authenticated && walletsReady && wallets?.length == 0) {
 			handleSignOut()
 		}

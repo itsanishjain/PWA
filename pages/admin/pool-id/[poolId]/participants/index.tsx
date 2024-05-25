@@ -133,9 +133,13 @@ const ManageParticipantsPage = () => {
 	const savedPayoutsPayoutAmounts =
 		savedPayoutsInfo?.map((participant) => participant?.payout_amount) ?? []
 
-	const checkedInParticipantsInfo = participantsInfo?.filter(
-		(participant) => participant?.participationData?.[0]?.status == 2,
-	)
+	const checkedInParticipantsInfo = participantsInfo
+		?.filter((participant) => participant?.participationData?.[0]?.status == 2)
+		.sort(
+			(a, b) =>
+				new Date(a?.participationData?.[0]?.check_in_time).getTime() -
+				new Date(b?.participationData?.[0]?.check_in_time).getTime(),
+		)
 
 	const onQrButtonClicked = () => {
 		console.log('QR Button Clicked')

@@ -87,6 +87,7 @@ export default async function handler(
 						participant_address: walletAddressLower,
 						status: 2,
 						pool_id: poolId,
+						check_in_time: new Date(),
 					})
 					.match({
 						pool_id: poolId,

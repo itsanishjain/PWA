@@ -96,24 +96,6 @@ const LoginPage = () => {
 								Connect wallet
 							</button>
 						</div>
-						{/* {showBackend && (
-							<div className='flex justify-center items-center h-full w-full mt-28'>
-								<button
-									className='rounded-full gradient-background px-28 py-3'
-									onClick={handleBackendLogin}
-								>
-									backend
-								</button>
-							</div>
-						)} */}
-					</div>
-					<div className=' absolute bottom-0 w-full flex flex-row justify-between text-black'>
-						<Link className=' text-black' href={'/terms'}>
-							Terms and Conditions
-						</Link>
-						<Link className='' href={'/privacy'}>
-							Privacy Policy
-						</Link>
 					</div>
 				</div>
 			</Section>
