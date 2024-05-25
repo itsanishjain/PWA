@@ -21,7 +21,7 @@ const Privacy = () => {
 		<Page>
 			<Section>
 				<div className='flex flex-row'>
-					<Link href={'/login'}>
+					<Link href={'/home'}>
 						<img src={leftArrowImage.src} alt='Back' />
 					</Link>
 				</div>

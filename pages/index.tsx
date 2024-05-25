@@ -22,7 +22,7 @@ import PastPoolTab from '@/components/tabs/PastPoolTab'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const Home = () => {
+const App = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
@@ -68,4 +68,4 @@ const Home = () => {
 	)
 }
 
-export default Home
+export default App
