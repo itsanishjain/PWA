@@ -22,7 +22,7 @@ import PastPoolTab from '@/components/tabs/PastPoolTab'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const Home = () => {
+const App = () => {
 	const router = useRouter()
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
@@ -40,11 +40,6 @@ const Home = () => {
 	}
 
 	useEffect(() => {
-		if (ready && !authenticated) {
-			// Replace this code with however you'd like to handle an unauthenticated user
-			// As an example, you might redirect them to a sign-in page
-			router.push('/login')
-		}
 		// Update the document title using the browser API
 		if (wallets.length > 0) {
 			console.log(`Wallet Length: ${wallets.length}`)
@@ -53,7 +48,7 @@ const Home = () => {
 		for (var i = 0; i < wallets.length; i++) {
 			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
-	}, [wallets, ready, authenticated, router])
+	}, [wallets])
 
 	return (
 		<Page>
@@ -73,4 +68,4 @@ const Home = () => {
 	)
 }
 
-export default Home
+export default App
