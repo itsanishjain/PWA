@@ -2,20 +2,19 @@ import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import UpcomingPoolTab from '@/components/tabs/UpcomingPoolTab'
-import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { usePrivy } from '@privy-io/react-auth'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
 const Home = () => {
 	const router = useRouter()
 	const { ready, authenticated } = usePrivy()
-	const { wallets } = useWallets()
 
 	useEffect(() => {
 		if (ready && !authenticated) {
 			router.replace('/login')
 		}
-	}, [wallets, ready, authenticated, router])
+	}, [ready, authenticated, router])
 
 	return (
 		<Page>
