@@ -53,6 +53,7 @@ import CountdownTimer from '@/components/countdown'
 import {
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
+	fetchTokenDecimals,
 	fetchTokenSymbol,
 	fetchUserDisplayForAddress,
 	fetchUserDisplayInfoFromServer,
@@ -136,18 +137,30 @@ const AdminPoolPage = () => {
 
 	const poolSCAdmin = poolSCInfo?.[0]
 	const poolSCDetail = poolSCInfo?.[1]
-	let poolSCBalance = poolSCInfo
-		? (BigInt(poolSCInfo?.[2][0]) / BigInt(1000000000000000000)).toString()
-		: 0
-	const poolSCName = poolSCInfo?.[1][2]
-	const poolSCDepositPerPerson = poolSCInfo ? BigInt(poolSCInfo?.[1][3]) : 0
-	const poolSCDepositPerPersonString = poolSCInfo
-		? (BigInt(poolSCInfo?.[1][3]) / BigInt(1000000000000000000)).toString()
-		: 0
-	const poolSCStatus = poolSCInfo?.[3]
 	const poolSCToken = poolSCInfo?.[4]
+	const poolSCName = poolSCInfo?.[1][2]
+	const poolSCStatus = poolSCInfo?.[3]
 	let poolSCParticipants = poolSCInfo?.[5]
 	const poolSCWinners = poolSCInfo?.[6]
+
+	const { data: tokenDecimals } = useQuery({
+		queryKey: ['fetchTokenDecimals', poolSCToken],
+		queryFn: fetchTokenDecimals,
+		enabled: !_.isEmpty(poolSCToken),
+	})
+
+	let poolSCBalance = poolSCInfo
+		? (
+				BigInt(poolSCInfo?.[2][0]) / BigInt(Math.pow(10, tokenDecimals ?? 18))
+		  ).toString()
+		: 0
+	const poolSCDepositPerPerson = poolSCInfo ? BigInt(poolSCInfo?.[1][3]) : 0
+	const poolSCDepositPerPersonString = poolSCInfo
+		? (
+				BigInt(poolSCInfo?.[1][3]) / BigInt(Math.pow(10, tokenDecimals ?? 18))
+		  ).toString()
+		: 0
+
 	const isRegisteredOnSC =
 		poolSCParticipants?.indexOf(wallets[0]?.address) !== -1
 

@@ -622,6 +622,22 @@ export const fetchTokenSymbol = async ({
 	return tokenSymbol
 }
 
+export const fetchTokenDecimals = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolTokenAddress] = queryKey
+	const contract = new ethers.Contract(
+		poolTokenAddress,
+		dropletContract.abi,
+		provider,
+	)
+	const tokenDecimals = await contract.decimals()
+	console.log('tokenDecimals', tokenDecimals)
+	return tokenDecimals
+}
+
 export const handleEnableDeposit = async ({
 	params,
 }: {
