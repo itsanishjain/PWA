@@ -15,6 +15,7 @@ import Appbar, { RightMenu } from '@/components/appbar'
 import { Inter } from 'next/font/google'
 
 import {
+	fetchAdminUsersFromServer,
 	fetchUserDisplayForAddress,
 	handleSavePayout,
 	handleSetWinner,
@@ -38,7 +39,7 @@ const UserProfile = () => {
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
 
-	const { wallets } = useWallets()
+	const { wallets, ready: walletsReady } = useWallets()
 
 	const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>(
 		`${frogImage.src}`,
@@ -136,11 +137,28 @@ const UserProfile = () => {
 		})
 	}
 
+	const { isSuccess: fetchAdminUsersSuccess, data: adminUsers } = useQuery({
+		queryKey: ['fetchAdminUsersFromServer'],
+		queryFn: fetchAdminUsersFromServer,
+	})
+
 	useEffect(() => {
 		if (ready && !authenticated) {
 			// Replace this code with however you'd like to handle an unauthenticated user
 			// As an example, you might redirect them to a sign-in page
 			router.push('/login')
+		}
+		if (fetchAdminUsersSuccess && ready && authenticated && walletsReady) {
+			const isAddressInList = adminUsers?.some(
+				(user) =>
+					user.address?.toLowerCase() === wallets?.[0]?.address?.toLowerCase(),
+			)
+			console.log('adminUsersData', adminUsers)
+			console.log('walletAddress', wallets?.[0]?.address?.toLowerCase())
+
+			if (!isAddressInList) {
+				router.push('/')
+			}
 		}
 
 		if (wallets.length > 0) {
@@ -159,7 +177,18 @@ const UserProfile = () => {
 		if (inputRef?.current) {
 			inputRef.current.focus()
 		}
-	}, [profileData, ready, authenticated, router, inputRef, inputValue])
+	}, [
+		profileData,
+		ready,
+		authenticated,
+		router,
+		inputRef,
+		inputValue,
+		adminUsers,
+		wallets,
+		fetchAdminUsersSuccess,
+		walletsReady,
+	])
 
 	return (
 		<Page>

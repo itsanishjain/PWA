@@ -104,8 +104,15 @@ export type UserDisplayRow = Database['public']['Tables']['usersDisplay']['Row']
 const PoolPage = () => {
 	const router = useRouter()
 
-	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
-		usePrivy()
+	const {
+		ready,
+		authenticated,
+		user,
+		signMessage,
+		sendTransaction,
+		logout,
+		login,
+	} = usePrivy()
 
 	const { wallets } = useWallets()
 
@@ -217,6 +224,7 @@ const PoolPage = () => {
 			const walletAddress = user!.wallet!.address
 			console.log(`Wallet Address ${walletAddress}`)
 		}
+
 		console.log('participants', poolSCParticipants)
 
 		setPoolDbData(poolDBInfo?.poolDBInfo)
@@ -336,11 +344,25 @@ const PoolPage = () => {
 		router.push(`${currentRoute}/ticket`)
 	}
 
+	const redirectIfNotLoggedIn = () => {
+		try {
+			if (wallets?.length == 0) {
+				toast({
+					title: 'You are not connected to a wallet',
+					description: 'Kindly log in to a wallet to continue.',
+				})
+				router.push('/login')
+			}
+		} catch (error) {
+			console.log(error)
+		}
+	}
 	const onRegisterButtonClicked = (e: any) => {
+		redirectIfNotLoggedIn()
 		// setTransactionInProgress(true)
 
 		console.log('onRegisterButtonClicked')
-		const connectorType = wallets[0].connectorType
+		const connectorType = wallets?.[0]?.connectorType
 		console.log('connectorType', connectorType)
 		toast({
 			title: 'Requesting Transaction/s',
@@ -353,7 +375,7 @@ const PoolPage = () => {
 
 	const onUnregisterButtonClicked = (e: any) => {
 		// setTransactionInProgress(true)
-
+		redirectIfNotLoggedIn()
 		console.log('onUnregisterButtonClicked')
 		const connectorType = wallets[0].connectorType
 		console.log('connectorType', connectorType)
@@ -369,6 +391,7 @@ const PoolPage = () => {
 
 	const onClaimButtonClicked = (e: any) => {
 		console.log('onClaimButtonClicked')
+		redirectIfNotLoggedIn()
 		const connectorType = wallets[0].connectorType
 		console.log('connectorType', connectorType)
 		toast({
