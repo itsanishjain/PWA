@@ -51,6 +51,7 @@ import {
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import CountdownTimer from '@/components/countdown'
 import {
+	fetchAdminUsersFromServer,
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
 	fetchTokenDecimals,
@@ -89,7 +90,7 @@ const AdminPoolPage = () => {
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
 
-	const { wallets } = useWallets()
+	const { wallets, ready: walletsReady } = useWallets()
 
 	const [poolBalance, setPoolBalance] = useState<number>(0)
 	const [poolParticipants, setPoolParticipants] = useState<number>(0)
@@ -151,13 +152,15 @@ const AdminPoolPage = () => {
 
 	let poolSCBalance = poolSCInfo
 		? (
-				BigInt(poolSCInfo?.[2][0]) / BigInt(Math.pow(10, tokenDecimals ?? 18))
+				BigInt(poolSCInfo?.[2][0]) /
+				BigInt(Math.pow(10, Number(tokenDecimals ?? 18)))
 		  ).toString()
 		: 0
 	const poolSCDepositPerPerson = poolSCInfo ? BigInt(poolSCInfo?.[1][3]) : 0
 	const poolSCDepositPerPersonString = poolSCInfo
 		? (
-				BigInt(poolSCInfo?.[1][3]) / BigInt(Math.pow(10, tokenDecimals ?? 18))
+				BigInt(poolSCInfo?.[1][3]) /
+				BigInt(Math.pow(10, Number(tokenDecimals ?? 18)))
 		  ).toString()
 		: 0
 
@@ -168,6 +171,11 @@ const AdminPoolPage = () => {
 		queryKey: ['fetchTokenSymbol', poolSCToken],
 		queryFn: fetchTokenSymbol,
 		enabled: !_.isEmpty(poolSCToken),
+	})
+
+	const { isSuccess: fetchAdminUsersSuccess, data: adminUsers } = useQuery({
+		queryKey: ['fetchAdminUsersFromServer'],
+		queryFn: fetchAdminUsersFromServer,
 	})
 
 	useEffect(() => {
@@ -186,7 +194,27 @@ const AdminPoolPage = () => {
 		setPageUrl(window?.location.href)
 		console.log('event_timestamp', poolDBInfo?.poolDBInfo?.event_timestamp)
 		calculateTimeLeft(poolDBInfo?.poolDBInfo?.event_timestamp)
-	}, [ready, authenticated, poolSCInfo, poolDBInfo])
+		if (fetchAdminUsersSuccess && ready && authenticated && walletsReady) {
+			const isAddressInList = adminUsers?.some(
+				(user) =>
+					user.address?.toLowerCase() === wallets?.[0]?.address?.toLowerCase(),
+			)
+			console.log('adminUsersData', adminUsers)
+			console.log('walletAddress', wallets?.[0]?.address?.toLowerCase())
+
+			if (!isAddressInList) {
+				router.push('/')
+			}
+		}
+	}, [
+		ready,
+		authenticated,
+		poolSCInfo,
+		poolDBInfo,
+		walletsReady,
+		adminUsers,
+		fetchAdminUsersFromServer,
+	])
 
 	const poolSCTimeStart = poolSCDetail?.[0]?.toString()
 	const eventDate = formatEventDateTime(poolSCTimeStart) ?? ''

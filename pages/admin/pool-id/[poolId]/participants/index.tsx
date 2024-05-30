@@ -9,6 +9,7 @@ import Appbar from '@/components/appbar'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 
 import {
+	fetchAdminUsersFromServer,
 	fetchAllPoolDataFromDB,
 	fetchAllPoolDataFromSC,
 	fetchParticipantsDataFromServer,
@@ -47,7 +48,7 @@ const ManageParticipantsPage = () => {
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
 
-	const { wallets } = useWallets()
+	const { wallets, ready: walletsReady } = useWallets()
 
 	const [poolDbData, setPoolDbData] = useState<any | undefined>()
 
@@ -233,6 +234,11 @@ const ManageParticipantsPage = () => {
 		setFilteredWinnersInfo(filteredData)
 	}
 
+	const { isSuccess: fetchAdminUsersSuccess, data: adminUsers } = useQuery({
+		queryKey: ['fetchAdminUsersFromServer'],
+		queryFn: fetchAdminUsersFromServer,
+	})
+
 	useEffect(() => {
 		// Update the document title using the browser API
 		if (ready && authenticated) {
@@ -266,6 +272,20 @@ const ManageParticipantsPage = () => {
 			'savedPayoutsParticipantsAddress',
 			savedPayoutsParticipantsAddresses,
 		)
+
+		if (fetchAdminUsersSuccess && ready && authenticated && walletsReady) {
+			const isAddressInList = adminUsers?.some(
+				(user) =>
+					user.address?.toLowerCase() === wallets?.[0]?.address?.toLowerCase(),
+			)
+			console.log('adminUsersData', adminUsers)
+			console.log('walletAddress', wallets?.[0]?.address?.toLowerCase())
+
+			if (!isAddressInList) {
+				router.push('/')
+			}
+		}
+
 		setPageUrl(window?.location.href)
 		setFilteredParticipantsInfo(participantsInfo)
 		setFilteredCheckedInParticipantsInfo(checkedInParticipantsInfo)
@@ -276,6 +296,9 @@ const ManageParticipantsPage = () => {
 		poolDBInfo,
 		participantsInfo,
 		poolWinnersDetails,
+		fetchAdminUsersSuccess,
+		walletsReady,
+		adminUsers,
 	])
 
 	const parentRoute = useMemo(() => {

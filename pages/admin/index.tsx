@@ -19,6 +19,8 @@ import styles from './styles/admin.module.css'
 import PoolRow from '@/components/poolRow'
 import UpcomingPoolTab from '@/components/tabs/UpcomingPoolTab'
 import PastPoolTab from '@/components/tabs/PastPoolTab'
+import { useQuery } from '@tanstack/react-query'
+import { fetchAdminUsersFromServer } from '@/lib/api/clientAPI'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,16 +29,22 @@ const Admin = () => {
 	const { ready, authenticated, user, signMessage, sendTransaction, logout } =
 		usePrivy()
 
-	const { wallets } = useWallets()
+	const { wallets, ready: walletsReady } = useWallets()
 
 	const handleCreatePool = async () => {
 		router.push('/create-pool')
 	}
 
 	const [selectedTab, setSelectedTab] = useState(0)
+
 	const selectTab = (tabIndex: number) => {
 		setSelectedTab(tabIndex)
 	}
+
+	const { isSuccess: fetchAdminUsersSuccess, data: adminUsers } = useQuery({
+		queryKey: ['fetchAdminUsersFromServer'],
+		queryFn: fetchAdminUsersFromServer,
+	})
 
 	useEffect(() => {
 		// Update the document title using the browser API
@@ -47,7 +55,29 @@ const Admin = () => {
 		if (ready && !authenticated) {
 			router.push('/login')
 		}
-	}, [wallets, ready, authenticated, router])
+		console.log('wallet', wallets[0]?.address)
+
+		if (fetchAdminUsersSuccess && ready && authenticated && walletsReady) {
+			const isAddressInList = adminUsers?.some(
+				(user) =>
+					user.address?.toLowerCase() === wallets?.[0]?.address?.toLowerCase(),
+			)
+			console.log('adminUsersData', adminUsers)
+			console.log('walletAddress', wallets?.[0]?.address?.toLowerCase())
+
+			if (!isAddressInList) {
+				router.push('/')
+			}
+		}
+	}, [
+		wallets,
+		ready,
+		authenticated,
+		adminUsers,
+		router,
+		fetchAdminUsersSuccess,
+		walletsReady,
+	])
 
 	return (
 		<Page>
