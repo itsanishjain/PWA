@@ -39,29 +39,39 @@ export default function App({ Component, pageProps }: AppProps) {
 				appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
 				// onSuccess={handleLogin}
 				config={{
-					loginMethods: ['google', 'wallet', 'farcaster'],
+					loginMethods: [
+						// 'google',
+						'wallet',
+						// 'farcaster',
+					],
 					appearance: {
 						theme: 'light',
 						accentColor: '#676FFF',
 						logo: '/images/pool.png',
-						showWalletLoginFirst: false,
+						// showWalletLoginFirst: false,
 					},
 					embeddedWallets: {
-						createOnLogin: 'users-without-wallets',
+						createOnLogin: 'off',
+						// createOnLogin: 'users-without-wallets',
 						priceDisplay: {
 							primary: 'native-token',
 							secondary: null,
 						},
 					},
+
 					defaultChain: chain,
 					supportedChains: [
 						base,
 						baseSepolia,
-						baseGoerli,
-						mainnet,
-						goerli,
-						chain,
+						// baseGoerli,
+						// mainnet,
+						// goerli,
+						// chain,
 					],
+					legal: {
+						privacyPolicyUrl: '/privacy',
+						termsAndConditionsUrl: '/terms',
+					},
 					fiatOnRamp: { useSandbox: true },
 				}}
 			>
