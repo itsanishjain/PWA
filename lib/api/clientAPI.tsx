@@ -622,6 +622,22 @@ export const fetchTokenSymbol = async ({
 	return tokenSymbol
 }
 
+export const fetchTokenDecimals = async ({
+	queryKey,
+}: {
+	queryKey: [string, string]
+}) => {
+	const [_, poolTokenAddress] = queryKey
+	const contract = new ethers.Contract(
+		poolTokenAddress,
+		dropletContract.abi,
+		provider,
+	)
+	const tokenDecimals = await contract.decimals()
+	console.log('tokenDecimals', tokenDecimals)
+	return tokenDecimals
+}
+
 export const handleEnableDeposit = async ({
 	params,
 }: {
@@ -921,6 +937,22 @@ export const fetchSavedPayoutsFromServer = async ({
 
 	console.log('savedPayouts', savedPayouts)
 	return savedPayouts
+}
+
+export const fetchAdminUsersFromServer = async ({
+	queryKey,
+}: {
+	queryKey: [string]
+}) => {
+	const { data: adminUsers, error }: PostgrestSingleResponse<any[]> =
+		await supabaseBrowserClient.from('admin').select('*')
+	if (error) {
+		console.error('Error reading data:', error)
+		return
+	}
+
+	console.log('adminUsers', adminUsers)
+	return adminUsers
 }
 
 export const handleSetWinners = async ({

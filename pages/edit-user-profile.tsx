@@ -141,6 +141,7 @@ const EditUserProfile = () => {
 	const handleSignOut = async () => {
 		console.log('handleSignOut')
 		wallets?.[0]?.disconnect()
+
 		toast({
 			title: 'Logging Out',
 			description: 'Please wait...',
@@ -154,7 +155,7 @@ const EditUserProfile = () => {
 		if (ready && !authenticated) {
 			// Replace this code with however you'd like to handle an unauthenticated user
 			// As an example, you might redirect them to a sign-in page
-			router.push('/login')
+			router.push('/')
 		}
 
 		if (wallets.length > 0) {
