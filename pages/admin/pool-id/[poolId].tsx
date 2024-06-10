@@ -31,7 +31,7 @@ import { config } from '@/constants/config'
 import poolContract from '@/SC-Output/out/Pool.sol/Pool.json'
 import dropletContract from '@/SC-Output/out_old/Droplet.sol/Droplet.json'
 
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { getSupabaseBrowserClient } from '@/utils/supabase/client'
 import DropdownChecklist from '@/components/dropdown-checklist'
 
 import defaultPoolImage from '@/public/images/frog.png'
@@ -67,7 +67,6 @@ import {
 	handleUnregisterServer,
 } from '@/lib/api/clientAPI'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCookie } from '@/hooks/cookie'
 import { Button } from '@/components/ui/button'
 
 import LoadingAnimation from '@/components/loadingAnimation'
@@ -103,8 +102,6 @@ const AdminPoolPage = () => {
 
 	const [pageUrl, setPageUrl] = useState('')
 	const [timeLeft, setTimeLeft] = useState<number>()
-
-	const { currentJwt } = useCookie()
 
 	const calculateTimeLeft = (startTime: string) => {
 		const currentTimestamp: Date = new Date()

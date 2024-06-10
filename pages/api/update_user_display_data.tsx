@@ -1,9 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { NextResponse } from 'next/server'
+import { hashMessage, recoverAddress, verifyMessage } from 'ethers'
 import { createClient } from '@supabase/supabase-js'
 import { JwtPayload, decode } from 'jsonwebtoken'
 import { getUser, verifyToken } from '@/lib/server'
 import { WalletWithMetadata } from '@privy-io/react-auth'
+
+type ResponseData = {
+	message: string
+}
+
+interface RequestData {
+	name: string
+	email: string
+	// Add other properties as needed
+}
 
 export default async function handler(
 	req: NextApiRequest,
@@ -11,10 +22,9 @@ export default async function handler(
 ) {
 	// Parse the request body
 	const requestData = await req.body
-	const { poolId, address, jwtString } = requestData
+	const { display_name, bio, company, jwtString } = requestData
 
 	console.log('jwt', JSON.stringify(jwtString))
-
 	// Return a response
 	const supabaseAdminClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,54 +38,38 @@ export default async function handler(
 	)
 
 	let jwtAddress: string = '0x'
+	let userId = ''
+
 	try {
 		const claims = await verifyToken(jwtString)
 		const user = await getUser(claims!.userId)
+		userId = claims!.userId
 		console.log('user', user)
 		const walletWithMetadata = user?.linkedAccounts[0] as WalletWithMetadata
 		jwtAddress = walletWithMetadata?.address?.toLowerCase()
-		console.log('address', jwtAddress)
 	} catch (error) {
 		console.error(error)
 		res.status(500).json({ error: 'Failed to decode Jwt.' })
 		return
 	}
 
-	async function deleteData(pool_id: string, address: string) {
-		const { data: poolData, error: poolDataError } = await supabaseAdminClient
-			.from('pool')
-			.select('*')
+	async function upsertData() {
+		// Update the existing row
+		const { data: updatedData, error: updateError } = await supabaseAdminClient
+			.from('usersDisplay')
+			.update({ display_name, company, bio })
 			.match({
-				pool_id: pool_id,
+				id: userId,
 			})
 
-		if (
-			poolData?.[0]?.['host_address'] != jwtAddress &&
-			poolData?.[0]?.['co_host_addresses'].indexOf(jwtAddress) == -1
-		) {
-			console.error('Not authorised to save payouts')
-			res.status(500).json({ message: 'Error' })
-
-			return
-		}
-		console.log('Passed Delete Authorization Check')
-
-		// Use supabase to delete the data
-		const { data: deletedData, error: deleteError } = await supabaseAdminClient
-			.from('participantStatus')
-			.delete()
-			.match({
-				pool_id: pool_id,
-				participant_address: address,
-			})
-		console.log('deletedData:', deletedData)
-
-		if (deleteError) {
-			console.log('Delete error:', deleteError.message)
-			res.status(500).json({ message: 'Error: Failed to delete participant' })
+		if (updateError) {
+			console.error('Error updating data:', updateError)
+			res.status(500).json({ error: 'Internal Server Error' })
+		} else {
+			console.log('Data updated successfully:', updatedData)
 		}
 	}
-	await deleteData(poolId, address.toLowerCase())
 
+	await upsertData()
 	res.status(200).json({ message: 'Success' })
 }

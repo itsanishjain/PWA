@@ -22,11 +22,7 @@ import {
 	fetchClaimablePoolsFromSC,
 	fetchUserDisplayForAddress,
 	handleClaimWinnings,
-	updateUserDisplayData,
-	uploadProfileImage,
 } from '@/lib/api/clientAPI'
-import { removeTokenCookie, useCookie } from '@/hooks/cookie'
-import { JwtPayload, decode } from 'jsonwebtoken'
 import camera from '@/public/images/camera.png'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -56,7 +52,6 @@ const UserProfile = () => {
 	)
 
 	const queryClient = useQueryClient()
-	const { currentJwt } = useCookie()
 	const { toast } = useToast()
 
 	const address = wallets?.[0]?.address ?? '0x'

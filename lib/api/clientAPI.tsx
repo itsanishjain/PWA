@@ -3,7 +3,7 @@ import Cookies from 'js-cookie'
 import { ErrorInfo } from 'react'
 import { decode } from 'jsonwebtoken'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { getSupabaseBrowserClient } from '@/utils/supabase/client'
 import { UserDisplayRow } from '@/pages/pool-id/[poolId]'
 import { QueryFunction } from '@tanstack/react-query'
 import { ethers } from 'ethers'
@@ -42,156 +42,81 @@ export interface FileObj {
 	data: Blob
 }
 
-const supabaseBrowserClient = createSupabaseBrowserClient()
-
-export async function fetchNonce(addressObject: addressObject) {
-	try {
-		const response = await fetch('/api/nonce', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(addressObject),
-		})
-		if (!response.ok) {
-			throw new Error('Network response was not ok')
-		}
-		const data = await response.json()
-		return data
-	} catch (error) {
-		console.error('There was a problem with the fetch operation:', error)
-	}
-}
-
-export async function fetchToken(backendLoginObj: backendLoginObject) {
-	try {
-		const response = await fetch('/api/backend_login', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(backendLoginObj),
-		})
-		if (!response.ok) {
-			throw new Error('Network response was not ok')
-		}
-		const data = await response.json()
-		return data
-	} catch (error) {
-		console.error('There was a problem with the fetch operation:', error)
-	}
-}
+const supabaseBrowserClient = getSupabaseBrowserClient()
 
 export const uploadProfileImage = async (
 	fileBlob: any,
 	selectedFile: any,
-	address: string,
+	selectedFileBase64: string,
 	jwt: string,
 ) => {
-	// Upload image to Supabase storage
-	const supabaseClient = createClient(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-		{
-			global: {
-				headers: {
-					Authorization: `Bearer ${jwt}`,
-				},
-			},
-		},
-	)
+	let dataObj = {
+		fileName: selectedFile.name,
+		fileType: selectedFile.type,
 
-	const jwtObj = decode(jwt, { json: true })
-	console.log('jwtObj', jwtObj)
-	console.log('file name', fileBlob.name)
+		selectedFileBase64: selectedFileBase64,
+		jwtString: jwt,
+	}
+
 	console.log('selectedFile', selectedFile)
+	console.log('fileBlob', selectedFile)
 
-	const { data, error } = await supabaseClient.storage
-		.from('profile')
-		.upload(
-			`/public/${jwtObj?.sub}/${Date.now()}-${selectedFile?.name}`,
-			fileBlob,
-		)
-
-	if (error) {
-		console.error('Error uploading image:', error.message)
-		return
-	}
-	console.log('Image uploaded successfully')
-
-	// Update user profile with image URL
-
-	const { data: userData, error: userError } = await supabaseClient
-		.from('usersDisplay')
-		.upsert(
-			{ avatar_url: data.path, id: jwtObj?.sub, address: jwtObj?.address },
-			{
-				onConflict: 'id',
+	try {
+		const response = await fetch('/api/upload_profile_image', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
 			},
-		)
+			body: JSON.stringify(dataObj),
+		})
 
-	if (userError) {
-		console.error('Error updating user data:', userError.message)
+		if (response.ok) {
+			const data = await response.json()
+			// setFileUrl(data.fileUrl)
+		} else {
+			console.error('Error uploading file')
+		}
+	} catch (error) {
+		console.error('Error uploading file:', error)
 	}
-
-	console.log('usersDisplay updated successfully')
 }
 
-export const updateUserDisplayData = async (
-	displayName: string,
-	company: string,
-	bio: string,
-	jwt: string,
-	address: string,
-) => {
-	// Upload image to Supabase storage
-	const supabaseClient = createClient(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-		{
-			global: {
-				headers: {
-					Authorization: `Bearer ${jwt}`,
-				},
-			},
-		},
-	)
-
-	const jwtObj = decode(jwt, { json: true })
-
-	console.log('jwtObj', jwtObj)
-
-	console.log('upload user address', address)
-	// Update user profile with image URL
-
-	const { data: userData, error: userError } = await supabaseClient
-		.from('usersDisplay')
-		.upsert(
-			{
-				display_name: displayName,
-				company: company,
-				bio: bio,
-				id: jwtObj!.sub,
-				address: jwtObj!.address?.toLowerCase(),
-			},
-			{
-				onConflict: 'id',
-			},
-		)
-
-	if (userError) {
-		console.error('Error updating user data:', userError.message)
+export const handleUpdateUserDisplayData = async ({
+	params,
+}: {
+	params: [string, string, string, string]
+}) => {
+	const [displayName, company, bio, jwt] = params
+	let dataObj = {
+		display_name: displayName,
+		company: company,
+		bio: bio,
+		jwtString: jwt,
 	}
-	return { userData, userError }
-	console.log('usersDisplay Information updated successfully')
+	try {
+		const response = await fetch('/api/update_user_display_data', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(dataObj),
+		})
+
+		if (response.ok) {
+			const data = await response.json()
+		} else {
+			console.error('Error updating profile')
+			throw new Error('Error updating profile')
+		}
+	} catch (error) {
+		console.error('Error uploading file:', error)
+		throw new Error('Error updating profile')
+	}
 }
 
 export const fetchUpcomingPools = async () => {
 	// Upload image to Supabase storage
-	const supabaseClient = createClient(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-	)
+	const supabaseClient = getSupabaseBrowserClient()
 	const currentTimestamp = new Date().toISOString()
 
 	const { data, error } = await supabaseClient
@@ -208,10 +133,7 @@ export const fetchUpcomingPools = async () => {
 
 export const fetchPastPools = async () => {
 	// Upload image to Supabase storage
-	const supabaseClient = createClient(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-	)
+	const supabaseClient = getSupabaseBrowserClient()
 	const currentTimestamp = new Date().toISOString()
 
 	const { data, error } = await supabaseClient
@@ -636,6 +558,22 @@ export const fetchTokenDecimals = async ({
 	const tokenDecimals = await contract.decimals()
 	console.log('tokenDecimals', tokenDecimals)
 	return tokenDecimals
+}
+
+export const fetchLatestPoolId = async ({
+	queryKey,
+}: {
+	queryKey: [string]
+}) => {
+	const [_] = queryKey
+	const contract = new ethers.Contract(
+		contractAddress,
+		poolContract.abi,
+		provider,
+	)
+	const latestPoolId = await contract.latestPoolId()
+	console.log('latestPoolId', latestPoolId)
+	return latestPoolId
 }
 
 export const handleEnableDeposit = async ({
@@ -1177,3 +1115,153 @@ export const handleClaimWinnings = async ({
 		return
 	}
 }
+
+export const handleCreatePool = async ({
+	params,
+}: {
+	params: [string, string, string, string, string, string, ConnectedWallet[]]
+}) => {
+	const [
+		timeStart,
+		timeEnd,
+		poolName,
+		depositAmountPerPerson,
+		penaltyFeeRate,
+		token,
+		wallets,
+	] = params
+
+	console.log('penaltyFeeRate', penaltyFeeRate)
+	const walletAddress = wallets[0].address
+	const wallet = wallets[0]
+
+	let createPoolDataString = poolIFace.encodeFunctionData('createPool', [
+		timeStart,
+		timeEnd,
+		poolName,
+		depositAmountPerPerson,
+		penaltyFeeRate,
+		token,
+	])
+
+	try {
+		const provider = await wallet.getEthereumProvider()
+		const signedTxn = await provider.request({
+			method: 'eth_sendTransaction',
+			params: [
+				{
+					from: walletAddress,
+					to: contractAddress,
+					data: createPoolDataString,
+				},
+			],
+		})
+		let transactionReceipt = null
+		while (transactionReceipt === null) {
+			transactionReceipt = await provider.request({
+				method: 'eth_getTransactionReceipt',
+				params: [signedTxn],
+			})
+			await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait 2 seconds before checking again
+		}
+		console.log('Transaction confirmed!', transactionReceipt)
+	} catch (e: any) {
+		console.log('User did not sign transaction')
+		return
+	}
+}
+
+export const handleCreatePoolServer = async ({
+	params,
+}: {
+	params: [
+		string,
+		string,
+		string,
+		string,
+		string,
+		string,
+		string,
+		string,
+		string,
+		string,
+		string,
+		string,
+		string[],
+		string,
+		string,
+	]
+}) => {
+	const [
+		fileName,
+		fileType,
+		fileBase64,
+		timeStart,
+		timeEnd,
+		poolName,
+		description,
+		price,
+		softCap,
+		penalty,
+		tokenAddr,
+		host,
+		coHosts,
+		termsUrl,
+		jwt,
+	] = params
+
+	let dataObj = {
+		fileName,
+		fileType,
+		fileBase64,
+		timeStart,
+		timeEnd,
+		poolName,
+		description,
+		price,
+		softCap,
+		penalty,
+		tokenAddr,
+		host,
+		coHosts,
+		termsUrl,
+		jwtString: jwt,
+	}
+
+	try {
+		const response = await fetch('/api/create_pool', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(dataObj),
+		})
+
+		if (response.ok) {
+			const data = await response.json()
+		} else {
+			console.error('Error uploading file')
+		}
+	} catch (error) {
+		console.error('Error uploading file:', error)
+	}
+}
+
+// export const handleCreatePoolServer = async ({
+// 	params,
+// }: {
+// 	params: [string, string, string, string, string, string, ConnectedWallet[]]
+// }) => {
+// 	const [
+// 		timeStart,
+// 		timeEnd,
+// 		poolName,
+// 		depositAmountPerPerson,
+// 		penaltyFeeRate,
+// 		token,
+// 		wallets,
+// 	] = params
+
+// 	const walletAddress = wallets[0].address
+// 	const wallet = wallets[0]
+// }
