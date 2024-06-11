@@ -2,32 +2,34 @@ name: Unified CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: ['main']
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch: # allows to trigger builds manually
 
 concurrency:
-  group: ${{ github.head_ref || github.ref }}
+  group: ${{ github.head_ref || github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+  avoid-redundancy:
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Cancel previous running jobs
+        uses: styfle/cancel-workflow-action
+        with:
+          access_token: ${{ github.token }}
 
-      # Set up Node.js and pnpm
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+  build-and-deploy:
+    # Setup node and pnpm
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-
-      # Install pnpm explicitly
-      - name: Install pnpm
-        run: npm install -g pnpm
 
       # Cache pnpm store
       - name: Cache pnpm store
@@ -40,7 +42,7 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       # Build the project
       - name: Build the project
@@ -49,7 +51,7 @@ jobs:
       # Deploy to Vercel
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+        if: github.repository == 'Pool-Escrow/PWA' && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
