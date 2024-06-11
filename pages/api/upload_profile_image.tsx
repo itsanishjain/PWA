@@ -1,9 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { getUser, verifyToken } from '@/lib/server'
 import { WalletWithMetadata } from '@privy-io/react-auth'
+import { createClient } from '@supabase/supabase-js'
 import { decode } from 'jsonwebtoken'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 const prepareBase64DataUrl = (base64: string) =>
 	base64
@@ -32,7 +31,7 @@ export default async function handler(
 	// Return a response
 	const supabaseAdminClient = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.SUPABASE_SERVICE_KEY!,
+		process.env.SUPABASE_SERVICE_ROLE_KEY!,
 		{
 			auth: {
 				autoRefreshToken: false,

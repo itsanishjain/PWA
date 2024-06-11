@@ -1,59 +1,39 @@
 'use client'
 
-import { ThemeProvider } from 'next-themes'
-import { PrivyProvider } from '@privy-io/react-auth'
-import { base, baseSepolia } from 'viem/chains'
-import { chain } from 'constants/constant'
-import { WagmiProvider } from 'wagmi'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { config } from '@/constants/config'
+import { PrivyProvider } from '@privy-io/react-auth'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { chain } from 'constants/constant'
+import { ThemeProvider } from 'next-themes'
+import { base, baseSepolia } from 'viem/chains'
+import { WagmiProvider } from 'wagmi'
 
 import { Toaster } from '@/components/ui/toaster'
 
 export default function Providers({ children }: React.PropsWithChildren) {
-	// const configureChainsConfig = createConfig({
-	// 	chains: [mainnet, goerli, foundry],
-	// 	transports: {
-	// 		[foundry.id]: http(),
-	// 		[sepolia.id]: http(),
-	// 	},
-	// })
-
 	const queryClient = new QueryClient()
 
 	return (
 		<PrivyProvider
 			appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
 			config={{
-				loginMethods: [
-					// 'google',
-					'wallet',
-					// 'farcaster',
-				],
+				loginMethods: ['email', 'wallet', 'farcaster'],
 				appearance: {
 					theme: 'light',
 					accentColor: '#676FFF',
 					logo: '/images/pool.png',
-					// showWalletLoginFirst: false,
+					showWalletLoginFirst: false,
 				},
 				embeddedWallets: {
-					createOnLogin: 'off',
-					// createOnLogin: 'users-without-wallets',
+					createOnLogin: 'users-without-wallets',
+					noPromptOnSignature: true,
 					priceDisplay: {
 						primary: 'native-token',
 						secondary: null,
 					},
 				},
-
 				defaultChain: chain,
-				supportedChains: [
-					base,
-					baseSepolia,
-					// baseGoerli,
-					// mainnet,
-					// goerli,
-					// chain,
-				],
+				supportedChains: [base, baseSepolia],
 				legal: {
 					privacyPolicyUrl: '/privacy',
 					termsAndConditionsUrl: '/terms',

@@ -1,52 +1,31 @@
+import Appbar from '@/components/appbar'
 import Page from '@/components/page'
 import Section from '@/components/section'
-import Image from 'next/image'
-import frogImage from '@/public/images/frog.png'
-import { useRouter } from 'next/router'
-import {
-	UnsignedTransactionRequest,
-	usePrivy,
-	useWallets,
-} from '@privy-io/react-auth'
-
-import React, { useState, useEffect, ChangeEvent } from 'react'
-
-import { ethers } from 'ethers'
-import Appbar from '@/components/appbar'
-
-import { FundWalletConfig } from '@privy-io/react-auth'
-import { provider } from '@/constants/constant'
-import { Inter } from 'next/font/google'
-import styles from './styles/user-profile.module.css'
 import {
 	fetchUserDisplayForAddress,
 	handleUpdateUserDisplayData,
 	uploadProfileImage,
 } from '@/lib/api/clientAPI'
 import camera from '@/public/images/camera.png'
+import frogImage from '@/public/images/frog.png'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Inter } from 'next/font/google'
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { ChangeEvent, useEffect, useState } from 'react'
+import styles from './styles/user-profile.module.css'
 
-import * as _ from 'lodash'
 import { useToast } from '@/components/ui/use-toast'
-import { convertToBase64, formatAddress } from '@/lib/utils'
-import { createClient } from '@supabase/supabase-js'
-import { decode } from 'jsonwebtoken'
 import { useCookie } from '@/hooks/cookie'
-import { getSupabaseBrowserClient } from '@/utils/supabase/client'
+import { convertToBase64, formatAddress } from '@/lib/utils'
+import * as _ from 'lodash'
 
 const inter = Inter({ subsets: ['latin'] })
 
 const EditUserProfile = () => {
 	const router = useRouter()
-	const {
-		ready,
-		authenticated,
-		user,
-		signMessage,
-		sendTransaction,
-		getAccessToken,
-		logout,
-	} = usePrivy()
+	const { ready, authenticated, logout } = usePrivy()
 
 	const { wallets } = useWallets()
 	const queryClient = useQueryClient()
@@ -151,7 +130,6 @@ const EditUserProfile = () => {
 		})
 	}
 
-	const address = wallets?.[0]?.address ?? '0x'
 	const { data: profileData } = useQuery({
 		queryKey: ['loadProfileImage', wallets?.[0]?.address],
 		queryFn: fetchUserDisplayForAddress,
@@ -175,28 +153,17 @@ const EditUserProfile = () => {
 
 	useEffect(() => {
 		if (ready && !authenticated) {
-			// Replace this code with however you'd like to handle an unauthenticated user
-			// As an example, you might redirect them to a sign-in page
 			router.push('/')
-		}
-
-		if (wallets.length > 0) {
-			console.log(`Wallet Length: ${wallets.length}`)
-			// console.log(`Wallet Address: ${wallets[0].address}`)
-		}
-		for (var i = 0; i < wallets.length; i++) {
-			console.log(`Wallet ${i} Address: ${wallets[i].address}`)
 		}
 
 		if (profileData?.profileImageUrl) {
 			setProfileImageUrl(profileData?.profileImageUrl)
 		}
-
 		setBio(profileData?.userDisplayData.bio ?? '')
 		setDisplayName(profileData?.userDisplayData.display_name ?? '')
 		setCompany(profileData?.userDisplayData.company ?? '')
 		console.log('displayName', profileData)
-	}, [profileData, ready, authenticated, router])
+	}, [profileData, ready, authenticated, router, wallets])
 
 	return (
 		<Page>
@@ -208,6 +175,7 @@ const EditUserProfile = () => {
 					<div className='flex flex-col w-96 pb-8'>
 						<div>
 							<input
+								title='Change Profile Image'
 								type='file'
 								accept='image/*'
 								id='fileInput'
@@ -218,19 +186,28 @@ const EditUserProfile = () => {
 
 						<div className='flex w-full justify-center flex-col items-center'>
 							<button
+								title='Change Profile Image'
+								type='button'
 								onClick={triggerFileInput}
 								className='relative rounded-full m-8 w-40 aspect-square '
 							>
-								<img
-									className='rounded-full w-40 aspect-square center object-cover z-0'
-									src={profileImageUrl}
-								/>
+								{profileImageUrl && (
+									<Image
+										className='rounded-full w-40 aspect-square center object-cover z-0'
+										src={profileImageUrl}
+										alt='profile image'
+										width={160}
+										height={160}
+									/>
+								)}
 								<div
 									className={`w-full h-full rounded-full absolute top-0 left-0 ${styles.overlay} z-10 flex items-center justify-center`}
 								>
-									<img
+									<Image
 										src={camera.src}
-										className='object-center   object-contain'
+										className='object-center object-contain'
+										alt='camera icon'
+										fill
 									/>
 								</div>
 							</button>
@@ -282,6 +259,8 @@ const EditUserProfile = () => {
 						<div className='flex justify-center mt-8'>
 							{isImageReady && (
 								<button
+									title='Save Profile Details'
+									type='button'
 									className='bg-black rounded-full text-white py-4 px-8 w-full mt-4'
 									onClick={handleSaveButtonClicked}
 								>
@@ -290,7 +269,9 @@ const EditUserProfile = () => {
 							)}
 						</div>
 						<div className='mt-8 flex justify-center'>
-							<button onClick={handleSignOut}>Sign Out</button>
+							<button title='Sign Out' type='button' onClick={handleSignOut}>
+								Sign Out
+							</button>
 						</div>
 					</div>
 				</div>
