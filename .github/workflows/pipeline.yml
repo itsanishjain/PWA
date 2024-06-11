@@ -18,7 +18,7 @@ jobs:
       - name: Cancel previous running jobs
         uses: styfle/cancel-workflow-action@0.12.1
         with:
-          access_token: ${{ github.token }}
+          access_token: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-deploy:
     runs-on: ubuntu-22.04
@@ -28,6 +28,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: '9'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,15 +45,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      # Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Build the project
       - name: Build the project
         run: pnpm run build
 
-      # Deploy to Vercel
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         if: github.repository == 'Pool-Escrow/PWA' && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
@@ -61,4 +60,4 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_TEAM_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
-          working-directory: './' # Specify if your project directory isn't the root
+          working-directory: './'
