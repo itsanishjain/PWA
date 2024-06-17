@@ -1,13 +1,9 @@
 import type { Config } from 'tailwindcss'
+import { textShadow } from './src/lib/utils/tailwind'
 
 const config = {
 	darkMode: ['class'],
-	content: [
-		'./pages/**/*.{ts,tsx}',
-		'./components/**/*.{ts,tsx}',
-		'./app/**/*.{ts,tsx}',
-		'./src/**/*.{ts,tsx}',
-	],
+	content: ['./src/**/*.tsx'],
 	prefix: '',
 	theme: {
 		container: {
@@ -18,16 +14,23 @@ const config = {
 			},
 		},
 		extend: {
-			width: {
-				100: '25rem',
-				104: '26rem',
-				108: '27rem',
-				112: '28rem',
-				116: '29rem',
-				120: '30rem',
-				124: '31rem',
-				128: '32rem',
-				256: '64rem',
+			animation: {
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
+			},
+			backgroundImage: {
+				cta: 'linear-gradient(180deg, #36a0f7, #1364da)',
+				'text-inner':
+					'radial-gradient(circle at center, #2989EC 80%, #151515 100%)',
+			},
+			borderRadius: {
+				lg: 'var(--radius)',
+				md: 'calc(var(--radius) - 2px)',
+				sm: 'calc(var(--radius) - 4px)',
+				mini: 'var(--border-radius-mini)',
+			},
+			boxShadow: {
+				panel: '0px -2px 22.6px 0px rgba(79, 79, 79, 0.25)',
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -63,11 +66,17 @@ const config = {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))',
 				},
+				panel: {
+					DEFAULT: 'hsl(var(--panel))',
+				},
 			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)',
+			fontFamily: {
+				logo: 'var(--font-logo), "Comfortaa-fallback", sans-serif',
+				body: 'var(--font-body), "Inter-fallback", sans-serif',
+			},
+			height: {
+				'top-bar': 'var(--top-bar-height)',
+				'bottom-bar': 'var(--bottom-bar-height)',
 			},
 			keyframes: {
 				'accordion-down': {
@@ -79,13 +88,31 @@ const config = {
 					to: { height: '0' },
 				},
 			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
+			padding: {
+				'top-bar-h': 'var(--top-bar-height)',
+				'bottom-bar-h': 'var(--bottom-bar-height)',
+			},
+			textShadow: {
+				inner: '0 3px 4px #fff, 0 0 0 #151515, 0px 3px 4px #fff',
+			},
+			width: {
+				100: '25rem',
+				104: '26rem',
+				108: '27rem',
+				112: '28rem',
+				116: '29rem',
+				120: '30rem',
+				124: '31rem',
+				128: '32rem',
+				256: '64rem',
 			},
 		},
 	},
-	plugins: [require('tailwindcss-animate'), require('tailwindcss-safe-area')],
+	plugins: [
+		require('tailwindcss-animate'),
+		require('tailwindcss-safe-area'),
+		textShadow,
+	],
 } satisfies Config
 
 export default config

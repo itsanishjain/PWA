@@ -1,10 +1,12 @@
 {
-	"name": "next-pwa-template",
+	"name": "pool-pwa",
 	"version": "0.0.0",
 	"license": "MIT",
 	"scripts": {
 		"check-types": "tsc --noemit",
-		"db:gen-types": "pnpx supabase gen types typescript --project-id gyxqgibjvhmkrvsaddcj --schema public > types/db.d.ts",
+		"init-contracts": "git submodule update --recursive --remote",
+		"gen-types:db": "pnpx supabase gen types typescript --project-id nmwbprtqvwjgctctsrsg --schema public > src/types/db.ts",
+		"gen-types:contract": "wagmi --config wagmi-cli.config.ts generate",
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
@@ -29,7 +31,9 @@
 		"@serwist/next": "9.0.3",
 		"@supabase/ssr": "0.3.0",
 		"@supabase/supabase-js": "2.43.4",
+		"@tanstack/query-sync-storage-persister": "5.45.0",
 		"@tanstack/react-query": "5.45.0",
+		"@tanstack/react-query-persist-client": "5.45.0",
 		"@wagmi/core": "2.11.2",
 		"axios": "1.7.2",
 		"class-variance-authority": "0.7.0",
@@ -37,6 +41,7 @@
 		"cmdk": "1.0.0",
 		"date-fns": "3.6.0",
 		"ethers": "6.13.0",
+		"framer-motion": "11.2.10",
 		"js-cookie": "3.0.5",
 		"jsonwebtoken": "9.0.2",
 		"lodash": "4.17.21",
@@ -44,7 +49,6 @@
 		"next": "14.2.4",
 		"next-themes": "0.3.0",
 		"react": "18.3.1",
-		"react-day-picker": "8.10.1",
 		"react-dom": "18.3.1",
 		"react-qr-code": "2.0.14",
 		"react-qr-reader": "3.0.0-beta-1",
@@ -57,6 +61,7 @@
 	},
 	"devDependencies": {
 		"@next/bundle-analyzer": "14.2.4",
+		"@tanstack/react-query-devtools": "5.45.0",
 		"@testing-library/jest-dom": "6.4.6",
 		"@testing-library/react": "16.0.0",
 		"@testing-library/user-event": "14.5.2",
@@ -114,5 +119,12 @@
 		"singleQuote": true,
 		"jsxSingleQuote": true,
 		"useTabs": true
+	},
+	"eslintConfig": {
+		"extends": [
+			"next",
+			"next/core-web-vitals",
+			"prettier"
+		]
 	}
 }
