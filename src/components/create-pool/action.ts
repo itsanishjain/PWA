@@ -16,7 +16,6 @@ export async function createPoolAction(
     // Verify auth token
     const cookieStore = cookies()
     const privyAuthToken = cookieStore.get('privy-token')?.value
-    console.log('Auth token:', privyAuthToken)
 
     if (!privyAuthToken) {
         throw new Error('Unauthorized. Missing or expired auth token.')
@@ -34,16 +33,15 @@ export async function createPoolAction(
     const { data, error } = await supabase
         .from('pools')
         .insert({
-            name: 'man',
-            description: 'wef',
-            bannerImage: 'reff',
-            termsURL: 'wdfwf',
-            softCap: 50,
-            startDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-            price: 50.5,
-            tokenAddress: '0x1234567890',
-            // contract_id: '50',
+            name: poolData.name,
+            description: poolData.description,
+            bannerImage: poolData.bannerImage,
+            termsURL: poolData.termsURL,
+            softCap: poolData.softCap,
+            startDate: poolData.startDate,
+            endDate: poolData.endDate,
+            price: poolData.price,
+            tokenAddress: poolData.tokenAddress,
             status: 'draft',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
