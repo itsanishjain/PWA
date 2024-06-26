@@ -1,32 +1,29 @@
+// src/app/layout.tsx
+
 import '@/styles/globals.css'
 
-import Providers from '@/components/shared/providers'
 import { comfortaa, inter } from '@/lib/utils/fonts'
-import { cn } from '@/lib/utils/tailwind'
+import { Providers } from '@/providers'
 
 export { metadata, viewport } from '@/lib/utils/metadata'
 
-export default function RootLayout({
-	top,
-	content,
-	bottom,
-}: LayoutWithSlots<'top' | 'content' | 'bottom'>) {
-	return (
-		<html lang='en'>
-			<head />
-			<body
-				className={cn(
-					'mt-safe-or-5',
-					`${(inter.variable, comfortaa.variable)}`,
-				)}
-			>
-				<Providers>
-					{top}
-					{/* <main className=' pt-top-bar-h pb-bottom-bar-h px-safe sm:pb-0 h-screen'> */}
-					<main>{content}</main>
-					{bottom}
-				</Providers>
-			</body>
-		</html>
-	)
+export default function RootLayout({ top, content, bottom }: LayoutWithSlots<'top' | 'content' | 'bottom'>) {
+    return (
+        <html lang='en'>
+            <head />
+            <body className={`${(inter.variable, comfortaa.variable)}`}>
+                <Providers>
+                    {top}
+                    {/* <PageTransitionEffect> */}
+                    {/* <Template> */}
+                    <main className='mx-auto flex size-full w-dvw max-w-screen-md flex-1 flex-col pt-safe-offset-24 mb-safe-or-44 px-safe-or-6'>
+                        {content}
+                    </main>
+                    {/* </Template> */}
+                    {/* </PageTransitionEffect> */}
+                    {bottom}
+                </Providers>
+            </body>
+        </html>
+    )
 }
