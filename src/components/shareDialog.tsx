@@ -1,7 +1,4 @@
-'use client'
-
 import { Button } from '@/components/ui/button'
-import { Dialog } from '@/components/ui/dialog'
 import {
     Drawer,
     DrawerClose,
@@ -14,20 +11,26 @@ import {
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import useMediaQuery from '@/hooks/use-media-query'
-import { cn } from '@/lib/utils/tailwind'
-import shareIcon from '@/public/images/share_icon.svg'
-import type { StaticImport } from 'next/dist/shared/lib/get-img-props'
+
+import shareIcon from '@/../public/images/share_icon.svg'
+import _ from 'lodash'
 import Image from 'next/image'
 import router from 'next/router'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import QRCode from 'react-qr-code'
+import Divider from './divider'
+import { Dialog } from './ui/dialog'
 import { toast } from 'sonner'
-import Divider from '../other/divider'
+import { cn } from '@/lib/utils/tailwind'
 
-const ShareDialog = () => {
+interface shareDialogProps {
+    open?: boolean
+    setOpen?: Dispatch<SetStateAction<boolean>>
+}
+const ShareDialog = (props: shareDialogProps) => {
     const [open, setOpen] = useState(false)
-    // TODO: THIS IS NOT NEEDED, USE THE PROPER TAILWIND BREAKPOINT
     const isDesktop = useMediaQuery('(min-width: 768px)')
+    const poolId = router.query.poolId
 
     if (isDesktop) {
         return (
@@ -36,8 +39,14 @@ const ShareDialog = () => {
                     <button
                         type='button'
                         title='Share with Friends'
-                        className='size-8 rounded-full bg-black/40 p-2 md:size-14 md:p-3'>
-                        <Image className='flex size-full' src={shareIcon as StaticImport} alt='Share with Friends' />
+                        className='relative h-8 w-8 rounded-full bg-black bg-opacity-40 p-2 md:h-14 md:w-14 md:p-3'>
+                        <Image
+                            className='flex h-8 w-8'
+                            src={shareIcon.src}
+                            alt='Share with Friends'
+                            width={14}
+                            height={14}
+                        />
                     </button>
                 </Dialog.Trigger>
                 <Dialog.Content className='sm:max-w-[425px]'>
@@ -59,8 +68,14 @@ const ShareDialog = () => {
                 <button
                     title='Share with Friends'
                     type='button'
-                    className='size-8 rounded-full bg-black/40 p-2 md:size-14 md:p-3'>
-                    <Image className='flex size-full' src={shareIcon as StaticImport} alt='Share with Friends' />
+                    className='relative h-8 w-8 rounded-full bg-black bg-opacity-40 p-2 md:h-14 md:w-14 md:p-3'>
+                    <Image
+                        className='flex h-8 w-8'
+                        src={shareIcon.src}
+                        alt='Share with Friends'
+                        width={14}
+                        height={14}
+                    />
                 </button>
             </DrawerTrigger>
             <DrawerContent>
@@ -88,30 +103,26 @@ function ShareForm({ className }: React.ComponentProps<'form'>) {
         setPageUrl(window?.location?.href)
     }, [])
 
-    const copyToClipboard = () => {
+    const copyToClipboard = async () => {
         console.log('copyToClipboard')
 
         try {
-            void navigator.clipboard.writeText(pageUrl.replace('admin/', ''))
-
-            toast.message('Share Link', {
+            await navigator.clipboard.writeText(pageUrl.replace('admin/', ''))
+            toast('Share Link', {
                 description: 'Copied link to clipboard!',
             })
-
             setCopied(true)
         } catch (error) {
             console.error('Failed to copy:', error)
-
-            toast.error('Share Link', {
+            toast('Share Link', {
                 description: 'Failed to copy link to clipboard!',
             })
         }
     }
-
     return (
         <div className={cn('my-8 flex flex-col space-y-10', className)}>
             <div className='flex h-60 w-full flex-col items-center justify-center'>
-                {Object.keys(currentRoute).length !== 0 && (
+                {!_.isEmpty(currentRoute) && (
                     <QRCode
                         size={256}
                         style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
