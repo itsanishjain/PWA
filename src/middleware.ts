@@ -26,6 +26,10 @@ export async function middleware(req: NextRequest) {
     // handle subdomains
     if (hostname.startsWith('app.')) {
         // for app.poolparty.cc or app.localhost:3000
+        if (pathname === '/' || pathname === '/pwa' || pathname === '/pwa/') {
+            // permanent redirect to /pools
+            return NextResponse.redirect(new URL('/pools', req.url), 301)
+        }
         return NextResponse.rewrite(new URL(`/pwa${pathname}`, req.url))
     } else if (hostname === rootDomain || hostname.startsWith('www.')) {
         // for localhost:3000, poolparty.cc or www.poolparty.cc

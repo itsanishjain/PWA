@@ -32,7 +32,6 @@ export default withBundleAnalyzer(
         images: {
             remotePatterns: [{ protocol: 'https', hostname: '*.supabase.co' }],
         },
-        redirects: async () => Promise.resolve([{ source: '/pwa', destination: '/pwa/pools', permanent: true }]),
         async rewrites() {
             return [
                 {
