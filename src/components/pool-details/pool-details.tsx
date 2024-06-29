@@ -1,39 +1,292 @@
 // src/components/pool-detail/pool-detail.tsx
+'use client'
 
 import frog from '@/../public/images/frog.png'
+import { usePoolDetails } from '@/hooks/use-pool-details'
+import { useAdmin } from '@/lib/hooks/use-admin'
+import { usePoolDetailsDB } from '@/lib/hooks/use-pool-details-db'
+import { formatEventDateTime } from '@/lib/utils/date-time'
+import { cn } from '@/lib/utils/tailwind'
+import { useBottomBarStore } from '@/providers/bottom-bar.provider'
+import { wagmi } from '@/providers/configs'
+import { dropletAbi, dropletAddress, poolAbi, poolAddress } from '@/types/contracts'
+import { useWallets } from '@privy-io/react-auth'
+import { useQueryClient } from '@tanstack/react-query'
 import { ChevronRight } from 'lucide-react'
-import Image from 'next/image'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { Address, getAbiItem } from 'viem'
+import { useBalance, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import Avatars from '../avatars/avatars'
+import OnRampDialog from '../common/dialogs/onramp.dialog'
+import { RegisteredDropdown } from '../registered-dropdown'
+import { Button } from '../ui/button'
+import PoolClaimRow from './pool-claim-row'
+import PoolImageRow from './pool-image-row'
 
 const avatarUrls = new Array(4).fill(frog.src)
 
-interface PoolDetailsProps {}
+interface PoolDetailsProps {
+    poolId: string
+}
 const PoolDetails = (props: PoolDetailsProps) => {
+    const { poolDetails, isLoading, error } = usePoolDetails(BigInt(props.poolId))
+    const {
+        poolDetailsDB,
+        isLoading: isLoadingPoolDetailsDB,
+        error: poolDetailsDBError,
+    } = usePoolDetailsDB(BigInt(props.poolId))
+
+    const queryClient = useQueryClient()
+    const poolSCStatus = poolDetails?.poolDetailFromSC?.[3]
+    const { wallets } = useWallets()
+    const { adminData } = useAdmin()
+    const embeddedWallet = wallets.find(wallet => wallet.walletClientType === 'privy')
+    const walletNativeBalance = useBalance({
+        address: wallets[0]?.address as Address,
+    })
+    const walletTokenBalance = useBalance({
+        address: wallets[0]?.address as Address,
+        token: poolDetails?.poolDetailFromSC?.[4] as Address,
+    })
+
+    const calculatedPoolSCDepositPerPerson = (
+        BigInt(poolDetails?.poolDetailFromSC?.[1]?.depositAmountPerPerson.toString() ?? 0) /
+        BigInt(Math.pow(10, Number(18 ?? 18)))
+    ).toString()
+
+    const cohostNames: string | undefined = poolDetailsDB?.cohostUserDisplayData
+        ?.map((data: any) => data.display_name)
+        .join(',')
+
+    const isRegisteredOnSC = poolDetails?.poolDetailFromSC?.[5]?.indexOf(wallets[0]?.address as Address) !== -1
+
+    const { showBar, hideBar, setContent } = useBottomBarStore(state => state)
+    const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
+
+    const { data: hash, isPending, writeContract, writeContractAsync } = useWriteContract()
+    const {
+        isLoading: isConfirming,
+        isSuccess: isConfirmed,
+        isError,
+        error: registerError,
+        data: txData,
+    } = useWaitForTransactionReceipt({
+        hash,
+    })
+
+    const onEnableDepositButtonClicked = () => {
+        try {
+            const EnableDepositFunction = getAbiItem({
+                abi: poolAbi,
+                name: 'enableDeposit',
+            })
+
+            writeContract({
+                address: poolAddress[wagmi.config.state.chainId as ChainId],
+                abi: [EnableDepositFunction],
+                functionName: 'enableDeposit',
+                args: [BigInt(props.poolId)],
+            })
+        } catch (error) {
+            console.log('enableDeposit Error', error)
+        }
+    }
+
+    const onStartPoolButtonClicked = () => {
+        try {
+            const StartPoolFunction = getAbiItem({
+                abi: poolAbi,
+                name: 'startPool',
+            })
+
+            writeContract({
+                address: poolAddress[wagmi.config.state.chainId as ChainId],
+                abi: [StartPoolFunction],
+                functionName: 'startPool',
+                args: [BigInt(props.poolId)],
+            })
+        } catch (error) {
+            console.log('startPool Error', error)
+        }
+    }
+    const onEndPoolButtonClicked = (e: any) => {
+        try {
+            const EndPoolFunction = getAbiItem({
+                abi: poolAbi,
+                name: 'endPool',
+            })
+
+            writeContract({
+                address: poolAddress[wagmi.config.state.chainId as ChainId],
+                abi: [EndPoolFunction],
+                functionName: 'endPool',
+                args: [BigInt(props.poolId)],
+            })
+        } catch (error) {
+            console.log('endPool Error', error)
+        }
+    }
+
+    const onApproveButtonClicked = async () => {
+        try {
+            console.log('approve')
+
+            console.log('deposit', poolDetails?.poolDetailFromSC?.[1]?.depositAmountPerPerson)
+
+            const ApprovePoolFunction = getAbiItem({
+                abi: dropletAbi,
+                name: 'approve',
+            })
+
+            writeContract({
+                address: dropletAddress[wagmi.config.state.chainId as ChainId],
+                abi: [ApprovePoolFunction],
+                functionName: 'approve',
+                args: [
+                    poolAddress[wagmi.config.state.chainId as ChainId],
+                    poolDetails?.poolDetailFromSC?.[1]?.depositAmountPerPerson ?? BigInt(0),
+                ],
+            })
+        } catch (error) {
+            console.log('approveSpend Error', error)
+        }
+    }
+
+    const onRegisterButtonClicked = async (deposit: bigint, balance: bigint, poolId: string) => {
+        if (balance < deposit) {
+            setOpenOnRampDialog(true)
+            return
+        }
+        await onApproveButtonClicked()
+
+        try {
+            console.log('Approved')
+
+            console.log('registering pool')
+
+            const RegisterPoolFunction = getAbiItem({
+                abi: poolAbi,
+                name: 'deposit',
+            })
+
+            writeContract({
+                address: poolAddress[wagmi.config.state.chainId as ChainId],
+                abi: [RegisterPoolFunction],
+                functionName: 'deposit',
+                args: [BigInt(poolId), deposit],
+            })
+        } catch (error) {}
+    }
+
+    useEffect(() => {
+        console.log('isRegisteredOnSC', isRegisteredOnSC)
+        if (adminData?.isAdmin) {
+            if (poolSCStatus === 0) {
+                setContent(
+                    <Button
+                        onClick={onEnableDepositButtonClicked}
+                        className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
+                        <span>Enable Deposit</span>
+                    </Button>,
+                )
+            } else if (poolSCStatus === 1) {
+                setContent(
+                    <Button
+                        onClick={onStartPoolButtonClicked}
+                        className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
+                        <span>Start Pool</span>
+                    </Button>,
+                )
+            } else if (poolSCStatus === 2) {
+                setContent(
+                    <Button
+                        onClick={onEndPoolButtonClicked}
+                        className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
+                        <span>End Pool</span>
+                    </Button>,
+                )
+            }
+        } else {
+            if (!isRegisteredOnSC) {
+                const deposit = BigInt(poolDetails?.poolDetailFromSC?.[1]?.depositAmountPerPerson.toString() ?? 0)
+                const balance = BigInt(walletTokenBalance?.data?.value.toString() ?? 0)
+                setContent(
+                    <Button
+                        onClick={() => onRegisterButtonClicked(deposit, balance, props.poolId)}
+                        className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
+                        <span>Register for ${calculatedPoolSCDepositPerPerson} USDC</span>
+                    </Button>,
+                )
+            } else {
+                setContent(
+                    <div className='flex w-full flex-row items-center space-x-2'>
+                        <Link
+                            href={`/pool/${props.poolId}/ticket`}
+                            className='mb-3 h-[46px] flex-1 flex-grow flex-row items-center justify-center rounded-[2rem] bg-cta px-6 py-[11px] text-center align-middle font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
+                            <span>Ticket</span>
+                        </Link>
+                        {/* <Button className='h-[46px] w-[46px] rounded-full'>Unregister</Button> */}
+                        <RegisteredDropdown poolId={props.poolId} />
+                    </div>,
+                )
+            }
+        }
+
+        showBar()
+    }, [
+        setContent,
+        showBar,
+        hideBar,
+        calculatedPoolSCDepositPerPerson,
+        isRegisteredOnSC,
+        wallets,
+        poolDetails,
+        walletTokenBalance?.data?.value,
+        adminData,
+    ])
+
+    useEffect(() => {
+        let updatePoolToastId
+        if (isConfirming) {
+            updatePoolToastId = toast.loading('Registering to Pool', {
+                description: 'Finalizing pool registration...',
+            })
+        }
+        if (isConfirmed && hash) {
+            toast.dismiss(updatePoolToastId)
+            queryClient.invalidateQueries({
+                queryKey: ['poolDetails', props.poolId, wagmi.config.state.chainId],
+            })
+        }
+        if (isError || registerError) {
+            console.log('Error', registerError)
+        }
+        if (txData) {
+            console.log('txData', txData)
+        }
+    }, [isConfirmed, isConfirming, hash, isError, registerError, txData])
     return (
         <div className='mx-auto max-w-md overflow-hidden rounded-lg bg-white shadow-lg'>
             <div className='p-4'>
-                <div className='relative mb-4'>
-                    <Image
-                        src={frog.src}
-                        alt='Indoor pool with inflatable flamingo'
-                        width={400}
-                        height={300}
-                        className='rounded-lg'
-                        priority
-                    />
-                    <span className='absolute bottom-2 left-2 rounded-full bg-red-500 px-2 py-1 text-xs text-white'>
-                        Live
-                    </span>
-                </div>
+                <PoolImageRow
+                    poolStatus={poolSCStatus}
+                    admin={adminData?.isAdmin}
+                    poolImage={poolDetailsDB?.poolImageUrl}
+                    poolId={props.poolId}
+                />
 
-                <h2 className='mb-1 text-xl font-bold text-blue-800'>The Original Pool Poker Party</h2>
-                <p className='mb-4 text-gray-600'>Today at 6:00PM</p>
+                <h2 className='mb-1 text-xl font-bold text-blue-800'>{poolDetails?.poolDetailFromSC?.[1].poolName}</h2>
+                <p className='mb-4 text-gray-600'>
+                    {formatEventDateTime(poolDetails?.poolDetailFromSC?.[1].timeStart ?? 0)}
+                </p>
 
                 <div className='mb-4 flex items-center'>
-                    <span className='mr-2 text-gray-700'>Hoste by:</span>
-                    <div className='flex'>
-                        <span className='mr-2 rounded-full bg-gray-200 px-3 py-1 text-sm font-semibold text-gray-700'>
-                            Pool
+                    <span className='mr-2 text-gray-700'>Hosted by {cohostNames}</span>
+                    {/* <div className='flex'>
+                        <span className='mr-2 overflow-clip rounded-full bg-gray-200 px-3 py-1 text-sm font-semibold text-gray-700'>
+                            {poolDetails?.poolDetailFromSC?.[0].host}
                         </span>
                         <span className='mr-2 rounded-full bg-gray-200 px-3 py-1 text-sm font-semibold text-gray-700'>
                             Supermoon
@@ -41,29 +294,57 @@ const PoolDetails = (props: PoolDetailsProps) => {
                         <span className='rounded-full bg-gray-200 px-3 py-1 text-sm font-semibold text-gray-700'>
                             Halborne
                         </span>
+                    </div> */}
+                </div>
+                <PoolClaimRow poolId={props.poolId} />
+                <div className='mb-4 rounded-3xl bg-[#F4F4F4] p-6 shadow-md'>
+                    <div className='mb-4'>
+                        <div className='mb-1 flex justify-between'>
+                            <span className='font-bold text-blue-800'>
+                                ${calculatedPoolSCDepositPerPerson}
+                                {``}
+                                USDC
+                            </span>
+                            <span className='text-[#003073]'>
+                                Goal of $
+                                {Number(calculatedPoolSCDepositPerPerson) * (poolDetailsDB?.poolDBInfo?.soft_cap ?? 0)}{' '}
+                                Prize
+                                {` `}
+                                Pool
+                            </span>
+                        </div>
+                        <div className='h-2.5 w-full rounded-full bg-blue-200'>
+                            {/* TODO: fix styles mixing here */}
+                            <div
+                                className={cn(
+                                    'h-2.5 rounded-full bg-blue-500',
+                                    `w-[${(poolDetails?.poolDetailFromSC?.[5]?.length ?? 0) / poolDetailsDB?.poolDBInfo?.soft_cap}%]`,
+                                )}></div>
+                        </div>
+                    </div>
+                    <div className='mb-4 flex'>Participants</div>
+                    <div className='mb-4 flex items-center justify-between'>
+                        <Avatars avatarUrls={avatarUrls} numPeople={poolDetails?.poolDetailFromSC?.[5]?.length ?? 0} />
+                        <Link href={`/pool/${props.poolId}/participants`} className='flex items-center'>
+                            <ChevronRight className='text-blue-500' />
+                        </Link>
                     </div>
                 </div>
-
-                <div className='mb-4'>
-                    <div className='mb-1 flex justify-between'>
-                        <span className='font-bold text-blue-800'>$825 USDC</span>
-                        <span className='text-gray-600'>Goal of $1,125 Prize Pool</span>
-                    </div>
-                    <div className='h-2.5 w-full rounded-full bg-blue-200'>
-                        <div className='h-2.5 rounded-full bg-blue-500' style={{ width: '73%' }}></div>
-                    </div>
+                <div className='mb-4 rounded-3xl bg-[#F4F4F4] p-6 shadow-md'>
+                    <div className='mb-1 flex justify-between font-medium text-[#003073]'>Description</div>
+                    <div>{poolDetailsDB?.poolDBInfo?.description}</div>
+                </div>
+                <div className='mb-4 rounded-3xl bg-[#F4F4F4] p-6 shadow-md'>
+                    <div className='mb-1 flex justify-between font-medium text-[#003073]'>Link to Terms</div>
+                    <div>{poolDetailsDB?.poolDBInfo?.termsURL}</div>
                 </div>
 
-                <div className='mb-4 flex items-center justify-between'>
-                    <Avatars avatarUrls={avatarUrls} numPeople={47} />
-                    <div className='flex items-center'>
-                        <ChevronRight className='text-blue-500' />
-                    </div>
-                </div>
-
-                <button className='w-full rounded-lg bg-blue-500 py-2 font-semibold text-white transition duration-300 hover:bg-blue-600'>
-                    Start Pool
-                </button>
+                <OnRampDialog
+                    open={openOnRampDialog}
+                    setOpen={setOpenOnRampDialog}
+                    balance={walletTokenBalance?.data?.value}
+                />
+                {/* <Button onClick={() => setOpenOnRampDialog(true)}>OnRamp</Button> */}
             </div>
         </div>
     )
