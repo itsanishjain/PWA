@@ -21,7 +21,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import _ from 'lodash'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Database } from '@/types/db'
 import { formatEventDateTime, formatTimeDiff } from '@/lib/utils/date-time'
@@ -37,7 +37,7 @@ export type PoolRow = Database['public']['Tables']['pools']['Row']
 export type UserDisplayRow = Database['public']['Tables']['users']['Row']
 
 const AdminPoolPage = () => {
-    const router = useRouter()
+    const params = useParams<{ poolId: string }>()
 
     const { ready, authenticated, user } = usePrivy()
 
@@ -64,7 +64,7 @@ const AdminPoolPage = () => {
         setTimeLeft(timeDiff)
     }
 
-    const poolId = router?.query?.poolId! ?? 0
+    const poolId = params?.poolId || '0'
     const queryClient = useQueryClient()
 
     const { data: poolSCInfo } = useQuery({
@@ -194,7 +194,7 @@ const AdminPoolPage = () => {
 
     const cohostNames: string = cohostDbData.map((data: any) => data.display_name).join(',')
 
-    if (_.isEmpty(router.query.poolId)) {
+    if (_.isEmpty(poolId)) {
         return <></>
     }
     return (

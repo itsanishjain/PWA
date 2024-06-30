@@ -15,7 +15,7 @@ import useMediaQuery from '@/hooks/use-media-query'
 import shareIcon from '@/../public/images/share_icon.svg'
 import _ from 'lodash'
 import Image from 'next/image'
-import router from 'next/router'
+import router, { useParams, usePathname } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import QRCode from 'react-qr-code'
 import Divider from './divider'
@@ -30,7 +30,6 @@ interface shareDialogProps {
 const ShareDialog = (props: shareDialogProps) => {
     const [open, setOpen] = useState(false)
     const isDesktop = useMediaQuery('(min-width: 768px)')
-    const poolId = router.query.poolId
 
     if (isDesktop) {
         return (
@@ -95,9 +94,11 @@ const ShareDialog = (props: shareDialogProps) => {
 }
 
 function ShareForm({ className }: React.ComponentProps<'form'>) {
-    const currentRoute = router.asPath
     const [, setCopied] = useState(false)
     const [pageUrl, setPageUrl] = useState('')
+    const params = useParams<{ poolId: string }>()
+    const pathname = usePathname()
+    const poolId = params?.poolId || '0'
 
     useEffect(() => {
         setPageUrl(window?.location?.href)
@@ -122,7 +123,7 @@ function ShareForm({ className }: React.ComponentProps<'form'>) {
     return (
         <div className={cn('my-8 flex flex-col space-y-10', className)}>
             <div className='flex h-60 w-full flex-col items-center justify-center'>
-                {!_.isEmpty(currentRoute) && (
+                {!_.isEmpty(poolId) && (
                     <QRCode
                         size={256}
                         style={{ height: 'auto', maxWidth: '100%', width: '100%' }}

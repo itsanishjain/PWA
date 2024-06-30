@@ -33,7 +33,6 @@ import { ethers } from 'ethers'
 import _ from 'lodash'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import {
     dictionaryToNestedArray,
@@ -45,11 +44,13 @@ import { formatEventDateTime } from '@/lib/utils/date-time'
 import { toast } from 'sonner'
 import AvatarImage from '@/components/common/avatars/avatarImage'
 import { cn } from '@/lib/utils/tailwind'
+import { useParams, useRouter } from 'next/navigation'
 
 export type PoolRow = Database['public']['Tables']['pools']['Row']
 export type UserDisplayRow = Database['public']['Tables']['users']['Row']
 
 const PoolPage = () => {
+    const params = useParams<{ poolId: string }>()
     const router = useRouter()
 
     const { ready, authenticated, user, getAccessToken } = usePrivy()
@@ -67,7 +68,7 @@ const PoolPage = () => {
     const [, setPageUrl] = useState('')
     const [currentJwt, setCurrentJwt] = useState<string | null>()
 
-    const poolId = router?.query?.poolId! ?? 0
+    const poolId = params?.poolId || '0'
     const queryClient = useQueryClient()
 
     const { data: poolSCInfo } = useQuery({
@@ -253,8 +254,7 @@ const PoolPage = () => {
     const participantPercent = (poolSCParticipants?.length / poolDbData?.soft_cap) * 100
 
     const viewTicketClicked = () => {
-        const currentRoute = router.asPath
-        router.push(`${currentRoute}/ticket`)
+        router.push(`/pool/${poolId}/ticket`)
     }
 
     const redirectIfNotLoggedIn = () => {
@@ -312,7 +312,7 @@ const PoolPage = () => {
 
     const cohostNames: string = cohostDbData.map((data: any) => data.display_name).join(',')
 
-    if (_.isEmpty(router.query.poolId)) {
+    if (_.isEmpty(poolId)) {
         return <></>
     }
     return (
@@ -382,7 +382,7 @@ const PoolPage = () => {
                                     </p>
 
                                     <Link
-                                        href={`${router?.asPath}/participants` as any}
+                                        href={`/pool/${poolId}/participants` as any}
                                         className='flex flex-row justify-between'>
                                         <div>
                                             {poolSCParticipants?.length ?? 0 <= 5 ? (
