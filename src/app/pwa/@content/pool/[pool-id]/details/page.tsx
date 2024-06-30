@@ -1,3 +1,5 @@
+'use client'
+
 import Appbar from '@/components/appbar'
 import Divider from '@/components/divider'
 import Page from '@/components/page'
