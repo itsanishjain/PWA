@@ -8,7 +8,8 @@ const turboEnabled = process.env.TURBO === 'true'
 const withSerwist = withSerwistInit({
     swSrc: 'src/lib/utils/sw.ts',
     swDest: 'public/sw.js',
-    disable: !inProduction,
+    // disable: !inProduction,
+    disable: true,
     scope: '/pwa',
 })
 
