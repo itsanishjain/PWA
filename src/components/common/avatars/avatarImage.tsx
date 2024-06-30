@@ -1,4 +1,4 @@
-import frogImage from '@/public/images/frog.png'
+import frogImage from '@/../public/images/frog.png'
 import Image from 'next/image'
 
 import { useQuery } from '@tanstack/react-query'

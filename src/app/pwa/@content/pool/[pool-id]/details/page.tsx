@@ -21,11 +21,11 @@ import {
     handleUnregister,
     handleUnregisterServer,
 } from '@/lib/api/clientAPI'
-import circleTick from '@/public/images/circle-tick.svg'
-import defaultPoolImage from '@/public/images/frog.png'
-import rightArrow from '@/public/images/right_arrow.svg'
-import tripleDotsIcon from '@/public/images/tripleDots.svg'
-import userUnregisterIcon from '@/public/images/user_delete.svg'
+import circleTick from '@/../public/images/circle-tick.svg'
+import defaultPoolImage from '@/../public/images/frog.png'
+import rightArrow from '@/../public/images/right_arrow.svg'
+import tripleDotsIcon from '@/../public/images/tripleDots.svg'
+import userUnregisterIcon from '@/../public/images/user_delete.svg'
 import { Database } from '@/types/db'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
