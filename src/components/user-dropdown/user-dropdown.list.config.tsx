@@ -1,4 +1,5 @@
 import { LogOutIcon, UndoIcon, UserIcon } from 'lucide-react'
+import { Route } from 'next'
 import type { LinkProps } from 'next/link'
 
 interface DropdownItemConfig {
@@ -11,12 +12,12 @@ interface DropdownItemConfig {
 
 export const dropdownItemsConfig: DropdownItemConfig[] = [
     {
-        href: '/profile',
+        href: '/profile/edit' as Route,
         icon: <UserIcon />,
         label: 'Edit Profile',
     },
     {
-        href: '/profile/request-refund',
+        href: '/profile/request-refund' as Route,
         icon: <UndoIcon />,
         label: 'Request a refund',
     },
