@@ -75,21 +75,23 @@ interface PoolListProps {
     sort?: SortCriteria<ComparableKeys | 'status'>
 }
 
+const isClient = typeof window !== 'undefined'
+
 export default function PoolList({ limit = 7, filter, sort = { sortBy: 'status', sortOrder: 'asc' } }: PoolListProps) {
-    const { pools, isLoading, error } = usePoolStore()
+    const { pools, isLoading, error, setPools, setError } = usePoolStore()
     const { data: fetchedPools, isLoading: isFetching, error: fetchError } = usePools()
-    const [isClient, setIsClient] = useState(false)
+    const [isMount, setIsMount] = useState(false)
 
     useEffect(() => {
-        setIsClient(true)
+        setIsMount(true)
 
         if (fetchedPools !== undefined) {
-            usePoolStore.getState().setPools(fetchedPools)
+            setPools(fetchedPools)
         }
         if (fetchError) {
-            usePoolStore.getState().setError(fetchError as Error)
+            setError(fetchError as Error)
         }
-    }, [fetchedPools, fetchError])
+    }, [fetchedPools, fetchError, setPools, setError])
 
     const poolsWithStatus = useMemo(() => {
         return pools.map(pool => ({
@@ -98,19 +100,27 @@ export default function PoolList({ limit = 7, filter, sort = { sortBy: 'status',
         }))
     }, [pools])
 
-    if (!isClient || isLoading || isFetching) return <PoolListSkeleton limit={limit} />
-    if (error) return <div suppressHydrationWarning>Error: {error.message}</div>
-    if (pools.length === 0) return <div>No pools found</div>
+    if (!isClient || !isMount || isLoading || isFetching) {
+        return <PoolListSkeleton limit={limit} />
+    }
+
+    if (error) {
+        return <div>Error: {error.message}</div>
+    }
+
+    if (pools.length === 0) {
+        return <div>No pools found</div>
+    }
 
     const filteredPools = filter ? filterPools(poolsWithStatus, filter) : poolsWithStatus
-    const sortedPools = sort && sortPools(filteredPools, sort)
+    const sortedPools = sort ? sortPools(filteredPools, sort) : filteredPools
     const visiblePools = sortedPools.slice(0, limit)
 
     return (
         <div className='flex flex-col gap-4'>
-            {visiblePools.map(pool => {
-                return <DynamicPoolCard key={pool.id} {...pool} />
-            })}
+            {visiblePools.map(pool => (
+                <DynamicPoolCard key={pool.id} {...pool} />
+            ))}
         </div>
     )
 }
