@@ -18,6 +18,7 @@ import Section from '@/components/common/layout/section'
 import { inter } from '@/lib/utils/fonts'
 import { formatAddress } from '@/lib/utils/addresses'
 import ClaimablePoolRow from '@/components/common/other/claimable-pool-row'
+import { Route } from 'next'
 
 const UserProfile = () => {
     const router = useRouter()
@@ -75,7 +76,7 @@ const UserProfile = () => {
 
     useEffect(() => {
         if (ready && !authenticated) {
-            router.push('/login')
+            router.push('/login' as Route)
         }
 
         for (var i = 0; i < wallets.length; i++) {
@@ -112,7 +113,7 @@ const UserProfile = () => {
                         <div className='flex justify-center'>
                             <Link
                                 className='barForeground w-full rounded-full bg-black px-8 py-2 text-center text-white'
-                                href={'/edit-user-profile'}>
+                                href={'/edit-user-profile' as Route}>
                                 Edit Profile
                             </Link>
                         </div>
@@ -130,6 +131,7 @@ const UserProfile = () => {
                 </div>
                 <div className='fixed bottom-5 left-1/2 w-full max-w-screen-md -translate-x-1/2 transform px-6 md:bottom-6'>
                     <button
+                        type='button'
                         className={`barForeground focus:shadow-outline h-12 w-full rounded-full px-4 py-2 font-bold text-white focus:outline-none md:h-16 md:text-2xl`}
                         onClick={onClaimAllButtonClicked}>
                         Claim All
