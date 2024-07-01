@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { CurrencyAmount } from '../common/forms/currency-amount.control'
 import { DateTimeRange } from '../common/forms/date-time-range.control'
 import { ImageUploader } from '../common/forms/image-uploader.control'
-import { Number } from '../common/forms/number.control'
+import { Number as NumberControl } from '../common/forms/number.control'
 import { TextArea } from '../common/forms/text-area.control'
 import { Text } from '../common/forms/text.control'
 import { Button } from '../ui/button'
@@ -17,7 +17,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { createPoolAction, updatePoolStatus } from './action'
 import { toast } from 'sonner'
-import { getAbiItem, parseEther } from 'viem'
+import { decodeEventLog, getAbiItem, parseEther } from 'viem'
 import { poolAbi, poolAddress } from '@/types/contracts'
 import { dropletAddress } from '@/types/droplet'
 import { wagmi } from '@/providers/configs'
@@ -75,7 +75,7 @@ const formFields: Array<{
         key: 'softCap',
         label: 'Soft Cap',
         description: 'Enter the max amount of paid entries allowed to join',
-        component: Number,
+        component: NumberControl,
     },
     {
         key: 'termsURL',
@@ -84,39 +84,6 @@ const formFields: Array<{
         component: Text,
     },
 ]
-
-// interface FormField {
-//     name: keyof Pool
-//     label: string
-//     description: string
-//     component: React.ComponentType<any>
-//     value: any
-//     setValue: (value: any) => void
-// }
-
-// const PoolDateTimeRange = ({
-//     value,
-//     setValue,
-// }: {
-//     value: { startDate: string; endDate: string }
-//     setValue: (value: { startDate: string; endDate: string }) => void
-// }) => {
-//     const [dateRangeValue, setDateRangeValue] = useState<DateTimeRangeValue>({
-//         start: value.startDate,
-//         end: value.endDate,
-//     })
-
-//     return <DateTimeRange value={dateRangeValue} setValue={setDateRangeValue} />
-// }
-
-// export default function CreatePoolPage() {
-//     const [formFields, setFormFields] = useState<FormField[]>([])
-//     const [dateRange, setDateRange] = useState<DateTimeRangeValue>({
-//         start: new Date().toISOString(),
-//         end: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-//     })
-
-//     const router = useRouter()
 
 export default function CreatePool() {
     const { draftPool, setDraftPool, resetDraftPool } = useCreatePoolStore()
@@ -127,7 +94,11 @@ export default function CreatePool() {
     const router = useRouter()
     const queryClient = useQueryClient()
     const { data: hash, isPending, writeContract } = useWriteContract()
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    const {
+        isLoading: isConfirming,
+        isSuccess: isConfirmed,
+        data: receipt,
+    } = useWaitForTransactionReceipt({
         hash,
     })
 
@@ -197,27 +168,54 @@ export default function CreatePool() {
     }, [])
 
     useEffect(() => {
-        // Move pool from pending to inactive.
-        if (isConfirmed && hash) {
-            const updatePoolToastId = toast.loading('Updating Pool', { description: 'Finalizing pool creation...' })
-            updatePoolStatus(createPoolMutation.data?.internal_id.toString() ?? '', 'inactive')
-                .then(() => {
-                    toast.success('Pool Created Successfully', { description: 'Redirecting to pool details...' })
-                    queryClient.invalidateQueries({ queryKey: ['pools'] })
-                    resetDraftPool()
-                    if (createPoolMutation.data?.contract_id)
-                        throw new Error('No internal ID returned from createPoolAction')
-                    router.push(`/pool/${createPoolMutation.data?.contract_id}` as Route)
+        if (isConfirmed && receipt) {
+            // Buscar el evento PoolCreated en los logs
+            const poolCreatedLog = receipt.logs.find(
+                log => log.topics[0] === '0x62cf78dd3c1528a147e40a8e7413f29c3deed8603e2ee1d0c5284b052dae7221',
+            )
+
+            if (poolCreatedLog) {
+                const decodedLog = decodeEventLog({
+                    abi: poolAbi,
+                    data: poolCreatedLog.data,
+                    topics: poolCreatedLog.topics,
                 })
-                .catch(error => {
-                    console.error('Error updating pool:', error)
+
+                // Extraer el latestPoolId del evento decodificado
+                // @ts-expect-error
+                const latestPoolId = Number(decodedLog.args.poolId)
+
+                console.log('Latest Pool ID:', latestPoolId)
+
+                const updatePoolToastId = toast.loading('Updating Pool', { description: 'Finalizing pool creation...' })
+                const internalId = createPoolMutation.data?.internal_id.toString()
+
+                if (!internalId) {
+                    console.error('Internal ID not found in createPoolMutation.data:', createPoolMutation.data)
                     toast.error('Failed to finalize pool creation', { description: 'Please contact support' })
-                })
-                .finally(() => {
-                    toast.dismiss(updatePoolToastId)
-                })
+                    return
+                }
+
+                updatePoolStatus(internalId, 'inactive', latestPoolId)
+                    .then(() => {
+                        toast.success('Pool Created Successfully', { description: 'Redirecting to pool details...' })
+                        queryClient.invalidateQueries({ queryKey: ['pools'] })
+                        resetDraftPool()
+                        router.push(`/pool/${latestPoolId}` as Route)
+                    })
+                    .catch(error => {
+                        console.error('Error updating pool:', error)
+                        toast.error('Failed to finalize pool creation', { description: 'Please contact support' })
+                    })
+                    .finally(() => {
+                        toast.dismiss(updatePoolToastId)
+                    })
+            } else {
+                console.error('PoolCreated event not found in transaction logs')
+                toast.error('Failed to retrieve pool ID', { description: 'Please contact support' })
+            }
         }
-    }, [isConfirmed, hash, createPoolMutation.data])
+    }, [isConfirmed, receipt, createPoolMutation.data])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -251,7 +249,7 @@ export default function CreatePool() {
             startDate: draftPool.dateRange.start,
             endDate: draftPool.dateRange.end,
             price: parseFloat(draftPool.price),
-            tokenAddress: '', // Asume que esto se maneja en otro lugar o se establece por defecto
+            tokenAddress: dropletAddress[wagmi.config.state.chainId as ChainId],
         }
 
         const creatingToastId = toast.loading('Creating Pool', { description: 'Please wait...' })

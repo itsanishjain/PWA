@@ -8,6 +8,22 @@ import { parseISO } from 'date-fns'
 
 type Pool = Database['public']['Tables']['pools']['Insert']
 
+export type CreatePoolActionResult = {
+    bannerImage: string | null
+    contract_id: number | null
+    createdAt: string | null
+    description: string
+    endDate: string
+    internal_id: number
+    name: string
+    price: number
+    softCap: number | null
+    startDate: string
+    termsURL: string | null
+    tokenAddress: string | null
+    updatedAt: string | null
+}
+
 export async function createPoolAction(
     poolData: Omit<Pool, 'internal_id' | 'createdAt' | 'updatedAt' | 'contract_id' | 'status'>,
 ) {
@@ -92,10 +108,11 @@ export async function createPoolAction(
 export async function updatePoolStatus(
     poolId: string,
     status: 'draft' | 'unconfirmed' | 'inactive' | 'depositsEnabled' | 'started' | 'paused' | 'ended' | 'deleted',
+    contract_id: number,
 ) {
     const supabase = createServiceClient()
     console.log('updatePoolStatus poolId', poolId, 'status', status)
-    const { error } = await supabase.from('pools').update({ status }).eq('internal_id', poolId)
+    const { error } = await supabase.from('pools').update({ status, contract_id }).eq('internal_id', poolId)
 
     if (error) throw error
 }
