@@ -22,6 +22,7 @@ import { poolAbi, poolAddress } from '@/types/contracts'
 import { dropletAddress } from '@/types/droplet'
 import { wagmi } from '@/providers/configs'
 import { useRouter } from 'next/navigation'
+import { Route } from 'next'
 
 type Pool = Database['public']['Tables']['pools']['Insert']
 
@@ -171,7 +172,8 @@ export default function CreatePool() {
                 { throwOnError: true },
             )
             resetDraftPool()
-            router.push(`/pool/${createdPool.contract_id}`)
+            if (!createdPool.contract_id) throw new Error('No contract ID returned from createPoolAction')
+            router.push(`/pool/${createdPool.contract_id}` as Route)
         },
         onError: error => {
             console.error('createPoolMutation Error:', error)
@@ -206,7 +208,9 @@ export default function CreatePool() {
                     toast.success('Pool Created Successfully', { description: 'Redirecting to pool details...' })
                     queryClient.invalidateQueries({ queryKey: ['pools'] })
                     resetDraftPool()
-                    router.push(`/pool/${createPoolMutation.data?.internal_id}`)
+                    if (createPoolMutation.data?.internal_id)
+                        throw new Error('No internal ID returned from createPoolAction')
+                    router.push(`/pool/${createPoolMutation.data?.internal_id}` as Route)
                 })
                 .catch(error => {
                     console.error('Error updating pool:', error)
