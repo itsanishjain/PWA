@@ -16,6 +16,7 @@ import UserDropdownItem from './user-dropdown.item'
 import type { DropdownItemConfig } from './user-dropdown.list.config'
 import { dropdownItemsConfig } from './user-dropdown.list.config'
 import { useRouter } from 'next/navigation'
+import { Route } from 'next'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.
@@ -52,7 +53,7 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
     /**
      * Handles the click event on the 'Disconnect' dropdown item.
      */
-    const handleLogoutClick = () => {
+    const handleLogoutClick = async () => {
         // close the dropdown menu:
         setOpen(false)
 
@@ -63,25 +64,20 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
                 onError() {
                     toast.error('Failed to disconnect')
                 },
-                onSettled() {
-                    toast.loading('Disconnecting...')
-                },
-                async onSuccess() {
-                    toast.loading('Completing disconnect...')
-
-                    // disconnect privy:
-                    try {
-                        await logout()
-                        toast.success('Disconnected successfully')
-                    } catch {
-                        toast.error('Failed to log out')
-                    } finally {
-                        toast.dismiss()
-                        router.push('/')
-                    }
-                },
             },
         )
+        console.log('Disconnecting...')
+
+        // disconnect privy:
+        try {
+            await logout().then(() => {
+                console.log('Logged out')
+                toast.success('Disconnected successfully')
+                router.push('/' as Route)
+            })
+        } catch {
+            toast.error('Failed to log out')
+        }
     }
 
     /**

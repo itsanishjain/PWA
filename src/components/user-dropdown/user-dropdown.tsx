@@ -27,7 +27,7 @@ const UserDropdown: React.FC = (): JSX.Element => {
     const [container, setContainer] = useState<HTMLElement | null>(null)
 
     useEffect(() => {
-        // Asume que el contenedor main tiene la referencia global mainRef
+        // Assumes that the main container has the global reference mainRef
         setContainer(document.querySelector('main'))
     }, [])
 

@@ -45,7 +45,7 @@ export async function isAdmin(address?: Address) {
             args: [adminRole, address],
         })
 
-        console.log('[auth] isAdmin', isWhitelisted)
+        console.log('[auth] has WHITELISTED_HOST?', isWhitelisted)
 
         return isWhitelisted
     } catch (error) {
