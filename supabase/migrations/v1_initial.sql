@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS "pools" (
     "price" decimal NOT NULL CHECK (price >= 0),
 
     -- Token address from the smart contract
-    "tokenAddress" varchar(42) unique not null,
+    "tokenAddress" varchar(42) not null,
 
     -- Internal status of the pool for the frontend (TODO: track updates and edits?)
     "status" "poolStatus" DEFAULT 'draft' NOT NULL
