@@ -31,7 +31,7 @@ export default function ProfileHeader() {
             </Avatar>
             <div>{truncatedAddress}</div>
             <SponsoredTxn
-                text='Mint 1000 DROPLET'
+                text='Mint 1000 USDC'
                 targetAddress={dropletAddress[wagmi.config.state.chainId as ChainId]}
                 abi={dropletAbi}
                 functionName='mint'
