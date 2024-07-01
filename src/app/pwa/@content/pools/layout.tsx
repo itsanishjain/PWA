@@ -52,7 +52,7 @@ export default function PoolsLayout({ yours, upcoming }: LayoutWithSlots<'yours'
 
     // TODO: ensure your pools is showing up
     return (
-        <div className='flex min-h-dvh scroll-py-6 flex-col gap-6'>
+        <div className='flex scroll-py-6 flex-col gap-6'>
             {isAuthenticated && userPools && userPools.length > 0 && yours}
             {upcoming}
         </div>
