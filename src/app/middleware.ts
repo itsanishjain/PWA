@@ -1,5 +1,6 @@
 // middleware.ts
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 
 export const config = {
     matcher: [
@@ -14,10 +15,10 @@ export const config = {
     ],
 }
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
     const url = req.nextUrl
     const pathname = url.pathname
-    let hostname = req.headers.get('host')!
+    const hostname = req.headers.get('host')!
 
     // Handle localhost:3000 and app.poolparty.cc
     const isDevelopment = process.env.NODE_ENV === 'development'
