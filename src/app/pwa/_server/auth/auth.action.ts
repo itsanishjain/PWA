@@ -1,23 +1,15 @@
 'use server'
 
-import { cookies } from 'next/headers'
-import { getWalletAddress, isAdmin } from '@/lib/server/auth'
-import { Address } from 'viem'
+import type { Address } from 'viem'
+import { getWalletAddress, isAdmin } from './privy'
 
 export async function getAuthStatus(): Promise<{
     isAuthenticated: boolean
     isAdmin: boolean
     address: Address | null
 }> {
-    const cookieStore = cookies()
-    const privyAuthToken = cookieStore.get('privy-token')?.value
-
-    if (!privyAuthToken) {
-        return { isAuthenticated: false, isAdmin: false, address: null }
-    }
-
     try {
-        const walletAddress = await getWalletAddress(privyAuthToken)
+        const walletAddress = await getWalletAddress()
 
         if (!walletAddress) {
             return { isAuthenticated: false, isAdmin: false, address: null }
