@@ -1,6 +1,7 @@
 import SponsoredTxn from '../../_components/sponsored-txn/sponsored-txn-CoinbaseSmartWallet'
 import Balance from './_components/balance'
 import ClaimablePrizes from './_components/claimable'
+import OnrampStripe from './_components/onramps/stripe'
 import UserInfo from './_components/user-info'
 
 import { getAddressBalanceAction, getUserInfoAction } from './actions'
@@ -20,6 +21,7 @@ export default async function ProfilePage() {
             <UserInfo initialUserInfo={userInfoResult} />
             <Balance initialBalance={balanceResult} />
             <SponsoredTxn />
+            <OnrampStripe />
             <ClaimablePrizes />
         </div>
     )
