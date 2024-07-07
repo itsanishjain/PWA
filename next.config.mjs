@@ -1,7 +1,7 @@
 // @ts-check
 import bundleAnalyzer from '@next/bundle-analyzer'
 // import withSerwistInit from '@serwist/next'
-import { inProduction } from './src/lib/utils/environment.mjs'
+import { inProduction } from './src/app/pwa/_lib/utils/environment.mjs'
 
 const turboEnabled = process.env.TURBO === 'true'
 
@@ -88,15 +88,17 @@ export default withBundleAnalyzer(
         //         },
         //     ]
         // },
-        webpack: (config, { dev, isServer }) => {
+        webpack: config => {
             // if (dev) {
             //     config.devtool = 'source-map'
             // }
             // Exclude *.test.ts(x) files from being compiled by Next.js
+            // eslint-disable-next-line
             config.module.rules.push({
                 test: /\.test\.tsx?$/,
                 use: 'ignore-loader',
             })
+            // eslint-disable-next-line
             return config
         },
     },
