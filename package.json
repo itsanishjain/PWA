@@ -30,7 +30,7 @@
         "@radix-ui/react-dropdown-menu": "2.0.6",
         "@radix-ui/react-label": "2.0.2",
         "@radix-ui/react-popover": "1.0.7",
-        "@radix-ui/react-progress": "1.0.3",
+        "@radix-ui/react-progress": "1.1.0",
         "@radix-ui/react-select": "2.0.0",
         "@radix-ui/react-slot": "1.0.2",
         "@radix-ui/react-tabs": "1.0.4",
@@ -60,6 +60,7 @@
         "permissionless": "0.1.31",
         "react": "18.3.1",
         "react-dom": "18.3.1",
+        "react-icons": "5.2.1",
         "react-qr-code": "2.0.14",
         "react-qr-reader": "3.0.0-beta-1",
         "serwist": "9.0.3",
@@ -70,7 +71,8 @@
         "valibot": "0.33.3",
         "vaul": "0.9.1",
         "viem": "2.13.10",
-        "wagmi": "2.10.2"
+        "wagmi": "2.10.2",
+        "zsa": "0.5.0"
     },
     "devDependencies": {
         "@next/bundle-analyzer": "14.2.4",
