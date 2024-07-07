@@ -1,27 +1,24 @@
-// src/app/layout.tsx
-
-import '@/styles/globals.css'
+import { Providers } from './_client/providers'
+import MainWrapper from './_components/main-wrapper'
+import './_styles/app-styles.css'
 
 import { comfortaa, inter } from '@/lib/utils/fonts'
-import { Providers } from '@/providers'
 
-export { metadata, viewport } from '@/lib/utils/metadata'
-
-export default function RootLayout({ top, content, bottom }: LayoutWithSlots<'top' | 'content' | 'bottom'>) {
+export default function RootLayout({
+    topbar,
+    children,
+    bottombar,
+    modal,
+}: React.PropsWithChildren<LayoutWithSlots<'topbar' | 'bottombar' | 'modal'>>) {
     return (
         <html lang='en'>
             <head />
             <body className={`${(inter.variable, comfortaa.variable)}`}>
                 <Providers>
-                    {top}
-                    {/* <PageTransitionEffect> */}
-                    {/* <Template> */}
-                    <main className='mx-auto flex size-full w-dvw max-w-screen-md flex-1 flex-col pt-safe-offset-24 mb-safe-or-24 px-safe-or-6'>
-                        {content}
-                    </main>
-                    {/* </Template> */}
-                    {/* </PageTransitionEffect> */}
-                    {bottom}
+                    {topbar}
+                    <MainWrapper>{children}</MainWrapper>
+                    {modal}
+                    {bottombar}
                 </Providers>
             </body>
         </html>
