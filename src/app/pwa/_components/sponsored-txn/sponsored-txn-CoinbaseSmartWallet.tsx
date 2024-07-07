@@ -1,81 +1,53 @@
 'use client'
 
-import { wagmi } from '@/app/pwa/_client/providers/configs'
-import { dropletAbi, dropletAddress } from '@/types/contracts'
-import { useMemo } from 'react'
-import { toast } from 'sonner'
-import { getAbiItem } from 'viem'
-import { useAccount } from 'wagmi'
-import { useCapabilities, useWriteContracts } from 'wagmi/experimental'
+import { useWallets } from '@privy-io/react-auth'
+import { useWriteContract } from 'wagmi'
+import { useSponsoredTxn } from '../../_client/hooks/use-sponsored-txn'
 import { Button } from '../ui/button'
 
-interface PaymasterService {
-    supported: boolean
-}
-
-interface ChainCapabilities {
-    paymasterService?: PaymasterService
-}
-
-export default function SponsoredTxn() {
-    const account = useAccount()
-
-    const { writeContracts } = useWriteContracts({
-        mutation: { onSuccess: id => toast(`Transaction completed: ${id}`) },
-    })
-
-    const { data: availableCapabilities } = useCapabilities({
-        account: account.address,
-    })
-
-    const capabilities = useMemo(() => {
-        if (!availableCapabilities || !account.chainId) {
-            console.log('No capabilities or chainId')
-            return {}
-        }
-
-        const capabilitiesForChain = availableCapabilities[account.chainId] as ChainCapabilities
-
-        if (capabilitiesForChain?.paymasterService?.supported) {
-            return {
-                paymasterService: {
-                    url: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL,
-                },
-            }
-        }
-        return {}
-    }, [availableCapabilities, account.chainId])
+export default function SponsoredTxn(prop: {
+    text: string
+    targetAddress: `0x${string}`
+    // eslint-disable-next-line
+    abi: any
+    functionName: string
+    // eslint-disable-next-line
+    args: any[]
+}) {
+    const { writeContract } = useWriteContract()
+    const { wallets } = useWallets()
+    const { sponsoredTxn } = useSponsoredTxn()
 
     const sendTransaction = () => {
         console.log('Sending transaction')
-
-        const MintFunction = getAbiItem({
-            abi: dropletAbi,
-            name: 'mint',
-        })
-
-        writeContracts({
-            contracts: [
+        if (
+            wallets[0].walletClientType === 'coinbase_smart_wallet' ||
+            wallets[0].walletClientType === 'coinbase_wallet'
+        ) {
+            sponsoredTxn([
                 {
-                    address: dropletAddress[wagmi.config.state.chainId as ChainId],
-                    abi: [MintFunction],
-                    functionName: 'mint',
-                    args: [account.address, '1000000000000000000000'],
+                    address: prop.targetAddress,
+                    // eslint-disable-next-line
+                    abi: prop.abi,
+                    functionName: prop.functionName,
+                    args: prop.args,
                 },
-            ],
-            capabilities,
-        })
+            ])
+        } else {
+            writeContract({
+                address: prop.targetAddress,
+                // eslint-disable-next-line
+                abi: prop.abi,
+                functionName: prop.functionName,
+                args: prop.args,
+            })
+        }
     }
-
-    if (!availableCapabilities || !account.chainId) return null
+    // if (!availableCapabilities || !account.chainId) return null
 
     return (
-        <section className='detail_card flex w-full flex-col gap-[0.69rem] rounded-3xl p-6'>
-            <Button
-                className='detail_card_claim_button h-9 w-full text-[0.625rem] text-white'
-                onClick={sendTransaction}>
-                Faucet: Mint 1000 DROP
-            </Button>
-        </section>
+        <Button
+            className='h-[30px] w-[100px] rounded-mini bg-cta px-[10px] py-[5px] text-[10px]'
+            onClick={sendTransaction}>{`${prop.text}`}</Button>
     )
 }

@@ -27,13 +27,10 @@ export default function SponsoredTxn() {
     const [txHash, setTxHash] = useState<string | null>(null)
 
     useEffect(() => {
-        async function init() {
-            if (embeddedWallet) {
-                await setActiveWallet(embeddedWallet)
-                console.log(process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL)
-            }
+        if (embeddedWallet) {
+            void setActiveWallet(embeddedWallet)
+            console.log(process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL)
         }
-        void init()
     }, [embeddedWallet, setActiveWallet])
 
     const onSendTransaction = async () => {
@@ -66,7 +63,7 @@ export default function SponsoredTxn() {
             value: 0n,
         })
         console.log('✅ Transaction successfully sponsored!')
-        console.log(`🔍 View on Etherscan: https://sepolia.basescan.org/tx/${txHash}`)
+        console.log(`🔍 View on BaseScan: https://sepolia.basescan.org/tx/${txHash}`)
         setTxHash(txHash)
     }
 
@@ -78,7 +75,10 @@ export default function SponsoredTxn() {
                     <p>✅ Transaction successfully sponsored!</p>
                     <p>
                         🔍 View on Etherscan:{' '}
-                        <a href={`https://sepolia.basescan.org/tx/${txHash}`} target='_blank' rel='noopener noreferrer'>
+                        <a
+                            href={`https://sepolia.basescan.org/tx/${txHash}`}
+                            target='_blank'
+                            rel='external noopener noreferrer nofollow'>
                             Transaction Link
                         </a>
                     </p>
