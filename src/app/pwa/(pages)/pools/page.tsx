@@ -1,0 +1,23 @@
+import BalanceInfo from './_components/balance-info'
+import NextUserPool from './_components/next-user-pool'
+import RenderBottomBar from './_components/render-bottom-bar'
+import UpcomingPools from './_components/upcoming-pools'
+import AuthenticatedContent from './_components/authenticated-content'
+import { checkAuthStatusAction } from './actions'
+
+export default async function PoolsLayout() {
+    const [result] = await checkAuthStatusAction()
+    const isAdmin = result && 'isAdmin' in result && result?.isAdmin
+
+    return (
+        <div className='flex scroll-py-6 flex-col gap-6'>
+            <AuthenticatedContent
+                isAdmin={isAdmin}
+                balanceInfo={<BalanceInfo />}
+                nextUserPool={<NextUserPool />}
+                renderBottomBar={<RenderBottomBar isAdmin={isAdmin} />}
+            />
+            <UpcomingPools />
+        </div>
+    )
+}
