@@ -8,7 +8,7 @@ const privyWagmiConfig: Config = createConfig({
     multiInjectedProviderDiscovery: false,
     syncConnectedChain: true,
     transports: {
-        [baseSepolia.id]: http(`https://base-sepolia.infura.io/v3/2ARoYAcrJ16OIvPpjJ7N8C6LqWX`),
+        [baseSepolia.id]: http(process.env.RPC_ENDPOINT),
     },
     ssr: true,
 })

@@ -1,3 +1,5 @@
+'use client'
+
 import type { PrivyProviderProps } from '@privy-io/react-auth'
 import { baseSepolia } from 'viem/chains'
 

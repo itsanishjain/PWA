@@ -14,15 +14,20 @@ export interface PoolDraft {
 }
 
 type CreatePoolStoreState = {
-    draftPool: PoolDraft
+    poolDraft: PoolDraft
     error: Error | null
     isHydrated: boolean
 }
 
+type DateRange = {
+    start: string
+    end: string
+}
+
 type CreatePoolStoreActions = {
-    setDraftPool: (field: keyof PoolDraft, value: any) => void
+    setPoolDraft: (field: keyof PoolDraft, value: string | File | DateRange | null | undefined) => void
     setError: (error: Error | null) => void
-    resetDraftPool: () => void
+    resetPoolDraft: () => void
     setHydrated: (state: boolean) => void
 }
 
@@ -35,7 +40,7 @@ const getDefaultDateTimeValue = () => {
     }
 }
 
-const initialDraftPool: PoolDraft = {
+const initialPoolDraft: PoolDraft = {
     bannerImage: '',
     name: '',
     dateRange: getDefaultDateTimeValue(),
@@ -49,18 +54,18 @@ export const useCreatePoolStore = create<CreatePoolStoreState & CreatePoolStoreA
     devtools(
         persist(
             set => ({
-                draftPool: initialDraftPool,
+                poolDraft: initialPoolDraft,
                 error: null,
                 isHydrated: false,
-                setDraftPool: (field, value) =>
+                setPoolDraft: (field, value) =>
                     set(state => ({
-                        draftPool: {
-                            ...state.draftPool,
+                        poolDraft: {
+                            ...state.poolDraft,
                             [field]: value,
                         },
                     })),
                 setError: (error: Error | null) => set({ error }),
-                resetDraftPool: () => set({ draftPool: initialDraftPool }),
+                resetPoolDraft: () => set({ poolDraft: initialPoolDraft }),
                 setHydrated: (state: boolean) => set({ isHydrated: state }),
             }),
             { name: 'create-pool-store' },
