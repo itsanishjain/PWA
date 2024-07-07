@@ -40,11 +40,16 @@ export function getRelativeTimeString(date: Date | number, lang = navigator.lang
     return rtf.format(Math.floor(deltaSeconds / divisor), units[unitIndex])
 }
 
+interface PoolBase {
+    startDate: string | Date
+    endDate: string | Date
+}
+
 export const getStatusString = ({
     status,
     startDate,
     endDate,
-}: Pick<PoolFrontend, 'startDate' | 'endDate'> & { status: 'live' | 'upcoming' | 'past' }) => {
+}: Pick<PoolBase, 'startDate' | 'endDate'> & { status: 'live' | 'upcoming' | 'past' }) => {
     const definitions = {
         upcoming: { verb: 'Starts', reference: startDate },
         past: { verb: 'Ended', reference: endDate },
@@ -62,4 +67,36 @@ export const getStatusString = ({
         console.error('Error parsing date:', error)
         return 'Date information unavailable'
     }
+}
+
+export const getFormattedEventTime = (startDate: Date | string, endDate: Date | string): string => {
+    const now = new Date()
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    if (now > end) {
+        return 'Ended'
+    }
+
+    const formatTime = (date: Date) => {
+        return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+    }
+
+    if (start.toDateString() === now.toDateString()) {
+        return `Today at ${formatTime(start)}`
+    }
+
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    if (start.toDateString() === tomorrow.toDateString()) {
+        return `Tomorrow at ${formatTime(start)}`
+    }
+
+    return (
+        start.toLocaleDateString([], {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        }) + ` at ${formatTime(start)}`
+    )
 }

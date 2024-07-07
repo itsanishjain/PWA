@@ -1,4 +1,12 @@
-export function getPoolStatus({ startDate, endDate }: Pick<PoolFrontend, 'startDate' | 'endDate'>): PoolStatus {
+interface PoolBase {
+    startDate: string | Date
+    endDate: string | Date
+}
+
+export function getPoolStatus({
+    startDate,
+    endDate,
+}: Pick<PoolBase, 'startDate' | 'endDate'>): 'upcoming' | 'live' | 'past' {
     const now = Date.now()
     const start = new Date(startDate).getTime()
     const end = new Date(endDate).getTime()
