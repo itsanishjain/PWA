@@ -81,13 +81,6 @@ export type Database = {
                         referencedColumns: ['internal_id']
                     },
                     {
-                        foreignKeyName: 'pool_participants_pool_id_fkey'
-                        columns: ['pool_id']
-                        isOneToOne: false
-                        referencedRelation: 'pools_with_main_host'
-                        referencedColumns: ['internal_id']
-                    },
-                    {
                         foreignKeyName: 'pool_participants_user_id_fkey'
                         columns: ['user_id']
                         isOneToOne: false
@@ -98,52 +91,52 @@ export type Database = {
             }
             pools: {
                 Row: {
-                    bannerImage: string | null
+                    bannerImage: string
                     contract_id: number | null
-                    createdAt: string | null
+                    createdAt: string
                     description: string
                     endDate: string
                     internal_id: number
                     name: string
                     price: number
-                    softCap: number | null
+                    softCap: number
                     startDate: string
                     status: Database['public']['Enums']['poolStatus']
                     termsURL: string
                     tokenAddress: string
-                    updatedAt: string | null
+                    updatedAt: string
                 }
                 Insert: {
-                    bannerImage?: string | null
+                    bannerImage: string
                     contract_id?: number | null
-                    createdAt?: string | null
+                    createdAt?: string
                     description: string
                     endDate: string
                     internal_id?: never
                     name: string
                     price: number
-                    softCap?: number | null
+                    softCap: number
                     startDate: string
                     status?: Database['public']['Enums']['poolStatus']
                     termsURL: string
                     tokenAddress: string
-                    updatedAt?: string | null
+                    updatedAt?: string
                 }
                 Update: {
-                    bannerImage?: string | null
+                    bannerImage?: string
                     contract_id?: number | null
-                    createdAt?: string | null
+                    createdAt?: string
                     description?: string
                     endDate?: string
                     internal_id?: never
                     name?: string
                     price?: number
-                    softCap?: number | null
+                    softCap?: number
                     startDate?: string
                     status?: Database['public']['Enums']['poolStatus']
                     termsURL?: string
                     tokenAddress?: string
-                    updatedAt?: string | null
+                    updatedAt?: string
                 }
                 Relationships: []
             }
@@ -214,34 +207,7 @@ export type Database = {
             }
         }
         Views: {
-            pools_with_main_host: {
-                Row: {
-                    bannerImage: string | null
-                    contract_id: number | null
-                    createdAt: string | null
-                    description: string | null
-                    endDate: string | null
-                    internal_id: number | null
-                    main_host_id: number | null
-                    name: string | null
-                    price: number | null
-                    softCap: number | null
-                    startDate: string | null
-                    status: Database['public']['Enums']['poolStatus'] | null
-                    termsURL: string | null
-                    tokenAddress: string | null
-                    updatedAt: string | null
-                }
-                Relationships: [
-                    {
-                        foreignKeyName: 'pool_participants_user_id_fkey'
-                        columns: ['main_host_id']
-                        isOneToOne: false
-                        referencedRelation: 'users'
-                        referencedColumns: ['id']
-                    },
-                ]
-            }
+            [_ in never]: never
         }
         Functions: {
             [_ in never]: never
