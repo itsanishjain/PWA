@@ -130,13 +130,13 @@ CREATE TABLE IF NOT EXISTS "pools" (
     "description" text NOT NULL,
 
     -- Banner image URL of the Pool
-    "bannerImage" text,
+    "bannerImage" text NOT NULL,
 
     -- URL to the pool terms, not present in the contract
     "termsURL" text NOT NULL,
 
     -- Soft cap of the pool, not present in the contract
-    "softCap" numeric CHECK ("softCap" > 0),
+    "softCap" numeric NOT NULL CHECK ("softCap" > 0),
 
     -- Database internals for auditing and logs purposes, TODO: make them auto-triggered
     "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT now(),
