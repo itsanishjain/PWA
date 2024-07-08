@@ -1,4 +1,4 @@
-import { devtools, persist } from 'zustand/middleware'
+// import { devtools, persist } from 'zustand/middleware'
 import { createStore } from 'zustand/vanilla'
 import type { MyPoolsTab } from '../../(pages)/my-pools/_components/my-pools.tabs.config'
 
@@ -28,17 +28,23 @@ export const defaultInitState: SettingsState = {
 
 export const createSettingsStore = (initState: SettingsState = defaultInitState) => {
     return createStore<SettingsStore>()(
-        devtools(
-            persist(
-                set => ({
-                    ...initState,
-                    setTopBarTitle: (title: string | null) => set({ topBarTitle: title }),
-                    setBottomBarContent: (content: React.ReactNode | null) => set({ bottomBarContent: content }),
-                    setMyPoolsTab: (tab: MyPoolsTab['id']) => set({ myPoolsTab: tab }),
-                }),
+        // devtools(
+        // persist(
+        set => ({
+            ...initState,
+            setTopBarTitle: (title: string | null) => set({ topBarTitle: title }),
+            setBottomBarContent: (content: React.ReactNode | null) => set({ bottomBarContent: content }),
+            setMyPoolsTab: (tab: MyPoolsTab['id']) => set({ myPoolsTab: tab }),
+        }),
 
-                { name: 'pool-app-settings' },
-            ),
-        ),
+        // {
+        //     name: 'pool-app-settings',
+        //     // partialize: state => ({
+        //     //     myPoolsTab: state.myPoolsTab,
+        //     //     // Add any other properties you want to persist here
+        //     // }),
+        // },
+        // ),
+        // ),
     )
 }
