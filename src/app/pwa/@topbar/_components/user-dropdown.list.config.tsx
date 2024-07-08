@@ -1,4 +1,4 @@
-import { LogOutIcon, UndoIcon, UserIcon } from 'lucide-react'
+import { LogOutIcon, PlusIcon, SendIcon, UndoIcon, UserIcon } from 'lucide-react'
 import type { Route } from 'next'
 import type { LinkProps } from 'next/link'
 
@@ -15,6 +15,15 @@ export const dropdownItemsConfig: DropdownItemConfig[] = [
         href: '/profile/edit' as Route,
         icon: <UserIcon />,
         label: 'Edit Profile',
+    },
+    {
+        icon: <PlusIcon />,
+        label: 'Deposit',
+    },
+    {
+        href: '/profile/send' as Route,
+        icon: <SendIcon />,
+        label: 'Send',
     },
     {
         href: '/profile/request-refund' as Route,

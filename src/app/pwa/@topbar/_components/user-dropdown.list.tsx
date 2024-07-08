@@ -6,6 +6,7 @@
 
 'use client'
 
+import { dropletAddress } from '@/types/contracts'
 import { usePrivy } from '@privy-io/react-auth'
 import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
@@ -13,7 +14,9 @@ import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useDisconnect } from 'wagmi'
+import { useAccount, useBalance, useDisconnect } from 'wagmi'
+import OnRampDialog from '../../(pages)/profile/_components/onramps/onramp.dialog'
+import { wagmi } from '../../_client/providers/configs'
 import UserDropdownItem from './user-dropdown.item'
 import type { DropdownItemConfig } from './user-dropdown.list.config'
 import { dropdownItemsConfig } from './user-dropdown.list.config'
@@ -49,6 +52,16 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
     const router = useRouter()
     const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
     const dropdownListRef = useRef<HTMLDivElement | null>(null)
+    const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
+
+    const account = useAccount()
+    const { data: tokenBalanceData } = useBalance({
+        address: account.address,
+        token: dropletAddress[wagmi.config.state.chainId as ChainId],
+    })
+
+    const decimals = BigInt(tokenBalanceData?.decimals ?? BigInt(18))
+    const _tokenBalance = ((tokenBalanceData?.value ?? BigInt(0)) / BigInt(10) ** decimals).toString()
 
     /**
      * Handles the click event on the 'Disconnect' dropdown item.
@@ -79,6 +92,10 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
         }
     }
 
+    const handleDepositClick = () => {
+        setOpenOnRampDialog(true)
+    }
+
     /**
      * Handles mouse entering a dropdown item to set the hovered state.
      *
@@ -92,9 +109,16 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
     const handleMouseLeave = () => setHoveredItemIndex(null)
 
     // Assign the handleLogoutClick to the corresponding dropdown item
-    const updatedDropdownItemsConfig: DropdownItemConfig[] = dropdownItemsConfig.map(item =>
-        item.label === 'Disconnect' ? { ...item, onClick: handleLogoutClick } : item,
-    )
+    const updatedDropdownItemsConfig: DropdownItemConfig[] = dropdownItemsConfig.map(item => {
+        switch (item.label) {
+            case 'Disconnect':
+                return { ...item, onClick: handleLogoutClick }
+            case 'Deposit':
+                return { ...item, onClick: handleDepositClick }
+            default:
+                return item
+        }
+    })
 
     return (
         <motion.div
@@ -131,6 +155,12 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
                     <UserDropdownItem {...item} />
                 </motion.div>
             ))}
+            <OnRampDialog
+                open={openOnRampDialog}
+                setOpen={setOpenOnRampDialog}
+                balance={tokenBalanceData?.value}
+                decimalPlaces={decimals}
+            />
         </motion.div>
     )
 }
