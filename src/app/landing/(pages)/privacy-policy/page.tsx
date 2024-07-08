@@ -104,7 +104,10 @@ const Privacy = () => {
                         <li>
                             <p>
                                 <strong>Website</strong> refers to Pool Party, accessible from{' '}
-                                <a href='https://poolparty.cc' rel='external nofollow noopener' target='_blank'>
+                                <a
+                                    href='https://poolparty.cc'
+                                    rel='external noopener noreferrer nofollow'
+                                    target='_blank'>
                                     https://poolparty.cc
                                 </a>
                             </p>
@@ -183,7 +186,7 @@ const Privacy = () => {
                         <a
                             href='https://www.termsfeed.com/blog/cookies/#What_Are_Cookies'
                             target='_blank'
-                            rel='noreferrer noopener'>
+                            rel='external noopener noreferrer nofollow'>
                             TermsFeed website
                         </a>{' '}
                         article.
