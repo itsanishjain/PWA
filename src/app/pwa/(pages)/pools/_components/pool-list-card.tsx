@@ -4,9 +4,9 @@ import { getPoolStatus } from '@/app/pwa/_lib/utils/get-pool.status'
 import { getStatusString } from '@/app/pwa/_lib/utils/get-relative-date'
 import { cn } from '@/lib/utils/tailwind'
 import { motion } from 'framer-motion'
-import { Link } from 'lucide-react'
 import type { Route } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface PoolItem {
     id: string

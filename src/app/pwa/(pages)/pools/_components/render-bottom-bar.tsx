@@ -3,7 +3,6 @@
 import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
 import route from '@/lib/utils/routes'
-
 import Link from 'next/link'
 import { useEffect } from 'react'
 
