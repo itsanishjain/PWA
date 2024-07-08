@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
+// import { devtools, persist } from 'zustand/middleware'
 
 export interface ProfileDraft {
     avatar: string | File | undefined
@@ -26,24 +26,25 @@ const initialProfileDraft: ProfileDraft = {
 
 export const useCreateProfileStore = (userId: string) =>
     create<CreateProfileStoreState & CreateProfileStoreActions>()(
-        devtools(
-            persist(
-                set => ({
-                    profileDraft: initialProfileDraft,
-                    error: null,
-                    isHydrated: false,
-                    setProfileDraft: (field, value) =>
-                        set(state => ({
-                            profileDraft: {
-                                ...state.profileDraft,
-                                [field]: value,
-                            },
-                        })),
-                    setError: (error: Error | null) => set({ error }),
-                    resetProfileDraft: () => set(() => ({ profileDraft: initialProfileDraft })),
-                    setHydrated: (state: boolean) => set({ isHydrated: state }),
-                }),
-                { name: `create-profile-store-${userId}` },
-            ),
-        ),
+        // TODO: fix circular dependency issues
+        // devtools(
+        // persist(
+        set => ({
+            profileDraft: initialProfileDraft,
+            error: null,
+            isHydrated: false,
+            setProfileDraft: (field, value) =>
+                set(state => ({
+                    profileDraft: {
+                        ...state.profileDraft,
+                        [field]: value,
+                    },
+                })),
+            setError: (error: Error | null) => set({ error }),
+            resetProfileDraft: () => set(() => ({ profileDraft: initialProfileDraft })),
+            setHydrated: (state: boolean) => set({ isHydrated: state }),
+        }),
+        // { name: `create-profile-store-${userId}` },
+        // ),
+        // ),
     )
