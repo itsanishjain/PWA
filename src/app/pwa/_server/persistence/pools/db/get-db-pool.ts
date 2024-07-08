@@ -6,6 +6,7 @@ export interface PoolItem {
     image: string
     softCap: number
     terms: string
+    hostName: string
 }
 
 export async function getDbPool(poolId: string): Promise<PoolItem | null> {
@@ -22,10 +23,47 @@ export async function getDbPool(poolId: string): Promise<PoolItem | null> {
         throw new Error(`Error fetching pool from database: ${error.message}`)
     }
 
+    const hostName = await getDbPoolHostName(poolId)
+
     return {
         description: poolData.description,
         image: poolData.bannerImage,
         softCap: poolData.softCap,
         terms: poolData.termsURL,
+        hostName,
     }
+}
+
+export async function getDbPoolHostName(poolId: string): Promise<string> {
+    const { data: hostData, error } = await db
+        .from('pool_participants')
+        .select(
+            `
+            users (
+                displayName,
+                walletAddress
+            )
+        `,
+        )
+        .eq('pool_id', poolId)
+        .eq('poolRole', 'mainHost')
+        .single()
+
+    if (error) {
+        if (error.code === 'PGRST116') {
+            throw new Error(`Host for pool ${poolId} not found in database`)
+        }
+        throw new Error(`Error fetching pool host from database: ${error.message}`)
+    }
+
+    const { displayName, walletAddress } = hostData.users || {
+        displayName: null,
+        walletAddress: null,
+    }
+
+    if (!walletAddress) {
+        throw new Error(`Host for pool ${poolId} not found in database`)
+    }
+
+    return displayName || walletAddress
 }

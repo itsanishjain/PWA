@@ -12,7 +12,7 @@ interface PoolItem {
 export async function getDbPools(): Promise<PoolItem[]> {
     const { data: poolsData, error } = await db
         .from('pools')
-        .select('contract_id, description, status, bannerImage')
+        .select('name, contract_id, description, status, bannerImage')
         .order('startDate', { ascending: true })
 
     if (error) {
@@ -22,7 +22,7 @@ export async function getDbPools(): Promise<PoolItem[]> {
     return poolsData
         .map(pool => {
             if (!pool.contract_id) {
-                console.error('Pool contract_id is missing')
+                console.error('Pool missing contract_id:', pool.name)
                 return null
             }
 
