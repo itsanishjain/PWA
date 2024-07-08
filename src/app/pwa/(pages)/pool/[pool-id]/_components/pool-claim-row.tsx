@@ -1,19 +1,20 @@
 // src/components/pool-detail/pool-detail.tsx
 'use client'
 
-import { useWinnerDetail } from '@/app/pwa/_client/hooks/use-winner-detail'
 import { Button } from '@/app/pwa/_components/ui/button'
-import { poolAbi, poolAddress } from '@/types/contracts'
-import { useWallets } from '@privy-io/react-auth'
-import { useEffect } from 'react'
-import { toast } from 'sonner'
-import type { Address } from 'viem'
-import { getAbiItem } from 'viem'
-import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
-import CircleCheckIcon from '../../../profile/claim-winning/_components/circle-check.icon'
-// import { useAdmin } from '@/app/pwa/_client/hooks/use-admin'
-import { useSponsoredTxn } from '@/app/pwa/_client/hooks/use-sponsored-txn'
-import { wagmi } from '@/app/pwa/_client/providers/configs'
+import { CircleCheckIcon } from 'lucide-react'
+
+// import { useWinnerDetail } from '@/app/pwa/_client/hooks/use-winner-detail'
+// import { poolAbi, poolAddress } from '@/types/contracts'
+// import { useWallets } from '@privy-io/react-auth'
+// import { useEffect } from 'react'
+// import { toast } from 'sonner'
+// import type { Address } from 'viem'
+// import { getAbiItem } from 'viem'
+// import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+// // import { useAdmin } from '@/app/pwa/_client/hooks/use-admin'
+// import { useSponsoredTxn } from '@/app/pwa/_client/hooks/use-sponsored-txn'
+// import { wagmi } from '@/app/pwa/_client/providers/configs'
 
 // const avatarUrls = new Array(4).fill(frog.src)
 
@@ -21,66 +22,67 @@ interface PoolDetailsProps {
     poolId: string
 }
 const PoolClaimRow = (props: PoolDetailsProps) => {
-    const { wallets } = useWallets()
-    const { winnerDetail /* isLoading, */ /* error */ } = useWinnerDetail(BigInt(props.poolId), wallets[0]?.address)
-    // const queryClient = useQueryClient()
-    // const { adminData } = useAdmin()
-    // const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
-    const { data: hash, /*isPending,*/ writeContract /* writeContractAsync*/ } = useWriteContract()
-    const { sponsoredTxn } = useSponsoredTxn()
-    const {
-        isLoading: isConfirming,
-        isSuccess: isConfirmed,
-        isError,
-        // error: registerError,
-        // data: txData,
-    } = useWaitForTransactionReceipt({
-        hash,
-    })
+    // const { wallets } = useWallets()
+    // const { winnerDetail /* isLoading, */ /* error */ } = useWinnerDetail(BigInt(props.poolId), wallets[0]?.address)
+    // // const queryClient = useQueryClient()
+    // // const { adminData } = useAdmin()
+    // // const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
+    // const { data: hash, /*isPending,*/ writeContract /* writeContractAsync*/ } = useWriteContract()
+    // const { sponsoredTxn } = useSponsoredTxn()
+    // const {
+    //     isLoading: isConfirming,
+    //     isSuccess: isConfirmed,
+    //     isError,
+    //     // error: registerError,
+    //     // data: txData,
+    // } = useWaitForTransactionReceipt({
+    //     hash,
+    // })
 
-    useEffect(() => {
-        if (isConfirmed) {
-            toast.message('Transaction Success', { description: 'Claimed winnings successfully' })
-        }
-    }, [isConfirmed, isConfirming, isError])
+    // useEffect(() => {
+    //     if (isConfirmed) {
+    //         toast.message('Transaction Success', { description: 'Claimed winnings successfully' })
+    //     }
+    // }, [isConfirmed, isConfirming, isError])
 
-    const claimAmount = BigInt(winnerDetail?.winnerDetailFromSC?.amountWon ?? 0)
+    // const claimAmount = BigInt(winnerDetail?.winnerDetailFromSC?.amountWon ?? 0)
     // const claimed = winnerDetail?.winnerDetailFromSC?.claimed ?? false
 
     const onClaimButtonClicked = () => {
         console.log('onClaimButtonClicked')
-        try {
-            const ClaimWinningFunction = getAbiItem({
-                abi: poolAbi,
-                name: 'claimWinning',
-            })
-            if (
-                wallets[0].walletClientType === 'coinbase_smart_wallet' ||
-                wallets[0].walletClientType === 'coinbase_wallet'
-            ) {
-                sponsoredTxn([
-                    {
-                        address: poolAddress[wagmi.config.state.chainId as ChainId],
-                        abi: [ClaimWinningFunction],
-                        functionName: 'claimWinning',
-                        args: [BigInt(props.poolId), wallets[0]?.address as Address],
-                    },
-                ])
-            } else {
-                writeContract({
-                    address: poolAddress[wagmi.config.state.chainId as ChainId],
-                    abi: [ClaimWinningFunction],
-                    functionName: 'claimWinning',
-                    args: [BigInt(props.poolId), wallets[0]?.address as Address],
-                })
-            }
-        } catch (error) {
-            console.log('claimWinning Error', error)
-        }
+        // try {
+        //     const ClaimWinningFunction = getAbiItem({
+        //         abi: poolAbi,
+        //         name: 'claimWinning',
+        //     })
+        //     if (
+        //         wallets[0].walletClientType === 'coinbase_smart_wallet' ||
+        //         wallets[0].walletClientType === 'coinbase_wallet'
+        //     ) {
+        //         sponsoredTxn([
+        //             {
+        //                 address: poolAddress[wagmi.config.state.chainId as ChainId],
+        //                 abi: [ClaimWinningFunction],
+        //                 functionName: 'claimWinning',
+        //                 args: [BigInt(props.poolId), wallets[0]?.address as Address],
+        //             },
+        //         ])
+        //     } else {
+        //         writeContract({
+        //             address: poolAddress[wagmi.config.state.chainId as ChainId],
+        //             abi: [ClaimWinningFunction],
+        //             functionName: 'claimWinning',
+        //             args: [BigInt(props.poolId), wallets[0]?.address as Address],
+        //         })
+        //     }
+        // } catch (error) {
+        //     console.log('claimWinning Error', error)
+        // }
     }
-    if (claimAmount === BigInt(0)) {
-        return
-    }
+
+    // if (claimAmount === BigInt(0)) {
+    //     return
+    // }
 
     return (
         <div className='mb-4 flex flex-col'>
@@ -89,7 +91,7 @@ const PoolClaimRow = (props: PoolDetailsProps) => {
                     <CircleCheckIcon />
                     <span className='font-semibold'>Winner</span>
                 </div>
-                <span>${winnerDetail?.winnerDetailFromSC?.amountWon?.toString()}</span>
+                {/* <span>${winnerDetail?.winnerDetailFromSC?.amountWon?.toString()}</span> */}
             </div>
             <Button
                 onClick={onClaimButtonClicked}
