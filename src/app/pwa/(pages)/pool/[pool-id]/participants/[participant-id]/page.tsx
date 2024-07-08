@@ -1,11 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-
-import { usePoolDetails } from '@/app/pwa/_client/hooks/use-pool-details'
 import { useSponsoredTxn } from '@/app/pwa/_client/hooks/use-sponsored-txn'
-import { useTokenDecimals } from '@/app/pwa/_client/hooks/use-token-decimals'
-import { useUserDetailsDB } from '@/app/pwa/_client/hooks/use-user-details'
 import { wagmi } from '@/app/pwa/_client/providers/configs'
 import { Button } from '@/app/pwa/_components/ui/button'
 import { Input } from '@/app/pwa/_components/ui/input'
@@ -19,6 +15,9 @@ import { toast } from 'sonner'
 import type { Address } from 'viem'
 import { getAbiItem } from 'viem'
 import { useWriteContract } from 'wagmi'
+import { useTokenDecimals } from '@/app/pwa/(pages)/profile/send/_components/use-token-decimals'
+import { usePoolDetails } from '../../ticket/_components/use-pool-details'
+import { useUserDetailsDB } from '../_components/use-user-details'
 
 const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participant-address': Address } }) => {
     const { userDetailsDB } = useUserDetailsDB(params['participant-address'])
@@ -79,8 +78,8 @@ const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participa
         }
     }, [isPending, hash, isSuccess])
 
-    const avatar = userDetailsDB?.usersDetail[0].avatar ?? frog.src
-    const displayName = userDetailsDB?.usersDetail[0].displayName ?? formatAddress(params['participant-address'])
+    const avatar = userDetailsDB?.userDetail?.avatar ?? frog.src
+    const displayName = userDetailsDB?.userDetail?.displayName ?? formatAddress(params['participant-address'])
 
     return (
         <div className='mx-auto max-w-md overflow-hidden rounded-lg bg-white'>
