@@ -33,7 +33,8 @@ export const useSmartAccount = () => {
             }
         } else {
             // TODO: it can be the user just connected with EOA, handle that.
-            handleError('Initialization error', new Error('Embedded wallet not found'))
+            console.log('Embedded wallet not found, user probably connected with EOA')
+            // handleError('Initialization error', new Error('Embedded wallet not found'))
         }
     }, [ready, wallets, handleError])
 
