@@ -5,15 +5,17 @@ import PageTransitionEffect from './page-transition'
 const mockUseFrozenRouter = vi.fn()
 const mockGetTransitionProps = vi.fn()
 
-export const setupTest = async (initialRoute: string, transitionProps: Record<string, string | number>) => {
+export const setupTest = (_initialRoute: string, _transitionProps: Record<string, string | number>) => {
     // Configura los mocks antes de importar el componente que los usa
     vi.mock('./frozen-router', async importActual => {
         const actual = await importActual()
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
         return { ...(actual as any), useFrozenRouter: mockUseFrozenRouter }
     })
 
     vi.mock('./get-transition-props', async importActual => {
         const actual = await importActual()
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
         return { ...(actual as any), getTransitionProps: mockGetTransitionProps }
     })
 
@@ -27,7 +29,7 @@ export const renderWithTransition = async (initialContent: string, newContent: s
         </PageTransitionEffect>,
     )
 
-    await act(async () => {
+    act(() => {
         rerender(
             <PageTransitionEffect>
                 <div data-testid='content'>{newContent}</div>

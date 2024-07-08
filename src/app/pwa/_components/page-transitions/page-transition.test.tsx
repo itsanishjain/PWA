@@ -8,11 +8,11 @@ describe('PageTransitionEffect', () => {
         vi.clearAllMocks()
     })
 
-    it('renders children', async () => {
+    it('renders children', () => {
         // Arrange
         const initialRoute = '/pools'
         const transitionProps = { x: 0, y: 0 }
-        await setupTest(initialRoute, transitionProps)
+        setupTest(initialRoute, transitionProps)
 
         render(
             <PageTransitionEffect>
@@ -27,7 +27,8 @@ describe('PageTransitionEffect', () => {
         const initialRoute = '/pools'
         const newRoute = '/my-pools'
         const transitionProps = { x: '-100%', y: 0 }
-        const { getTransitionProps, useFrozenRouter } = await setupTest(initialRoute, transitionProps)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { getTransitionProps, useFrozenRouter } = setupTest(initialRoute, transitionProps)
 
         // Act
         const container = await renderWithTransition(`${initialRoute} Content`, `${newRoute} Content`)
