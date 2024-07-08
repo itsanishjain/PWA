@@ -22,7 +22,7 @@ export default function Providers({ children }: React.PropsWithChildren) {
                 <HydrationBoundary state={dehydrate(queryClient.client)}>
                     <WagmiProvider {...wagmi}>
                         <SettingsStoreProvider>{children}</SettingsStoreProvider>
-                        <Toaster position='top-center' />
+                        <Toaster position='top-center' visibleToasts={1} />
                         {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
                     </WagmiProvider>
                 </HydrationBoundary>
