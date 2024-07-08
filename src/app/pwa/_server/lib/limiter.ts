@@ -17,7 +17,7 @@ const trackers: Record<
     }
 > = {}
 
-export async function rateLimitByKey(key: string, limit: number = 1, expire: number = 10000) {
+export function rateLimitByKey(key: string, limit: number = 1, expire: number = 10_000) {
     if (!key) throw new Error('Key is required')
     const tracker = trackers[key] || { count: 0, expireAt: 0 }
 
