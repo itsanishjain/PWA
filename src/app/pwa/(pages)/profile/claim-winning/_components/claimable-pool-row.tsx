@@ -4,6 +4,7 @@ interface ClaimablePoolRowProps {
     poolId: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ClaimablePoolRow: React.FC<ClaimablePoolRowProps> = ({ poolId }) => {
     // const { wallets } = useWallets()
 

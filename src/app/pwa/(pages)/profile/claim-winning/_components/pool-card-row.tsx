@@ -13,6 +13,7 @@ interface PoolCardRowProps {
     poolId: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PoolCardRow = ({ poolId }: PoolCardRowProps) => {
     // const { wallets } = useWallets()
     // const {
