@@ -1,12 +1,12 @@
 // src/components/pool-detail/pool-detail.tsx
 'use client'
 
-import { usePoolDetails } from '@/app/pwa/_client/hooks/use-pool-details'
 import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { useWallets } from '@privy-io/react-auth'
 import type { ChangeEvent } from 'react'
 import { useEffect, useState } from 'react'
 import ParticipantRow from './participantRow'
+import { usePoolDetails } from '../../ticket/_components/use-pool-details'
 
 interface PoolParticipantsProps {
     poolId: string
