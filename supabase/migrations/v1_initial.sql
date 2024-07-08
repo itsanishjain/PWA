@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS "pool_participants" (
     "user_id" int NOT NULL REFERENCES "users" ("id"),
 
     -- Reference to the internal_id of the pool
-    "pool_id" int NOT NULL REFERENCES "pools" ("internal_id"),
+    "pool_id" int NOT NULL REFERENCES "pools" ("contract_id"),
 
     -- Role of the pool participant
     "poolRole" "poolRoles" NOT NULL,
