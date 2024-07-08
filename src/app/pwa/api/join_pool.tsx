@@ -2,10 +2,12 @@ import 'server-only'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type ResponseData = {
     message: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface RequestData {
     name: string
     email: string

@@ -2,10 +2,11 @@ import 'server-only'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const prepareBase64DataUrl = (base64: string) =>
     base64.replace('data:image/jpeg;', 'data:image/jpeg;charset=utf-8;').replace(/^.+,/, '')
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(_req: NextApiRequest, res: NextApiResponse) {
     // Parse the request body
     // const requestData = await req.body
 
