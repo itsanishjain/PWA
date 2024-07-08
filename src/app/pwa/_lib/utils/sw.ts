@@ -51,12 +51,12 @@ if (isAppSubdomain) {
     serwist.addEventListeners()
 } else {
     // if the app is not running on the app subdomain, disable the service worker
-    self.addEventListener('install', () => self.skipWaiting())
+    self.addEventListener('install', () => void self.skipWaiting())
 
     self.addEventListener('activate', event => {
         event.waitUntil(self.clients.claim())
         // unregister the service worker
-        self.registration.unregister().then(() => {
+        void self.registration.unregister().then(() => {
             console.log('Service worker unregistered for this domain')
         })
     })
