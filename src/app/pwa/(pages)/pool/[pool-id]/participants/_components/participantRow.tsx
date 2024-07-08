@@ -1,4 +1,3 @@
-import { useUserDetailsDB } from '@/app/pwa/_client/hooks/use-user-details'
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/pwa/_components/ui/avatar'
 import { formatAddress } from '@/app/pwa/_lib/utils/addresses'
 import route from '@/lib/utils/routes'
@@ -6,6 +5,7 @@ import { cn } from '@/lib/utils/tailwind'
 import frog from '@/public/app/images/frog.png'
 import Link from 'next/link'
 import type { Address } from 'viem'
+import { useUserDetailsDB } from './use-user-details'
 
 interface ParticipantRowProps {
     address: Address
@@ -14,8 +14,8 @@ interface ParticipantRowProps {
 
 const ParticipantRow: React.FC<ParticipantRowProps> = (props: ParticipantRowProps) => {
     const { userDetailsDB } = useUserDetailsDB(props.address)
-    const avatar = userDetailsDB?.usersDetail[0].avatar || frog.src
-    const displayNameOrAddress = userDetailsDB?.usersDetail[0].displayName || formatAddress(props.address)
+    const avatar = userDetailsDB?.userDetail?.avatar || frog.src
+    const displayNameOrAddress = userDetailsDB?.userDetail?.walletAddress || formatAddress(props.address)
 
     return (
         <Link
