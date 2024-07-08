@@ -24,7 +24,8 @@ export const getPoolDetailsAction = unauthenticatedAction
         const { session, needsRefresh } = await validateRequest()
 
         if (needsRefresh) {
-            return { needsRefresh: true }
+            // since it is an anonymous user, there is no need to refresh the session here
+            // return { needsRefresh: true }
         }
 
         if (!session || !session.address) {
