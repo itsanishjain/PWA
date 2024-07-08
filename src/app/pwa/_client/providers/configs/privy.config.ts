@@ -1,5 +1,6 @@
 'use client'
 
+import logo from '@/public/app/images/pool-logo-horizontal.png'
 import type { PrivyProviderProps } from '@privy-io/react-auth'
 import { baseSepolia } from 'viem/chains'
 
@@ -13,7 +14,7 @@ export default {
         appearance: {
             theme: 'light',
             accentColor: '#1364DA',
-            logo: '/images/pool-logo-4x.png',
+            logo: logo.src,
             landingHeader: 'Log in or sign up to continue',
             loginMessage: 'Pooling funds made simple.',
             showWalletLoginFirst: false,
