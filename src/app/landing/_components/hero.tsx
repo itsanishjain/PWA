@@ -2,6 +2,7 @@ import getAppUrl from '@/lib/utils/get-app-url'
 import route from '@/lib/utils/routes'
 import poolEvent from '@/public/landing/images/pool-event.png'
 import poolHeroBg from '@/public/landing/images/pool-hero-bg.png'
+import { Route } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -42,7 +43,7 @@ export default function Hero() {
                                 Get Started
                             </Link>
                             <Link
-                                href={route['/terms']}
+                                href={'/terms' as Route}
                                 className='rounded-full py-3 text-center font-semibold transition duration-300 hover:text-opacity-90 md:px-10'>
                                 <span className='hidden sm:inline'>Terms and conditions</span>
                                 <span className='sm:hidden'>Terms</span>

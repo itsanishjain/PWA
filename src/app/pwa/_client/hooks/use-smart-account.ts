@@ -9,6 +9,7 @@ import { useCallback, useState } from 'react'
 import { initializeSmartAccount } from '../blockchain/initialize-smart-account'
 import type { PrivyErrorCode } from './use-error-handling'
 import { useErrorHandling } from './use-error-handling'
+import { Route } from 'next'
 
 export const useSmartAccount = () => {
     const router = useRouter()
@@ -56,7 +57,7 @@ export const useSmartAccount = () => {
                 // New user: initialize smart account, create in DB, redirect to profile/new
                 await initializeAccount()
                 await createUserAction()
-                router.push(route['/profile/new'])
+                router.push('/profile/new' as Route)
                 // } else {
                 // Existing user: check DB and redirect accordingly
                 // const existingUser = await getUserUseCase(user.id)

@@ -84,8 +84,8 @@ export default function Footer() {
                 <div className='footerDivider w-full' />
                 <div className='flex flex-col items-center space-y-2 text-[10px] sm:flex-row sm:space-x-4 sm:space-y-0 sm:text-xs md:space-x-12'>
                     <span>{new Date().getFullYear()} MIT Licensed - All rights reserved - Pool</span>
-                    <Link href={route['/privacy-policy']}>Privacy</Link>
-                    <Link href={route['/terms']}>Terms</Link>
+                    <Link href={'/privacy-policy' as Route}>Privacy</Link>
+                    <Link href={'/terms' as Route}>Terms</Link>
                 </div>
             </footer>
         </section>

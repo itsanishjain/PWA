@@ -37,20 +37,18 @@ const isInApp = () => {
     return typeof window !== 'undefined' && window.location.hostname.includes('app.')
 }
 
+const getLandingUrl = (path: string): string => {
+    return `https://www.poolparty.cc${path}`
+}
+
 // Function to get the correct route
 const getRoute = (path: AllRoutes): Route => {
-    if (isInApp()) {
-        // If we're in the app, use the app URL
-        // if (appRouteSchema.safeParse(path).success) {
-        return getAppUrl(`/${path}`)
-        // }
-        // throw new Error(`Invalid app route: ${path}`)
+    if (appRouteSchema.safeParse(path).success) {
+        return getAppUrl(path) as Route
+    } else if (landingRouteSchema.safeParse(path).success) {
+        return getLandingUrl(path) as Route
     } else {
-        // If we're on the landing page, use the relative path
-        // if (landingRouteSchema.safeParse(path).success) {
-        return `/${path}` as Route
-        // }
-        // throw new Error(`Invalid landing route: ${path}`)
+        throw new Error(`Invalid route: ${path}`)
     }
 }
 

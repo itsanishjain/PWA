@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/pwa/_components/ui/avatar'
 import route from '@/lib/utils/routes'
+import { Route } from 'next'
 import Link from 'next/link'
 
 interface UserAvatarProps {
@@ -9,7 +10,7 @@ interface UserAvatarProps {
 export default function UserAvatar({ userAvatar }: UserAvatarProps) {
     return (
         <Avatar className='size-10 cursor-pointer' aria-label='Go to Profile' asChild>
-            <Link href={route['/profile']}>
+            <Link href={'/profile' as Route}>
                 {userAvatar && <AvatarImage alt='User Avatar' src={userAvatar} />}
                 <AvatarFallback className='bg-[#d9d9d9]' />
             </Link>
