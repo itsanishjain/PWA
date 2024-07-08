@@ -68,7 +68,7 @@ export default function Footer() {
                         return (
                             <li className='relative size-5 sm:size-6' key={index}>
                                 <Link href={linkHref} className='size-full' passHref legacyBehavior>
-                                    <a rel='external nofollow noopener' target='_blank'>
+                                    <a rel='external noopener noreferrer nofollow' target='_blank'>
                                         <Image
                                             src={social.image}
                                             fill={true}
