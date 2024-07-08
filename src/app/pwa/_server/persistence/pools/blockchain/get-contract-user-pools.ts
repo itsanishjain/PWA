@@ -1,10 +1,11 @@
 // src/persistence/pools/blockchain/get-user-pools.ts
 import 'server-only'
 
-import { createConfig, getPublicClient, multicall } from '@wagmi/core'
 import { poolAbi, poolAddress } from '@/types/contracts'
-import { Address, getAbiItem, http } from 'viem'
+import { createConfig, getPublicClient, multicall } from '@wagmi/core'
 import { baseSepolia } from '@wagmi/core/chains'
+import type { Address } from 'viem'
+import { getAbiItem, http } from 'viem'
 
 const config = createConfig({
     chains: [baseSepolia],
