@@ -39,16 +39,13 @@ const isInApp = () => {
 
 // Function to get the correct route
 const getRoute = (path: AllRoutes): Route => {
-    console.log('Path:', path)
     if (isInApp()) {
-        console.log('In app')
         // If we're in the app, use the app URL
         // if (appRouteSchema.safeParse(path).success) {
         return getAppUrl(`/${path}`)
         // }
         // throw new Error(`Invalid app route: ${path}`)
     } else {
-        console.log('On landing page')
         // If we're on the landing page, use the relative path
         // if (landingRouteSchema.safeParse(path).success) {
         return `/${path}` as Route

@@ -1,4 +1,4 @@
-import { poolAbi, poolAddress } from './contracts'
+import type { poolAddress } from './contracts'
 
 declare global {
     type LayoutWithSlots<T extends string> = {
