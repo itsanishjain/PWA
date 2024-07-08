@@ -1,11 +1,11 @@
-import type { Address } from 'viem'
+import type { Abi, Address } from 'viem'
 import { useAccount, useWriteContract } from 'wagmi'
 import { useCallsStatus, useCapabilities, useWriteContracts } from 'wagmi/experimental'
 
 interface ContractCall {
     address: Address
     // eslint-disable-next-line
-    abi: any
+    abi: Abi
     functionName: string
     // eslint-disable-next-line
     args: any[]
