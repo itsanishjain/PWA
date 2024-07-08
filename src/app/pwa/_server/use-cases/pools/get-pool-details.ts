@@ -6,7 +6,6 @@ import type { ParticipantDetail } from '../../persistence/pools/blockchain/get-c
 import getContractParticipantDetail from '../../persistence/pools/blockchain/get-contract-participant-detail'
 import type { ContractPoolData } from '../../persistence/pools/blockchain/get-contract-pool'
 import { getContractPool } from '../../persistence/pools/blockchain/get-contract-pool'
-import type { WinnerDetail } from '../../persistence/pools/blockchain/get-contract-winner-detail'
 import getContractWinnerDetail from '../../persistence/pools/blockchain/get-contract-winner-detail'
 import type { ParticipantsInfo } from '../../persistence/pools/db/get-db-participants-info'
 import getDbParticipantsInfo from '../../persistence/pools/db/get-db-participants-info'
@@ -15,18 +14,25 @@ import { getDbPool } from '../../persistence/pools/db/get-db-pool'
 
 function processPoolDetails(
     contractPool: ContractPoolData,
-    poolInfo: PoolItem,
+    poolInfo: PoolItem | null,
     participantsInfo: ParticipantsInfo,
-    winnerDetail: WinnerDetail | null,
+    claimableAmount: bigint,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     userInfo: ParticipantDetail | null,
 ): PoolDetailsDTO {
+    if (!poolInfo) {
+        throw new Error(`Pool with ID ${contractPool.id} not found in database`)
+    }
+    // console.info('[get-pool-details] terms:', poolInfo.terms)
     return {
-        claimableWinnings: Number(winnerDetail?.amountWon) ?? undefined,
+        hostName: poolInfo.hostName,
+        contractId: BigInt(contractPool.id),
+        claimableAmount: Number(claimableAmount),
         participants: participantsInfo.participants.map((user: { name: string; avatarUrl: string }) => ({
             name: user.name,
             avatarUrl: user.avatarUrl,
         })),
-        userDeposit: Number(userInfo?.deposit) ?? 0,
+        // userDeposit: Number(userInfo?.deposit) ?? 0,
         goal: poolInfo.softCap * contractPool.price,
         progress: Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
         name: contractPool.name,
@@ -41,8 +47,7 @@ function processPoolDetails(
         winnerTitle: contractPool.status === POOLSTATUS.ENDED ? 'Winner' : undefined,
         softCap: poolInfo.softCap,
         description: poolInfo.description,
-        termsUrl: poolInfo.terms,
-        mainHost: contractPool.mainHost,
+        termsUrl: poolInfo.terms || undefined,
     }
 }
 
@@ -58,19 +63,25 @@ export async function getPoolDetailsUseCase(poolId: string, userAddress?: Addres
     ])
 
     if (!poolInfo) {
-        throw new Error(`Pool with ID ${poolId} not found in database`)
+        console.log('Pool not found in database with id:', poolId)
+        // throw new Error(`Pool with ID ${poolId} not found in database`)
     }
 
-    let winnerDetail: WinnerDetail | null = null
+    let claimableAmount: bigint = BigInt(0)
     let userDeposit: ParticipantDetail | null = null
 
     if (userAddress && contractPool.participantAddresses.includes(userAddress)) {
         userDeposit = await getContractParticipantDetail(poolId, userAddress)
 
         if (contractPool.status === POOLSTATUS.ENDED) {
-            winnerDetail = await getContractWinnerDetail(poolId, userAddress)
+            const winnerDetail = (await getContractWinnerDetail(poolId, userAddress)) || {
+                amountWon: BigInt(0),
+                amountClaimed: BigInt(0),
+                forfeited: false,
+            }
+            claimableAmount = winnerDetail?.forfeited ? 0n : winnerDetail?.amountWon - winnerDetail?.amountClaimed
         }
     }
 
-    return processPoolDetails(contractPool, poolInfo, usersInfo, winnerDetail, userDeposit)
+    return processPoolDetails(contractPool, poolInfo, usersInfo, claimableAmount, userDeposit)
 }
