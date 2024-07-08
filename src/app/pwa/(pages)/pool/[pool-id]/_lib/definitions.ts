@@ -14,29 +14,31 @@ const PoolDetailsDTOSchema = z.object({
     name: z.string(),
     startDate: z.string().datetime(),
     endDate: z.string().datetime(),
-    claimableWinnings: z.number().nonnegative().optional(),
+    claimableAmount: z.number().nonnegative().default(0),
     numParticipants: z.number().int().nonnegative(),
     price: z.number().positive().multipleOf(0.01),
     tokenSymbol: z.string(),
     tokenDecimals: z.number().int().nonnegative(),
     status: z.nativeEnum(POOLSTATUS),
+    contractId: z.bigint(),
 
     // Database data
     imageUrl: z.string().url(),
     winnerTitle: z.string().optional(),
     softCap: z.number().int().positive(),
     description: z.string(),
-    termsUrl: z.string().url(),
+    termsUrl: z.string().optional().or(z.literal('')),
+    hostName: z.string(),
+    //TODO: enforce string().url() for terms
 
     // Mixed data
-    mainHost: z.string(),
     participants: z.array(
         z.object({
             name: z.string(),
             avatarUrl: z.string().url(),
         }),
     ),
-    userDeposit: z.number().nonnegative(),
+    // userDeposit: z.number().nonnegative(),
 
     // Calculated fields
     goal: z.number().positive(),
@@ -56,5 +58,5 @@ function validatePartialPoolDetailsDTO(data: unknown): Partial<PoolDetailsDTO> {
     return PoolDetailsDTOSchema.partial().parse(data)
 }
 
-export { PoolDetailsDTOSchema, validatePoolDetailsDTO, validatePartialPoolDetailsDTO }
+export { PoolDetailsDTOSchema, validatePartialPoolDetailsDTO, validatePoolDetailsDTO }
 export type { PoolDetailsDTO }
