@@ -1,10 +1,10 @@
-import SponsoredTxn from '../../_components/sponsored-txn/sponsored-txn-CoinbaseSmartWallet'
-import Balance from './_components/balance'
-import ClaimablePrizes from './_components/claimable'
-import OnrampStripe from './_components/onramps/stripe'
-import UserInfo from './_components/user-info'
-
+import MainContentWrapper from '../../_components/main-wrapper'
+import Title from '../../_components/title'
+import Balance from '../pools/_components/balance'
+import { OnrampWithStripe } from './_components/onramps/onramp-stripe'
+import UserInfo from './_components/user-info/user-info'
 import { getAddressBalanceAction, getUserInfoAction } from './actions'
+import { ClaimablePrizes } from './claim-winning/_components'
 
 export default async function ProfilePage() {
     // TODO: Merge data from server (less requests)
@@ -18,10 +18,10 @@ export default async function ProfilePage() {
 
     return (
         <div className='space-y-[0.94rem] bg-white p-2'>
+            <Title title='User Profile' />
             <UserInfo initialUserInfo={userInfoResult} />
             <Balance initialBalance={balanceResult} />
-            <SponsoredTxn />
-            <OnrampStripe />
+            <OnrampWithStripe />
             <ClaimablePrizes />
         </div>
     )
@@ -40,7 +40,7 @@ export default async function ProfilePage() {
 // import Link from 'next/link'
 // import { useRouter } from 'next/navigation'
 // import { useEffect, useState } from 'react'
-// import OnRampButton from '@/components/onRampButton'
+// import OnRampCoinbaseButton from '@/components/onRampButton'
 // import { useCookie } from '@/hooks/use-cookie'
 // import { getAllIndicesMatching, getValuesFromIndices } from '@/lib/utils/database'
 // import { toast } from 'sonner'
@@ -148,7 +148,7 @@ export default async function ProfilePage() {
 //                             </Link>
 //                         </div>
 //                         <div className='flex justify-center'>
-//                             <OnRampButton />
+//                             <OnRampCoinbaseButton />
 //                         </div>
 //                         <div className={`cardBackground flex w-full flex-col rounded-3xl p-6 md:space-y-10 md:p-10`}>
 //                             <h2 className='font-medium'>Claimable</h2>
