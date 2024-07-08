@@ -2,10 +2,10 @@
 // import { useEffect, useMemo, useState } from 'react'
 'use client'
 
-import { usePoolDetails } from '@/app/pwa/_client/hooks/use-pool-details'
 import { useWallets } from '@privy-io/react-auth'
 import QRCode from 'react-qr-code'
 import type { Address } from 'viem'
+import { usePoolDetails } from './_components/use-pool-details'
 
 // import { usePrivy, useWallets } from '@privy-io/react-auth'
 // import { useQuery } from '@tanstack/react-query'
