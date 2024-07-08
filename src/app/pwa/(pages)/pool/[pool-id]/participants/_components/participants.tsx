@@ -1,29 +1,34 @@
 // src/components/pool-detail/pool-detail.tsx
-// 'use client'
+'use client'
 
-// import { usePoolDetails } from '@/lib/hooks/use-pool-details'
-// import { useBottomBarStore } from '@/providers/bottom-bar.provider'
-// import { useWallets } from '@privy-io/react-auth'
-// import { ChangeEvent, useEffect, useState } from 'react'
-// import ParticipantRow from '../common/other/participantRow'
+import { usePoolDetails } from '@/app/pwa/_client/hooks/use-pool-details'
+import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
+import { useWallets } from '@privy-io/react-auth'
+import type { ChangeEvent } from 'react'
+import { useEffect, useState } from 'react'
+import ParticipantRow from './participantRow'
 
 interface PoolParticipantsProps {
     poolId: string
 }
-const Participants = (_props: PoolParticipantsProps) => {
-    // const { poolDetails, isLoading, error } = usePoolDetails(BigInt(props.poolId))
-    // const { wallets } = useWallets()
+const Participants = (props: PoolParticipantsProps) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { poolDetails, isLoading, error } = usePoolDetails(BigInt(props.poolId))
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { wallets } = useWallets()
 
-    // const participants = poolDetails?.poolDetailFromSC?.[5]
-    // const { showBar, hideBar, setContent } = useBottomBarStore(state => state)
-    // const [query, setQuery] = useState('')
-    // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    //     console.log('Query', e.target.value)
-    //     setQuery(e.target.value)
-    // }
-    // useEffect(() => {
-    //     hideBar()
-    // }, [hideBar])
+    const participants = poolDetails?.poolDetailFromSC?.[5]
+    const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [query, setQuery] = useState('')
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        console.log('Query', e.target.value)
+        setQuery(e.target.value)
+    }
+    useEffect(() => {
+        setBottomBarContent(undefined)
+    }, [setBottomBarContent])
 
     return (
         <div className='mx-auto max-w-md overflow-hidden rounded-lg bg-white'>
@@ -60,10 +65,9 @@ const Participants = (_props: PoolParticipantsProps) => {
                         className='mb-2 h-10 rounded-full px-10'
                     />
                 </div> */}
-                {/* {participants?.map((participant, index) => {
+                {participants?.map(participant => {
                     return <ParticipantRow poolId={props.poolId} key={participant} address={participant} />
-                })} */}
-                Participants
+                })}
             </div>
         </div>
     )

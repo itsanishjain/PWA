@@ -1,28 +1,38 @@
+import { useUserDetailsDB } from '@/app/pwa/_client/hooks/use-user-details'
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/pwa/_components/ui/avatar'
+import { formatAddress } from '@/app/pwa/_lib/utils/addresses'
+import route from '@/lib/utils/routes'
+import { cn } from '@/lib/utils/tailwind'
+import frog from '@/public/app/images/frog.png'
+import Link from 'next/link'
+import type { Address } from 'viem'
+
 interface ParticipantRowProps {
-    address: string
+    address: Address
     poolId: string
 }
 
 const ParticipantRow: React.FC<ParticipantRowProps> = (props: ParticipantRowProps) => {
-    return <>In construction</>
-    // const { userDetailsDB } = useUserDetailsDB(props.address)
+    const { userDetailsDB } = useUserDetailsDB(props.address)
+    const avatar = userDetailsDB?.usersDetail[0].avatar || frog.src
+    const displayNameOrAddress = userDetailsDB?.usersDetail[0].displayName || formatAddress(props.address)
 
-    // return (
-    //     <Link
-    //         className='bottomDivider flex flex-row space-x-4 py-4'
-    //         href={`/pool/${props.poolId}/participants/${props.address}`}>
-    //         <Avatar className='size-[73px]' aria-label='User Avatar'>
-    //             <AvatarImage alt='User Avatar' src={userDetailsDB?.userDetail?.avatar ?? frog.src} />
-    //             <AvatarFallback className='bg-[#d9d9d9]' />
-    //         </Avatar>
-    //         <div className='flex flex-1 flex-col'>
-    //             <h4 className='overflow-hidden text-lg font-medium text-black'>
-    //                 {userDetailsDB?.userDetail?.displayName ?? formatAddress(props.address)}
-    //             </h4>
-    //             <p className={`fontRegistered text-[#6993FF]`}>Registered</p>
-    //         </div>
-    //     </Link>
-    // )
+    return (
+        <Link
+            className={cn('bottom-2 flex flex-row space-x-4 border-b-[1px] border-[#E9F1F5] py-4')}
+            // href={`/pool/${props.poolId}/participants/${props.address}`}>
+            href={route['/pool/[pool-id]/participants/[participant-id]']}>
+            <Avatar className='size-[48px]' aria-label='User Avatar'>
+                {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+                <AvatarImage alt='User Avatar' src={avatar} />
+                <AvatarFallback className='bg-[#d9d9d9]' />
+            </Avatar>
+            <div className='flex flex-1 flex-col'>
+                <h4 className='overflow-hidden text-[12pt] font-medium text-black'>{displayNameOrAddress}</h4>
+                <p className={`fontRegistered text-[10pt] text-[#6993FF]`}>Registered</p>
+            </div>
+        </Link>
+    )
 }
 
 export default ParticipantRow

@@ -26,6 +26,7 @@ const futureDateTimeSchema = dateTimeSchema.refine(
     },
 )
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ethereumAddressSchema = z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Token address format')
 
 export const CreatePoolFormSchema = z
