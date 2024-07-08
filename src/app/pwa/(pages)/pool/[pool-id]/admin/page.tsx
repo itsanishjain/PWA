@@ -13,8 +13,10 @@ export type UserDisplayRow = Database['public']['Tables']['users']['Row']
 const AdminPoolPage = () => {
     const params = useParams<{ poolId: string }>()
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ready, authenticated, user } = usePrivy()
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { wallets, ready: walletsReady } = useWallets()
 
     // const [poolDbData, setPoolDbData] = useState<any | undefined>()
@@ -22,9 +24,12 @@ const AdminPoolPage = () => {
     // const [cohostDbData, setCohostDbData] = useState<any[]>([])
     // const [transactionInProgress, setTransactionInProgress] = useState<boolean>(false)
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [pageUrl, setPageUrl] = useState('')
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [timeLeft, setTimeLeft] = useState<number>()
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const calculateTimeLeft = (startTime: string) => {
         const currentTimestamp: Date = new Date()
         const startDateObject: Date = new Date(startTime)
@@ -38,7 +43,9 @@ const AdminPoolPage = () => {
         setTimeLeft(timeDiff)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const poolId = params?.poolId || '0'
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const queryClient = useQueryClient()
 
     // const { data: poolSCInfo } = useQuery({

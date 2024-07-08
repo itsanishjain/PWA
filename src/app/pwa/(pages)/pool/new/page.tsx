@@ -1,5 +1,6 @@
 'use client'
 
+import { useSponsoredTxn } from '@/app/pwa/_client/hooks/use-sponsored-txn'
 import { wagmi } from '@/app/pwa/_client/providers/configs'
 import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import type { PoolDraft } from '@/app/pwa/_client/stores/create-pool.store'
@@ -8,6 +9,7 @@ import type { DateTimeRangeValue } from '@/app/pwa/_components/forms-controls/da
 import { Button } from '@/app/pwa/_components/ui/button'
 import { Label } from '@/app/pwa/_components/ui/label'
 import { dropletAddress, poolAbi, poolAddress } from '@/types/contracts'
+import { useWallets } from '@privy-io/react-auth'
 import type { Route } from 'next'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -150,6 +152,8 @@ export default function CreatePool() {
     } = useWaitForTransactionReceipt({
         hash,
     })
+    const { wallets } = useWallets()
+    const { sponsoredTxn } = useSponsoredTxn()
 
     const { setBottomBarContent, setTopBarTitle } = useSettingsStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
@@ -204,6 +208,7 @@ export default function CreatePool() {
             setTopBarTitle(null)
             setBottomBarContent(null)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -219,20 +224,42 @@ export default function CreatePool() {
                     name: 'createPool',
                 })
 
-                writeContract({
-                    address: poolAddress[wagmi.config.state.chainId as ChainId],
-                    abi: [CreatePoolFunction],
-                    functionName: 'createPool',
-                    args: [
-                        timeStart,
-                        timeEnd,
-                        poolDraft.name,
-                        parseEther(poolDraft.price.toString()),
-                        1000, // penaltyFeeRate, assuming 10% (1000 basis points), adjust as needed
-                        //TODO: change to usdc/ flexible token
-                        dropletAddress[wagmi.config.state.chainId as ChainId],
-                    ],
-                })
+                if (
+                    wallets[0].walletClientType === 'coinbase_smart_wallet' ||
+                    wallets[0].walletClientType === 'coinbase_wallet'
+                ) {
+                    sponsoredTxn([
+                        {
+                            address: poolAddress[wagmi.config.state.chainId as ChainId],
+                            abi: [CreatePoolFunction],
+                            functionName: 'createPool',
+                            args: [
+                                timeStart,
+                                timeEnd,
+                                poolDraft.name,
+                                parseEther(poolDraft.price.toString()),
+                                1000, // penaltyFeeRate, assuming 10% (1000 basis points), adjust as needed
+                                //TODO: change to usdc/ flexible token
+                                dropletAddress[wagmi.config.state.chainId as ChainId],
+                            ],
+                        },
+                    ])
+                } else {
+                    writeContract({
+                        address: poolAddress[wagmi.config.state.chainId as ChainId],
+                        abi: [CreatePoolFunction],
+                        functionName: 'createPool',
+                        args: [
+                            timeStart,
+                            timeEnd,
+                            poolDraft.name,
+                            parseEther(poolDraft.price.toString()),
+                            1000, // penaltyFeeRate, assuming 10% (1000 basis points), adjust as needed
+                            //TODO: change to usdc/ flexible token
+                            dropletAddress[wagmi.config.state.chainId as ChainId],
+                        ],
+                    })
+                }
             }
         }
     }, [
@@ -240,8 +267,10 @@ export default function CreatePool() {
         poolDraft.dateRange.start,
         poolDraft.name,
         poolDraft.price,
+        sponsoredTxn,
         state.internalPoolId,
         state?.message,
+        wallets,
         writeContract,
     ])
 
