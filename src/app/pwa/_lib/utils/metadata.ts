@@ -18,8 +18,8 @@ const APP_DESCRIPTION = 'Pool Party! 🏖️'
 export const metadata: Metadata = {
     ...(process.env.NODE_ENV === 'production' ? { metadataBase: new URL('https://poolparty.cc') } : {}),
     icons: {
-        icon: '/images/favicon.png',
-        apple: '/images/icon-maskable-512.png',
+        icon: '/app/assets/favicon.png',
+        apple: '/app/assets/icon-maskable-512.png',
     },
     // TODO: correct this
     // manifest: '/pwa/manifest.json',
