@@ -14,14 +14,13 @@ export default async function getDbParticipantsInfo(
         .from('pool_participants')
         .select(
             `
-            users (
-                displayName,
-                avatar
-            ),
-            count
-        `,
+      users (
+        displayName,
+        avatar,
+        walletAddress
+      )
+    `,
         )
-        .in('user_id', participantAddresses)
         .eq('pool_id', poolId)
 
     if (error) {
@@ -33,11 +32,12 @@ export default async function getDbParticipantsInfo(
         .map(({ users }) => ({
             name: users?.displayName || '',
             avatarUrl: users?.avatar || '',
+            walletAddress: users?.walletAddress || '',
         }))
         .filter(participant => Boolean(participant.name) && Boolean(participant.avatarUrl))
 
     return {
         participants,
-        count: participantsInfo[0].count || 0,
+        count: participantsInfo.length,
     }
 }
