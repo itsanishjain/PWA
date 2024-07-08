@@ -1,12 +1,13 @@
 import 'server-only'
 
 import type { Tables } from '@/types/db'
+import type { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { db } from '../../../database/db'
 
-type UserItem = Pick<Tables<'users'>, 'avatar' | 'displayName'>
+type UserRow = Pick<Tables<'users'>, 'avatar' | 'displayName'>
 
-export async function getDbUser(privyId: string): Promise<UserItem | null> {
-    const { data: userData, error } = await db
+export async function getDbUser(privyId: string): Promise<UserRow | null> {
+    const { data: userData, error }: PostgrestSingleResponse<UserRow> = await db
         .from('users')
         .select('avatar, displayName')
         .eq('privyId', privyId)
