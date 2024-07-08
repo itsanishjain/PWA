@@ -116,6 +116,7 @@ const ProfileForm = ({ userId }: { userId: string }) => {
             setTopBarTitle(null)
             setBottomBarContent(null)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
