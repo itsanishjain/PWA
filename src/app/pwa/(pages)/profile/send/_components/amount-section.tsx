@@ -1,6 +1,5 @@
 'use client'
 
-import { useTokenDecimals } from '@/app/pwa/_client/hooks/use-token-decimals'
 import { wagmi } from '@/app/pwa/_client/providers/configs'
 import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
@@ -13,6 +12,7 @@ import { getAbiItem } from 'viem'
 import { useBalance, useWriteContract } from 'wagmi'
 import Container from '../../claim-winning/_components/container'
 import SectionContent from '../../claim-winning/_components/section-content'
+import { useTokenDecimals } from './use-token-decimals'
 
 export default function AmountSection() {
     const { wallets } = useWallets()
