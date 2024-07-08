@@ -14,6 +14,7 @@ export interface WinnerDetail {
     amountWon: bigint
     amountClaimed: bigint
     claimed: boolean
+    forfeited: boolean
 }
 
 export default async function getContractWinnerDetail(
@@ -32,12 +33,13 @@ export default async function getContractWinnerDetail(
             return null
         }
 
-        const { amountWon, amountClaimed, claimed } = winnerInfo
+        const { amountWon, amountClaimed, claimed, forfeited } = winnerInfo
 
         return {
             amountWon,
             amountClaimed,
             claimed,
+            forfeited,
         }
     } catch (error) {
         console.error('Error fetching winner details from contract:', error)
