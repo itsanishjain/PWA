@@ -132,7 +132,7 @@ const ProfileForm = ({ userId }: { userId: string }) => {
                 const errors = state?.errors?.[field.key] || []
 
                 return (
-                    <section key={field.key} className='flex flex-1 flex-col'>
+                    <section key={field.key} className='mx-6 flex flex-1 flex-col'>
                         <Label className='text-base font-medium text-[#090909]'>{field.label}</Label>
                         <p className='mb-4 mt-1.5 text-xs font-medium text-[#b2b2b2]'>{field.description}</p>
                         <field.component
@@ -162,7 +162,7 @@ export default function NewProfilePage() {
     }, [ready, user, router])
 
     if (!ready || !user) {
-        return <div>Loading...</div>
+        return <div className='flex-center mx-6'>Loading...</div>
     }
 
     return <ProfileForm userId={user.id} />

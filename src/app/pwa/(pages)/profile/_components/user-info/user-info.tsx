@@ -1,10 +1,14 @@
 'use client'
 
 import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
-import { Avatar, AvatarFallback } from '@/app/pwa/_components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/pwa/_components/ui/avatar'
 import { ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
+import { userInfo } from 'os'
+import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
+import { getUserInfoAction } from '../../actions'
+import { Skeleton } from '@/app/pwa/_components/ui/skeleton'
 
 interface UserItem {
     avatar: string | null
@@ -12,53 +16,47 @@ interface UserItem {
 }
 
 interface UserInfoProps {
-    initialUserInfo: UserItem | { needsRefresh: true }
+    initialUserInfo: UserItem | { needsRefresh: boolean }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function UserInfo({ initialUserInfo }: UserInfoProps) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const setTopBarTitle = useSettingsStore(state => state.setTopBarTitle)
     const account = useAccount()
-    // const [error, data] = useState<UserItem>(
-    //     initialUserInfo && 'needsRefresh' in initialUserInfo ? null : initialUserInfo,
-    // )
+    const [userInfo, setUserInfo] = useState<UserItem>(
+        initialUserInfo && 'needsRefresh' in initialUserInfo ? { avatar: null, displayName: null } : initialUserInfo,
+    )
 
-    // useEffect(() => {
-    //     setTopBarTitle('User Profile')
-    //     return () => {
-    //         setTopBarTitle(null)
-    //     }
-    // }, [setTopBarTitle])
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            const [result] = await getUserInfoAction()
+            if (result && 'needsRefresh' in result) {
+                // Wait for client-side refresh
+                setTimeout(fetchUserInfo, 1000)
+            } else {
+                if (result) {
+                    setUserInfo(result)
+                }
+            }
+        }
 
-    // useEffect(() => {
-    //     const fetchUserInfo = async () => {
-    //         const [result] = await getUserInfoAction()
-    //         if (result && 'needsRefresh' in result) {
-    //             // Wait for client-side refresh
-    //             setTimeout(fetchUserInfo, 1000)
-    //         } else {
-    //             setUserInfo(result)
-    //         }
-    //     }
+        if ((initialUserInfo && 'needsRefresh' in initialUserInfo) || !userInfo) {
+            fetchUserInfo()
+        }
+    }, [initialUserInfo, userInfo])
 
-    //     if ((initialUserInfo && 'needsRefresh' in initialUserInfo) || !userInfo) {
-    //         fetchUserInfo()
-    //     }
-    // }, [initialUserInfo, userInfo])
-
-    // const truncatedAddress = account.address?.slice(0, 6) + '...' + account.address?.slice(-4)
+    const truncatedAddress = account.address?.slice(0, 6) + '...' + account.address?.slice(-4)
 
     return (
         <section className='detail_card inline-flex w-full gap-[0.69rem] rounded-3xl p-6'>
             <Avatar className='size-[3.125rem] cursor-pointer' aria-label='User Avatar'>
-                {/* {userInfo?.avatar && <AvatarImage alt='User Avatar' src={userInfo.avatar} />} */}
+                {'avatar' in initialUserInfo && initialUserInfo.avatar && (
+                    <AvatarImage alt='User Avatar' src={initialUserInfo.avatar} />
+                )}
                 <AvatarFallback className='bg-[#d9d9d9]/40 backdrop-blur-xl' />
             </Avatar>
             <div className='flex-1 space-y-1'>
-                {/* <h1 className='font-medium'>{userInfo?.displayName || <Skeleton className='h-4 w-24' />}</h1> */}
+                <h1 className='font-medium'>{userInfo?.displayName || <Skeleton className='h-4 w-24' />}</h1>
                 <h2 className='font-mono text-xs text-[#5472E9]'>
-                    {/* {account.address ? truncatedAddress : <Skeleton className='h-4 w-16 bg-[#5472E9]/20' />} */}
+                    {account.address ? truncatedAddress : <Skeleton className='h-4 w-16 bg-[#5472E9]/20' />}
                 </h2>
             </div>
             <Link href={`https://sepolia.basescan.org/address/${account.address}`} passHref legacyBehavior>
