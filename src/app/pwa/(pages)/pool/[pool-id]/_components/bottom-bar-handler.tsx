@@ -15,10 +15,11 @@ import { POOLSTATUS } from '../_lib/definitions'
 import { useSmartAccount } from '@/app/pwa/_client/hooks/use-smart-account'
 import { usePrivy } from '@privy-io/react-auth'
 import { revalidatePath } from 'next/cache'
-import { Address } from 'viem'
+import { Address, parseUnits } from 'viem'
 
 export default function BottomBarHandler({
     isAdmin,
+    walletAddress,
     poolStatus,
     poolId,
     poolPrice,
@@ -31,14 +32,17 @@ export default function BottomBarHandler({
     poolPrice: number
     poolTokenSymbol: string
     tokenDecimals: number
+    walletAddress: Address | null
 }) {
     const { login } = useSmartAccount()
-    const { ready, authenticated, user } = usePrivy()
+    const { ready, authenticated } = usePrivy()
     const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
     const { writeContractAsync: enableDeposits } = useWritePoolEnableDeposit()
     const { writeContractAsync: startPool } = useWritePoolStartPool()
     const { writeContractAsync: endPool } = useWritePoolEndPool()
     const { writeContractAsync: joinPool } = useWritePoolDeposit()
+
+    const { data: userBalance, error: balanceError } = useReadDropletBalanceOf({ args: [walletAddress || '0x'] })
 
     const handleEnableDeposits = async () => {
         toast('Enabling deposits...')
@@ -76,18 +80,12 @@ export default function BottomBarHandler({
 
         if (ready && authenticated) {
             console.log('Check funds')
-            const userWalletAddress = user?.wallet?.address as Address
-            if (userWalletAddress === undefined) {
-                console.error('No wallet address')
-                handleJoinPool()
-            }
+
             // convert prize to correct format with decimals:
-            const bigIntPrice = BigInt(poolPrice * 10 ** tokenDecimals)
+            const bigIntPrice = parseUnits(poolPrice.toString(), tokenDecimals)
 
-            const { data: userBalance, error } = useReadDropletBalanceOf({ args: [userWalletAddress] })
-
-            if (error || userBalance === undefined) {
-                console.error('Error reading balance', error)
+            if (balanceError || userBalance === undefined) {
+                console.error('Error reading balance', balanceError)
                 return
             }
 
@@ -101,9 +99,10 @@ export default function BottomBarHandler({
             console.log('Join pool')
             toast('Joining pool...')
 
-            await joinPool({
+            const result = await joinPool({
                 args: [poolId, bigIntPrice],
             })
+            console.log('result', result)
             revalidatePath(`/pool/${poolId}`)
         }
     }
