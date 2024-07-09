@@ -8,14 +8,29 @@ import PoolDetailsBannerButtons from './pool-details-banner-button'
 import PoolDetailsBannerStatus from './pool-details-banner-status'
 import PoolDetailsInfo from './pool-details-info'
 import BottomBarHandler from './bottom-bar-handler'
+import { checkAuthStatusAction } from '../../../pools/actions'
+import AuthenticatedContent from './authenticated-pool-details'
 
 export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
     const poolBalance = pool.numParticipants * pool.price
     const avatarUrls = pool.participants.map(participant => participant.avatarUrl)
-
+    const [result] = await checkAuthStatusAction()
+    const isAdmin = result && 'isAdmin' in result && result?.isAdmin
     return (
         <>
-            {/* <BottomBarHandler /> */}
+            <AuthenticatedContent
+                isAdmin={isAdmin}
+                renderBottomBar={
+                    <BottomBarHandler
+                        poolId={pool.contractId}
+                        isAdmin={isAdmin || false}
+                        poolStatus={pool.status}
+                        poolPrice={pool.price}
+                        poolTokenSymbol={pool.tokenSymbol}
+                        tokenDecimals={pool.tokenDecimals}
+                    />
+                }
+            />
             <div className='space-y-3 bg-white p-2'>
                 <section className='detail_card rounded-[2.875rem] p-[1.12rem]'>
                     <PoolDetailsBanner
