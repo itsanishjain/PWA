@@ -107,6 +107,11 @@ export default function ClaimablePrizesList() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [claimablePools, wallets])
+
+    if (claimablePools?.[0].length === 0) {
+        return <div className='flex-center p-6'>Prizes you win may appear here.</div>
+    }
+
     return (
         <Container>
             <SectionTitle />

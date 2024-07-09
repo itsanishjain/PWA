@@ -1,6 +1,5 @@
-import MainContentWrapper from '../../_components/main-wrapper'
 import Title from '../../_components/title'
-import Balance from '../pools/_components/balance'
+import Balance from './_components/balance/balance'
 import { OnrampWithStripe } from './_components/onramps/onramp-stripe'
 import UserInfo from './_components/user-info/user-info'
 import { getAddressBalanceAction, getUserInfoAction } from './actions'

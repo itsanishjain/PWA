@@ -6,11 +6,12 @@ import Image from 'next/image'
 import type { RefObject } from 'react'
 import { useRef } from 'react'
 import AvatarUploadIcon from './avatar-upload-icon'
+import { convertToBase64 } from '@/app/pwa/_lib/utils/convert-image'
 
 export interface AvatarUploaderProps {
     name: string
-    value: string | File | undefined
-    onChange: (value: string | File | undefined) => void
+    value: string | null
+    onChange: (value: string | null) => void
 }
 
 const AvatarPreview = ({
@@ -20,14 +21,11 @@ const AvatarPreview = ({
     onChange,
 }: {
     hoverRef: RefObject<HTMLInputElement>
-    value: string | File | undefined
+    value: string
     handleImageLoad: (e: React.MouseEvent) => void
-    onChange: (value: string | File | undefined) => void
+    onChange: (value: string | null) => void
 }) => {
-    // if value is a file, we need to convert it to a url
-    if (!value) return null
-    const previewUrl = typeof value === 'string' ? value : URL.createObjectURL(value)
-
+    const previewUrl = value
     return (
         <div
             className='relative size-[109px] items-center justify-center overflow-hidden rounded-full'
@@ -43,14 +41,18 @@ const AvatarPreview = ({
             <Image alt='image' src={previewUrl} className='rounded-full object-cover object-center' fill priority />
             <div ref={hoverRef} hidden>
                 <div className='absolute inset-0 flex size-[109px] flex-col items-center justify-center rounded-full bg-black/50'>
-                    <Button size='icon' variant='outline' className='m-2 rounded-full' onClick={handleImageLoad}>
+                    <Button
+                        size='icon'
+                        variant='outline'
+                        className='m-2 rounded-full bg-white'
+                        onClick={handleImageLoad}>
                         <CameraIcon />
                     </Button>
                     <Button
                         size='icon'
                         variant='destructive'
                         className='m-2 rounded-full'
-                        onClick={() => onChange(undefined)}>
+                        onClick={() => onChange(null)}>
                         <Trash2Icon />
                     </Button>
                 </div>
@@ -79,15 +81,18 @@ export default function AvatarUploader({ name, value, onChange }: AvatarUploader
         inputRef.current.click()
     }
 
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
         const file = event.target.files?.[0] || null
         if (file) {
-            const objectUrl = URL.createObjectURL(file)
-            onChange(objectUrl as string & File)
+            const base64 = await convertToBase64(file)
+            onChange(`data:image/png;base64,${base64}`)
         } else {
-            onChange(undefined)
+            onChange(null)
         }
         if (hoverRef.current) hoverRef.current.hidden = true
+
+        // Reset the input value so that the same image can be selected again
+        if (event.target) event.target.value = ''
     }
 
     return (
@@ -102,14 +107,14 @@ export default function AvatarUploader({ name, value, onChange }: AvatarUploader
             ) : (
                 <UploadAvatarPlaceholder handleImageLoad={handleImageLoad} />
             )}
+            <input title='image upload control' className='hidden' value={value || ''} name={name} type='text' />
             <input
                 title='avatar upload control'
                 className='hidden'
                 ref={inputRef}
-                onChange={e => void handleImageChange(e)}
+                onChange={handleImageChange}
                 type='file'
                 accept='image/*'
-                name={name}
             />
         </>
     )

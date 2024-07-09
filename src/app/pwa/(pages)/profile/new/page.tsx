@@ -23,8 +23,8 @@ const Text = dynamic(() => import('@/app/pwa/_components/forms-controls/text.con
 
 type AvatarUploaderProps = {
     name: string
-    value: string | File | undefined
-    onChange: (value: string | File | undefined) => void
+    value: string | null
+    onChange: (value: string | null) => void
 }
 
 type TextProps = {
@@ -127,7 +127,7 @@ const ProfileForm = ({ userId }: { userId: string }) => {
     }, [state?.message, resetProfileDraft, router])
 
     return (
-        <form action={action} className='mx-6 flex w-full flex-col gap-6 py-6'>
+        <form action={action} className='mx-auto flex w-full max-w-full flex-col'>
             {formFields.map(field => {
                 const errors = state?.errors?.[field.key] || []
 

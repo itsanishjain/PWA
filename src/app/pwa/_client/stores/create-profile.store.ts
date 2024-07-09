@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
 export interface ProfileDraft {
-    avatar: string | File | undefined
+    avatar: string | null
     displayName: string | undefined
 }
 
@@ -20,13 +20,12 @@ type CreateProfileStoreActions = {
 }
 
 const initialProfileDraft: ProfileDraft = {
-    avatar: undefined,
+    avatar: null,
     displayName: '',
 }
 
 export const useCreateProfileStore = (userId: string) =>
     create<CreateProfileStoreState & CreateProfileStoreActions>()(
-        // TODO: fix circular dependency issues
         devtools(
             persist(
                 set => ({
