@@ -65,13 +65,14 @@ const UploadImagePlaceholder = ({ handleImageLoad }: { handleImageLoad: (e: Reac
     )
 }
 
-export default function ImageUploader({ name = '', value, onChange }: ImageUploaderProps) {
+export default function ImageUploader({ name, value, onChange }: ImageUploaderProps) {
     const hoverRef = useRef<HTMLInputElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
     const handleImageLoad = (e: React.MouseEvent) => {
         e.preventDefault()
-        inputRef.current!.click()
+        if (!inputRef.current) return
+        inputRef.current.click()
     }
 
     const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {

@@ -3,11 +3,12 @@ import BalanceInfo from './_components/balance-info'
 import NextUserPool from './_components/next-user-pool'
 import RenderBottomBar from './_components/render-bottom-bar'
 import UpcomingPools from './_components/upcoming-pools'
-import { checkAuthStatusAction } from './actions'
+import { checkAuthStatusAction, getAllPoolsAction } from './actions'
 
 export default async function PoolsPage() {
     const [result] = await checkAuthStatusAction()
     const isAdmin = result && 'isAdmin' in result && result?.isAdmin
+    const pools = await getAllPoolsAction()
 
     return (
         <div className='space-y-6'>
