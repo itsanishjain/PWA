@@ -4,7 +4,7 @@ import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
 export interface PoolDraft {
-    bannerImage: string
+    bannerImage: string | null
     name: string
     dateRange: { start: string; end: string }
     description: string
@@ -25,7 +25,7 @@ type DateRange = {
 }
 
 type CreatePoolStoreActions = {
-    setPoolDraft: (field: keyof PoolDraft, value: string | File | DateRange | null | undefined) => void
+    setPoolDraft: (field: keyof PoolDraft, value: string | DateRange | null | undefined) => void
     setError: (error: Error | null) => void
     resetPoolDraft: () => void
     setHydrated: (state: boolean) => void
@@ -41,7 +41,7 @@ const getDefaultDateTimeValue = () => {
 }
 
 const initialPoolDraft: PoolDraft = {
-    bannerImage: '',
+    bannerImage: null,
     name: '',
     dateRange: getDefaultDateTimeValue(),
     description: '',
