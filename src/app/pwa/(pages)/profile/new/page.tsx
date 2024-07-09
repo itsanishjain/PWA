@@ -21,35 +21,19 @@ const Text = dynamic(() => import('@/app/pwa/_components/forms-controls/text.con
     ssr: false,
 })
 
-type AvatarUploaderProps = {
-    name: string
-    value: string | null
-    onChange: (value: string | null) => void
-}
-
-type TextProps = {
-    name: string
-    value: string | undefined
-    onChange: (value: string | undefined) => void
-}
-
-type FormField<T> = {
+const formFields: Array<{
     name: string
     key: keyof ProfileDraft
     label: string
     description: string
-    component: React.ComponentType<T>
-    type: 'avatar' | 'text'
-}
-
-const formFields: Array<FormField<AvatarUploaderProps> | FormField<TextProps>> = [
+    component: typeof AvatarUploader | typeof Text
+}> = [
     {
         key: 'avatar',
         name: 'avatar',
         label: 'User Image',
         description: 'Choose your account image',
         component: AvatarUploader,
-        type: 'avatar',
     },
     {
         key: 'displayName',
@@ -57,15 +41,14 @@ const formFields: Array<FormField<AvatarUploaderProps> | FormField<TextProps>> =
         label: 'User Name',
         description: 'Choose a user name',
         component: Text,
-        type: 'text',
     },
 ]
 
 type FormState = {
     message?: string
     errors?: {
-        displayName: string[]
-        avatar: string[]
+        displayName: []
+        avatar: []
     }
 }
 
@@ -123,8 +106,9 @@ const ProfileForm = ({ userId }: { userId: string }) => {
         if (state?.message === 'Profile created successfully') {
             resetProfileDraft()
             router.back()
+            state.message = ''
         }
-    }, [state?.message, resetProfileDraft, router])
+    }, [state?.message])
 
     return (
         <form action={action} className='mx-auto flex w-full max-w-full flex-col'>

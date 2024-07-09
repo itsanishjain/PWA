@@ -1,11 +1,11 @@
 'use client'
 
-import Image from 'next/image'
-import type { RefObject } from 'react'
-import { useEffect, useRef, useState } from 'react'
-import ImageUploadIcon from '../icons/image-upload.icon'
 import { Button } from '../ui/button'
-import { convertFromBase64, convertToBase64 } from '../../_lib/utils/convert-image'
+import Image from 'next/image'
+import ImageUploadIcon from '../icons/image-upload.icon'
+import type { RefObject } from 'react'
+import { useRef } from 'react'
+import { convertToBase64 } from '../../_lib/utils/convert-image'
 
 export type ImageUploaderValue = string
 

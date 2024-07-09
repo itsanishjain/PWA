@@ -7,7 +7,6 @@ import { dropletAddress } from '@/types/contracts'
 import { cookies } from 'next/headers'
 import { baseSepolia } from 'viem/chains'
 import { CreatePoolFormSchema } from './_lib/definitions'
-import { convertFromBase64 } from '@/app/pwa/_lib/utils/convert-image'
 
 type FormState = {
     message?: string

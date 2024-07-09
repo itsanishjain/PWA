@@ -1,12 +1,14 @@
 'use client'
 
 import { Button } from '@/app/pwa/_components/ui/button'
-import { CameraIcon, Trash2Icon } from 'lucide-react'
 import Image from 'next/image'
+import AvatarUploadIcon from './avatar-upload-icon'
+import { CameraIcon, Trash2Icon } from 'lucide-react'
 import type { RefObject } from 'react'
 import { useRef } from 'react'
-import AvatarUploadIcon from './avatar-upload-icon'
 import { convertToBase64 } from '@/app/pwa/_lib/utils/convert-image'
+
+export type AvatarUploaderValue = string
 
 export interface AvatarUploaderProps {
     name: string
