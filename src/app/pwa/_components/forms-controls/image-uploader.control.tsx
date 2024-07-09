@@ -2,16 +2,17 @@
 
 import Image from 'next/image'
 import type { RefObject } from 'react'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ImageUploadIcon from '../icons/image-upload.icon'
 import { Button } from '../ui/button'
+import { convertFromBase64, convertToBase64 } from '../../_lib/utils/convert-image'
 
 export type ImageUploaderValue = string
 
 interface ImageUploaderProps {
     name: string
-    value: string | File | null
-    onChange: (value: string | File | null) => void
+    value: string | null
+    onChange: (value: string | null) => void
 }
 
 const ImagePreview = ({
@@ -21,13 +22,11 @@ const ImagePreview = ({
     onChange,
 }: {
     hoverRef: RefObject<HTMLInputElement>
-    value: string | File
+    value: string
     handleImageLoad: (e: React.MouseEvent) => void
-    onChange: (value: string | File | null) => void
+    onChange: (value: string | null) => void
 }) => {
-    // if the value is a file, create a preview URL
-    const previewUrl = typeof value === 'string' ? value : URL.createObjectURL(value)
-
+    const previewUrl = value
     return (
         <div
             className='relative size-32 items-center justify-center overflow-hidden rounded-xl'
@@ -43,7 +42,7 @@ const ImagePreview = ({
             <Image alt='image' src={previewUrl} className='rounded-xl object-cover object-center' fill priority />
             <div ref={hoverRef} hidden>
                 <div className='absolute inset-0 flex w-32 flex-col items-center justify-center rounded-xl bg-black/50'>
-                    <Button size='sm' variant='outline' className='m-2 rounded-full' onClick={handleImageLoad}>
+                    <Button size='sm' variant='outline' className='m-2 rounded-full bg-white' onClick={handleImageLoad}>
                         Change
                     </Button>
                     <Button size='sm' variant='destructive' className='m-2 rounded-full' onClick={() => onChange(null)}>
@@ -75,13 +74,13 @@ export default function ImageUploader({ name = '', value, onChange }: ImageUploa
         inputRef.current!.click()
     }
 
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
         const file = event.target.files?.[0] || null
         if (file) {
-            const objectUrl = URL.createObjectURL(file)
-            onChange(objectUrl)
+            const base64 = await convertToBase64(file)
+            onChange(`data:image/png;base64,${base64}`)
         } else {
-            onChange('')
+            onChange(null)
         }
         if (hoverRef.current) hoverRef.current.hidden = true
 
@@ -96,6 +95,7 @@ export default function ImageUploader({ name = '', value, onChange }: ImageUploa
             ) : (
                 <UploadImagePlaceholder handleImageLoad={handleImageLoad} />
             )}
+            <input title='image upload control' className='hidden' value={value || ''} name={name} type='text' />
             <input
                 title='image upload control'
                 className='hidden'
@@ -103,7 +103,6 @@ export default function ImageUploader({ name = '', value, onChange }: ImageUploa
                 onChange={handleImageChange}
                 type='file'
                 accept='image/*'
-                name={name}
             />
         </>
     )
