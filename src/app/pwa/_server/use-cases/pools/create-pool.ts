@@ -6,7 +6,7 @@ import { createPoolInDb } from '../../persistence/pools/db/create-db-pool'
 interface PoolItem {
     name: string
     description: string
-    bannerImage: File
+    bannerImage: string
     termsURL: string
     softCap: number
     startDate: string
