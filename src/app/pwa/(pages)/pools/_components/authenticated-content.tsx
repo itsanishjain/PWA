@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
+import { getUserInfoAction } from '../../profile/actions'
 
 export default function AuthenticatedContent({
     balanceInfo,
@@ -13,12 +14,14 @@ export default function AuthenticatedContent({
     nextUserPool: React.ReactNode
     renderBottomBar: React.ReactNode
 }) {
-    const { authenticated } = usePrivy()
+    const { ready, authenticated } = usePrivy()
     const [isConnected, setIsConnected] = useState(false)
 
     useEffect(() => {
-        setIsConnected(authenticated)
-    }, [authenticated])
+        if (ready) {
+            setIsConnected(authenticated)
+        }
+    }, [ready, authenticated])
 
     if (!isConnected) return null
 

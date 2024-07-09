@@ -5,7 +5,7 @@ import RenderBottomBar from './_components/render-bottom-bar'
 import UpcomingPools from './_components/upcoming-pools'
 import { checkAuthStatusAction } from './actions'
 
-export default async function PoolsLayout() {
+export default async function PoolsPage() {
     const [result] = await checkAuthStatusAction()
     const isAdmin = result && 'isAdmin' in result && result?.isAdmin
 
