@@ -5,7 +5,7 @@ import { db } from '../../../database/db'
 import { uploadAvatarToStorage } from '../storage/upload-avatar'
 
 interface UserItem {
-    avatar?: File | null
+    avatar?: string | null
     displayName?: string
 }
 
