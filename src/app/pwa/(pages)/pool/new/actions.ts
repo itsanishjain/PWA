@@ -7,6 +7,7 @@ import { dropletAddress } from '@/types/contracts'
 import { cookies } from 'next/headers'
 import { baseSepolia } from 'viem/chains'
 import { CreatePoolFormSchema } from './_lib/definitions'
+import { convertFromBase64 } from '@/app/pwa/_lib/utils/convert-image'
 
 type FormState = {
     message?: string
@@ -41,7 +42,8 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
         }
     }
 
-    const bannerImage = formData.get('bannerImage') as File
+    const bannerImage = formData.get('bannerImage') as string
+
     const name = formData.get('name') as string
     const description = formData.get('description') as string
     const termsURL = formData.get('termsURL') as string
@@ -56,7 +58,13 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
 
     if (dateRangeString && typeof dateRangeString === 'string') {
         try {
-            dateRange = JSON.parse(dateRangeString) as { start: string; end: string }
+            const parsedDateRange = JSON.parse(dateRangeString) as { start: string; end: string }
+
+            // Truncate seconds from the date strings
+            dateRange = {
+                start: parsedDateRange.start.substring(0, 16), // YYYY-MM-DDTHH:MM
+                end: parsedDateRange.end.substring(0, 16), // YYYY-MM-DDTHH:MM
+            }
         } catch (error) {
             console.error('Error parsing dateRange:', error)
         }
@@ -129,7 +137,31 @@ export async function updatePoolStatus(
     status: 'draft' | 'unconfirmed' | 'inactive' | 'depositsEnabled' | 'started' | 'paused' | 'ended' | 'deleted',
     contract_id: number,
 ) {
+    const user = await getPrivyUser()
+    if (!user) {
+        throw new Error('User not found trying to add as mainhost')
+    }
+
     const { error } = await db.from('pools').update({ status, contract_id }).eq('internal_id', poolId)
+
+    const { data: userId, error: userError } = await db.from('users').select('id').eq('privyId', user?.id).single()
+
+    if (userError) {
+        console.error('Error finding user:', userError)
+        throw userError
+    }
+
+    // Now insert into pool_participants using the found user ID
+    const { error: participantError } = await db.from('pool_participants').insert({
+        user_id: userId.id,
+        pool_id: contract_id,
+        poolRole: 'mainHost',
+    })
+
+    if (participantError) {
+        console.error('Error adding participant:', participantError)
+        throw participantError
+    }
 
     if (error) throw error
 }

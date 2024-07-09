@@ -262,17 +262,7 @@ export default function CreatePool() {
                 }
             }
         }
-    }, [
-        poolDraft.dateRange.end,
-        poolDraft.dateRange.start,
-        poolDraft.name,
-        poolDraft.price,
-        sponsoredTxn,
-        state.internalPoolId,
-        state?.message,
-        wallets,
-        writeContract,
-    ])
+    }, [state.internalPoolId])
 
     useEffect(() => {
         if (isConfirmed && receipt) {
@@ -304,9 +294,10 @@ export default function CreatePool() {
 
                 updatePoolStatus(internalId, 'inactive', latestPoolId)
                     .then(() => {
+                        toastId && toast.dismiss(toastId)
                         toast.success('Pool Created Successfully', { description: 'Redirecting to pool details...' })
-                        resetPoolDraft()
                         router.push(`/pool/${latestPoolId}` as Route)
+                        resetPoolDraft()
                     })
                     .catch(error => {
                         console.error('Error updating pool:', error)
@@ -317,10 +308,11 @@ export default function CreatePool() {
                     })
             } else {
                 console.error('PoolCreated event not found in transaction logs')
-                toast.error('Failed to retrieve pool ID', { description: 'Please contact support' })
+                // TODO: this probably does not apply:
+                // toast.error('Failed to retrieve pool ID', { description: 'Please contact support' })
             }
         }
-    }, [isConfirmed, receipt, resetPoolDraft, router, state.internalPoolId])
+    }, [isConfirmed, receipt])
 
     return (
         <form action={action} className='flex w-full flex-col gap-6 py-6'>
@@ -330,8 +322,8 @@ export default function CreatePool() {
                     <p className='mb-4 mt-1.5 text-xs font-medium text-[#b2b2b2]'>{description}</p>
                     <Component
                         name={name}
-                        value={poolDraft[key] as (string & DateTimeRangeValue) | (File & string & DateTimeRangeValue)}
-                        onChange={(value: string | File | DateRange | null | undefined) => setPoolDraft(key, value)}
+                        value={poolDraft[key] as string & DateTimeRangeValue}
+                        onChange={(value: string | DateRange | null | undefined) => setPoolDraft(key, value)}
                     />
                     {state?.errors?.[key] && <p className='mt-1 text-xs text-red-500'>{state.errors[key]}</p>}
                     <p aria-live='polite' className='sr-only'>

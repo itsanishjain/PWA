@@ -35,13 +35,13 @@ export const CreatePoolFormSchema = z
             .string()
             .min(5, 'The name must have at least 5 characters')
             .max(50, 'The name cannot have more than 50 characters'),
-        bannerImage: z
-            .instanceof(File)
-            .refine(file => file?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
-            .refine(
-                file => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-                'Only .jpg, .jpeg, .png and .webp formats are supported.',
-            ),
+        bannerImage: z.string().optional(),
+        // bannerImage: z.instanceof(File),
+        // .refine(file => file?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
+        // .refine(
+        //     file => ACCEPTED_IMAGE_TYPES.includes(file?.type),
+        //     'Only .jpg, .jpeg, .png and .webp formats are supported.',
+        // ),
         description: z
             .string()
             .min(5, 'The description must have at least 5 characters')
