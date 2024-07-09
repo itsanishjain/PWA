@@ -10,12 +10,15 @@ import PoolDetailsInfo from './pool-details-info'
 import BottomBarHandler from './bottom-bar-handler'
 import { checkAuthStatusAction } from '../../../pools/actions'
 import AuthenticatedContent from './authenticated-pool-details'
+import { Divide } from 'lucide-react'
 
 export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
     const poolBalance = pool.numParticipants * pool.price
     const avatarUrls = pool.participants.map(participant => participant.avatarUrl)
     const [result] = await checkAuthStatusAction()
-    const isAdmin = result && 'isAdmin' in result && result?.isAdmin
+    const isAdmin = result && 'isAdmin' in result && result.isAdmin
+    const walletAddress = result && 'address' in result ? result.address : null
+
     return (
         <>
             <AuthenticatedContent
@@ -28,6 +31,7 @@ export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
                         poolPrice={pool.price}
                         poolTokenSymbol={pool.tokenSymbol}
                         tokenDecimals={pool.tokenDecimals}
+                        walletAddress={walletAddress}
                     />
                 }
             />
