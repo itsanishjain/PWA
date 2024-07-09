@@ -127,12 +127,12 @@ const ProfileForm = ({ userId }: { userId: string }) => {
     }, [state?.message, resetProfileDraft, router])
 
     return (
-        <form action={action} className='flex w-full flex-col gap-6 py-6'>
+        <form action={action} className='mx-6 flex w-full flex-col gap-6 py-6'>
             {formFields.map(field => {
                 const errors = state?.errors?.[field.key] || []
 
                 return (
-                    <section key={field.key} className='mx-6 flex flex-1 flex-col'>
+                    <section key={field.key} className='flex flex-1 flex-col'>
                         <Label className='text-base font-medium text-[#090909]'>{field.label}</Label>
                         <p className='mb-4 mt-1.5 text-xs font-medium text-[#b2b2b2]'>{field.description}</p>
                         <field.component

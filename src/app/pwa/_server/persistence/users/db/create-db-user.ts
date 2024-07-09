@@ -3,17 +3,23 @@ import 'server-only'
 import type { Address } from 'viem'
 import { db } from '../../../database/db'
 
-interface UserItem {
+interface UserInfo {
     walletAddress: Address
+    role: 'admin' | 'user'
 }
 
-export async function createUserInDb(userPrivyId: string, data: UserItem) {
-    const { error } = await db
+interface UserItem {
+    privyId: string
+    info: UserInfo
+}
+
+export async function createUserInDb({ privyId, info }: UserItem) {
+    const { data: newUser, error } = await db
         .from('users')
         .insert({
-            privyId: userPrivyId,
-            walletAddress: data.walletAddress,
-            role: 'user',
+            privyId: privyId,
+            walletAddress: info.walletAddress,
+            role: info.role,
         })
         .select('*')
         .single()
@@ -21,4 +27,8 @@ export async function createUserInDb(userPrivyId: string, data: UserItem) {
     if (error) {
         throw new Error(`Error creating user in database: ${error.message}`)
     }
+
+    console.log('user created in db with privyId:', privyId, 'and walletAddress:', info.walletAddress)
+
+    return newUser
 }

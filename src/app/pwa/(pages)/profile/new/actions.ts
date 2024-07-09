@@ -58,15 +58,21 @@ export async function createProfileAction(_prevState: FormState, formData: FormD
 export const createUserAction = authenticatedAction
     .createServerAction()
     .handler(async (): Promise<void | { needsRefresh: true } | null> => {
+        console.log('createUserAction called')
         const { session, needsRefresh } = await validateRequest()
 
         if (needsRefresh) {
+            console.log('Needs refresh')
             return { needsRefresh: true }
         }
 
         if (!session || !session.address) {
+            console.log('User not authenticated or address not available')
             throw new Error('User not authenticated or address not available')
         }
 
-        await createUserUseCase(session.id, { walletAddress: session.address })
+        await createUserUseCase({
+            privyId: session.id,
+            info: { walletAddress: session.address, role: session.isAdmin ? 'admin' : 'user' },
+        })
     })

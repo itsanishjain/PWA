@@ -3,10 +3,16 @@ import 'server-only'
 import type { Address } from 'viem'
 import { createUserInDb } from '../../persistence/users/db/create-db-user'
 
-interface UserItem {
+interface UserInfo {
     walletAddress: Address
+    role: 'admin' | 'user'
 }
 
-export async function createUserUseCase(userId: string, info: UserItem) {
-    await createUserInDb(userId, info)
+interface UserItem {
+    privyId: string
+    info: UserInfo
+}
+
+export async function createUserUseCase({ privyId, info }: UserItem) {
+    return createUserInDb({ privyId, info })
 }

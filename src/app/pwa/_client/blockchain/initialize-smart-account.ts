@@ -13,36 +13,38 @@ import { baseSepolia } from 'viem/chains'
 const bundlerUrl = process.env.NEXT_PUBLIC_BUNDLER_URL
 const paymasterUrl = process.env.NEXT_PUBLIC_PAYMASTER_URL
 
-export const initializeSmartAccount = async (
-	embeddedWallet: ConnectedWallet,
-) => {
-	if (!bundlerUrl || !paymasterUrl) {
-		throw new Error('Missing environment variables for bundler or paymaster')
-	}
+export const initializeSmartAccount = async (embeddedWallet: ConnectedWallet) => {
+    if (!bundlerUrl || !paymasterUrl) {
+        throw new Error('Missing environment variables for bundler or paymaster')
+    }
 
-	await embeddedWallet.switchChain(baseSepolia.id)
-	const embeddedProvider = await embeddedWallet.getEthersProvider()
-	const signer = embeddedProvider.getSigner()
+    await embeddedWallet.switchChain(baseSepolia.id)
+    const embeddedProvider = await embeddedWallet.getEthersProvider()
+    const signer = embeddedProvider.getSigner()
 
-	const bundler = new Bundler({
-		bundlerUrl,
-		chainId: baseSepolia.id,
-		entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
-	})
-	const paymaster = new BiconomyPaymaster({ paymasterUrl })
-	const validationModule = await ECDSAOwnershipValidationModule.create({
-		signer,
-		moduleAddress: DEFAULT_ECDSA_OWNERSHIP_MODULE,
-	})
+    console.log('Initializing smart account with signer:', signer)
 
-	const smartAccount = await createSmartAccountClient({
-		provider: embeddedProvider as unknown as WalletClient,
-		chainId: baseSepolia.id,
-		bundler,
-		paymaster,
-		entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
-		defaultValidationModule: validationModule,
-	})
+    const bundler = new Bundler({
+        bundlerUrl,
+        chainId: baseSepolia.id,
+        entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
+    })
+    const paymaster = new BiconomyPaymaster({ paymasterUrl })
+    const validationModule = await ECDSAOwnershipValidationModule.create({
+        signer,
+        moduleAddress: DEFAULT_ECDSA_OWNERSHIP_MODULE,
+    })
 
-	return smartAccount
+    const smartAccount = await createSmartAccountClient({
+        provider: embeddedProvider as unknown as WalletClient,
+        chainId: baseSepolia.id,
+        bundler,
+        paymaster,
+        entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
+        defaultValidationModule: validationModule,
+    })
+
+    console.log('Smart account initialized:', smartAccount)
+
+    return smartAccount
 }
