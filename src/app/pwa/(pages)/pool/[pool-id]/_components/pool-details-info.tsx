@@ -30,7 +30,7 @@ export default function PoolDetailsInfo({ description, price, tokenSymbol, terms
     ]
 
     return (
-        <div className='space-y-3 rounded-[2.875rem] bg-[#F4F4F4] p-5'>
+        <div className='space-y-3 rounded-[2.875rem] p-5'>
             {items.map((item, index) => (
                 <PoolDetailsInfoItem key={index} title={item.title} value={item.value} />
             ))}
