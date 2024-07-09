@@ -110,7 +110,7 @@ const EncryptText: React.FC<EncryptTextProps> = ({
     }
 
     return (
-        <div className='relative inline-flex w-full justify-between whitespace-nowrap align-middle'>
+        <div className='relative mb-6 inline-flex w-full justify-between whitespace-nowrap align-middle'>
             <div className={cn('relative inline-flex items-baseline gap-2 text-4xl font-bold', `text-[${color}]`)}>
                 {!isEncoded && (
                     <div className={cn('absolute', childrenVisible ? 'opacity-100' : 'opacity-0')}>{children}</div>
@@ -139,7 +139,7 @@ const EncryptText: React.FC<EncryptTextProps> = ({
                     </AnimatePresence>
                 </div>
             </div>
-            <Button size='icon' variant='ghost' className='z-10 text-black' onClick={handleToggle}>
+            <Button size='icon' variant='ghost' className='z-10 size-4 text-black sm:size-6' onClick={handleToggle}>
                 {isEncoded ? <EyeIcon /> : <EyeOffIcon />}
             </Button>
         </div>

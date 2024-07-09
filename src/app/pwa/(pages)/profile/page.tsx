@@ -12,7 +12,7 @@ export default async function ProfilePage() {
     const [balanceResult] = await getAddressBalanceAction()
 
     if (!userInfoResult || !balanceResult) {
-        console.log('Error fetching user info or balance')
+        console.log('[ProfilePage]', 'No data found for user')
         return null
     }
 

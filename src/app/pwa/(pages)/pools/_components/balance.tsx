@@ -64,7 +64,7 @@ export default function Balance({ initialBalance }: BalanceProps) {
         : { integerPart: 0, fractionalPart: 0 }
 
     return (
-        <section className='detail_card flex w-full flex-col gap-[0.69rem] rounded-3xl p-6'>
+        <section className='detail_card flex min-h-min w-full flex-col gap-[0.69rem] rounded-3xl p-6'>
             <h1 className='text-[0.6875rem] font-semibold'>Total balance</h1>
             {showSkeleton ? (
                 <BalanceSkeleton />
