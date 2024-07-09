@@ -24,7 +24,7 @@ export const checkAuthStatusAction = authenticatedAction
     .createServerAction()
     .handler(
         async (): Promise<
-            { isAdmin: boolean; authenticated: boolean; adddress: Address } | { needsRefresh: true } | null
+            { isAdmin: boolean; authenticated: boolean; address: Address } | { needsRefresh: true } | null
         > => {
             const { session, needsRefresh } = await validateRequest()
 
@@ -36,7 +36,7 @@ export const checkAuthStatusAction = authenticatedAction
                 throw new Error('User not authenticated or address not available')
             }
 
-            return { isAdmin: session.isAdmin, authenticated: true, adddress: session.address }
+            return { isAdmin: session.isAdmin, authenticated: true, address: session.address }
         },
     )
 
