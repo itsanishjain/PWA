@@ -11,7 +11,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <input
                 type={type}
                 className={cn(
-                    'relative h-[38px] w-full rounded-[70px] border border-[#ebebeb] pr-6 text-sm font-normal leading-tight text-black backdrop-blur-[2px]',
+                    'relative h-[38px] w-full rounded-[70px] border border-[#ebebeb] pr-6 text-sm font-normal leading-tight text-black',
                     `${startAdornment ? 'pl-9' : 'pl-6'}`,
                     `${className}`,
                 )}
