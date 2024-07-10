@@ -4,7 +4,7 @@ interface SessionResponse {
 
 export const getSession = async (): Promise<SessionResponse> => {
     try {
-        const response = await fetch('/api/onramp_stripe')
+        const response = await fetch('/api/onramp-stripe')
         if (!response.ok) {
             throw new Error('Network response was not ok')
         }

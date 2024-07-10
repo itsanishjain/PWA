@@ -20,7 +20,6 @@ export default async function ProfilePage() {
             <Title title='User Profile' />
             <UserInfo initialUserInfo={userInfoResult} />
             <Balance initialBalance={balanceResult} />
-            <OnrampWithStripe />
             <ClaimablePrizes />
         </div>
     )

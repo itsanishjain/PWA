@@ -11,7 +11,7 @@ const OnRampCoinbaseButton = ({ className }: React.ComponentProps<'form'>) => {
 
         const dataObj = { chainName, address }
         try {
-            const response = await fetch('/api/on_ramp_coinbase', {
+            const response = await fetch('/api/onramp-coinbase', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
