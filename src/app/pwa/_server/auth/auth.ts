@@ -70,7 +70,7 @@ export const validateRequest = async (): Promise<{
     if (!user?.displayName || !user.avatar) {
         console.log('[auth] User has no display name or avatar')
 
-        redirect('/profile/new')
+        // redirect('/profile/new')
     }
 
     return {
