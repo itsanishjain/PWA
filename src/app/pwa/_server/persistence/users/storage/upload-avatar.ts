@@ -1,10 +1,10 @@
 import 'server-only'
 import { db } from '../../../database/db'
 
-export async function uploadAvatarToStorage(userId: string, avatarBuffer: Buffer): Promise<string> {
+export async function uploadAvatarToStorage(userId: string, avatar: File): Promise<string> {
     const fileName = `${userId}/avatar.png`
 
-    const { error } = await db.storage.from('images').upload(fileName, avatarBuffer, {
+    const { error } = await db.storage.from('images').upload(fileName, avatar, {
         contentType: 'image/png',
         upsert: true, // overwrite existing file with same name
     })

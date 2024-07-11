@@ -6,6 +6,7 @@ import { getPrivyUser, getWalletAddress, isAdmin } from './privy'
 import { getUserUseCase } from '../use-cases/users/get-user'
 import { createUserUseCase } from '../use-cases/users/create-user'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
 interface Session {
     id: string
@@ -72,6 +73,8 @@ export const validateRequest = async (): Promise<{
 
         // redirect('/profile/new')
     }
+
+    revalidatePath('/pools')
 
     return {
         user: privyUser,

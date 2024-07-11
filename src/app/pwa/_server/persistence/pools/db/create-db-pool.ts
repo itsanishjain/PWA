@@ -8,7 +8,7 @@ import { uploadBannerImageToStorage } from '../storage/upload-banner-image'
 interface PoolItem {
     name: string
     description: string
-    bannerImage: string
+    bannerImage: File
     termsURL: string
     softCap: number
     startDate: string
@@ -46,7 +46,7 @@ export async function createPoolInDb(creatorAddress: Address, data: PoolItem) {
 
     if (data.bannerImage) {
         const processedBuffer = await processImage(data.bannerImage, 1024, 512)
-        bannerImageUrl = await uploadBannerImageToStorage(poolId, processedBuffer)
+        bannerImageUrl = await uploadBannerImageToStorage(poolId, data.bannerImage)
     }
 
     // update bannerImage with correct url
@@ -62,20 +62,20 @@ export async function createPoolInDb(creatorAddress: Address, data: PoolItem) {
     // Add the creator as the main host
     // First, find the connected user's ID
     // managed from the update stage after contract confirm
-    // const { data: userData, error: userError } = await db
-    //     .from('users')
-    //     .select('id')
-    //     .eq('walletAddress', creatorAddress)
-    //     .single()
+    const { data: userData, error: userError } = await db
+        .from('users')
+        .select('id')
+        .eq('walletAddress', creatorAddress)
+        .single()
 
-    // if (userError) {
-    //     console.error('Error finding user:', userError)
-    //     throw userError
-    // }
+    if (userError) {
+        console.error('Error finding user:', userError)
+        throw userError
+    }
 
-    // if (!userData) {
-    //     throw new Error('User not found')
-    // }
+    if (!userData) {
+        throw new Error('User not found')
+    }
 
     return createdPool // Return the created pool
 }

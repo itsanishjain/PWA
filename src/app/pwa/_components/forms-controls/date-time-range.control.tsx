@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Input } from '../ui/input'
 
 export type DateTimeRangeValue = {
@@ -10,8 +10,6 @@ export type DateTimeRangeValue = {
 
 interface DateTimeRangeProps {
     name: string
-    onChange: (value: DateTimeRangeValue) => void
-    value: DateTimeRangeValue
 }
 
 const getDefaultDateTimeValue = () => {
@@ -23,38 +21,23 @@ const getDefaultDateTimeValue = () => {
     }
 }
 
-export default function DateTimeRange({ name, value, onChange }: DateTimeRangeProps) {
-    // eventDate sample: '2024-05-09T23:59/2024-05-10T23:59',
-    const [localValue, setLocalValue] = useState<DateTimeRangeValue>(() => {
-        if (value && value.start && value.end) {
-            return value
-        }
-        return getDefaultDateTimeValue()
-    })
-
-    useEffect(() => {
-        if (value && value.start && value.end) {
-            setLocalValue(value)
-        }
-    }, [value])
+export default function DateTimeRange({ name }: DateTimeRangeProps) {
+    const [localValue, setLocalValue] = useState<DateTimeRangeValue>(getDefaultDateTimeValue)
 
     const updateValue = (field: 'start' | 'end', type: 'date' | 'time', newValue: string) => {
         const [currentDate, currentTime] = localValue[field].split('T')
         const updatedValue = type === 'date' ? `${newValue}T${currentTime}` : `${currentDate}T${newValue}`
 
-        const newLocalValue = {
-            ...localValue,
+        setLocalValue(prevValue => ({
+            ...prevValue,
             [field]: updatedValue,
-        }
-        setLocalValue(newLocalValue)
-        onChange(newLocalValue)
+        }))
     }
 
     return (
         <>
             <input type='hidden' name={name} value={JSON.stringify(localValue)} />
             <div className='flex flex-row items-center justify-between border-b border-[#ebebeb] pb-2 text-black'>
-                {/* the div is required to set the width of the input */}
                 <span className='text-xs font-medium'>Starts</span>
                 <div className='inline-flex flex-row flex-nowrap gap-1'>
                     <div className='relative'>
@@ -80,7 +63,6 @@ export default function DateTimeRange({ name, value, onChange }: DateTimeRangePr
                 </div>
             </div>
             <div className='flex flex-row items-center justify-between border-b border-[#ebebeb] py-2 text-black'>
-                {/* the div is required to set the width of the input */}
                 <span className='text-xs font-medium'>Ends</span>
                 <div className='inline-flex flex-row flex-nowrap gap-1'>
                     <div className='relative'>

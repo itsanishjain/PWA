@@ -12,7 +12,7 @@ const PoolCardRowImage = ({ image }: { image: string }) => {
             {isLoading && <Skeleton className='absolute inset-0 size-full' />}
             <Image
                 src={image}
-                alt='pool image'
+                alt='pool card row image'
                 fill
                 fetchPriority='low'
                 sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'

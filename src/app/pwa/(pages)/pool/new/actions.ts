@@ -20,6 +20,12 @@ type FormState = {
         termsURL: string[]
     }
     internalPoolId?: string
+    poolData?: {
+        name: string
+        startDate: string
+        endDate: string
+        price: string
+    }
 }
 
 export async function createPoolAction(_prevState: FormState, formData: FormData): Promise<FormState> {
@@ -41,7 +47,7 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
         }
     }
 
-    const bannerImage = formData.get('bannerImage') as string
+    const bannerImage = formData.get('bannerImage') as File
 
     const name = formData.get('name') as string
     const description = formData.get('description') as string
@@ -124,7 +130,13 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
 
         return {
             message: 'Pool created successfully',
-            internalPoolId, // Include the internal pool ID in the response
+            internalPoolId,
+            poolData: {
+                name,
+                startDate: dateRange.start,
+                endDate: dateRange.end,
+                price,
+            },
         }
     } catch (error) {
         return { message: 'Error creating pool: ' + (error as Error).message }

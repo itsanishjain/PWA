@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import type { Route } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import frog from '@/public/app/images/frog.png'
 
 interface PoolItem {
     id: string
@@ -21,6 +22,8 @@ interface PoolItem {
 export default function PoolListCard({ name, startDate, endDate, id, status, image }: PoolItem) {
     const statusIndicator = getPoolStatus({ startDate, endDate })
 
+    const resolvedImage = image || frog.src
+
     return (
         <Link href={`/pool/${id}` as Route}>
             <motion.div
@@ -28,7 +31,7 @@ export default function PoolListCard({ name, startDate, endDate, id, status, ima
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}>
                 <div className='relative size-[72px] shrink-0 overflow-hidden rounded-[16px] bg-neutral-200'>
-                    <Image src={image} alt='Pool Image' fill priority sizes='72px' className='object-cover' />
+                    <Image src={resolvedImage} alt='Pool Image' fill priority sizes='72px' className='object-cover' />
                     {status !== 'past' && (
                         <div
                             className={cn(

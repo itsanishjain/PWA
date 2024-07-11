@@ -2,19 +2,13 @@ import { Input } from '../ui/input'
 
 export interface TextProps {
     name: string
-    value: string | undefined
-    onChange: (value: string | undefined) => void
+    onChange?: (value: string) => void
 }
 
-export default function Text({ name, value, onChange }: TextProps) {
-    return (
-        <Input
-            className='bg-transparent'
-            type='text'
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            autoComplete='off'
-            name={name}
-        />
-    )
+export default function Text({ name, onChange }: TextProps) {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange?.(e.target.value)
+    }
+
+    return <Input className='bg-transparent' type='text' autoComplete='off' name={name} onChange={handleChange} />
 }

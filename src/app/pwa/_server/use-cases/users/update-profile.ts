@@ -4,7 +4,7 @@ import { getDbUser } from '../../persistence/users/db/get-db-user'
 import { updateUserInDb } from '../../persistence/users/db/update-db-user'
 
 interface UserItem {
-    avatar?: string
+    avatar?: File
     displayName?: string
 }
 

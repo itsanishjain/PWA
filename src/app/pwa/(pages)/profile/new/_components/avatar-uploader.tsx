@@ -4,120 +4,72 @@ import { Button } from '@/app/pwa/_components/ui/button'
 import Image from 'next/image'
 import AvatarUploadIcon from './avatar-upload-icon'
 import { CameraIcon, Trash2Icon } from 'lucide-react'
-import type { RefObject } from 'react'
-import { useRef } from 'react'
-import { convertToBase64 } from '@/app/pwa/_lib/utils/convert-image'
-
-export type AvatarUploaderValue = string
+import { useState, ChangeEvent } from 'react'
 
 export interface AvatarUploaderProps {
     name: string
-    value: string | null
-    onChange: (value: string | null) => void
+    onChange?: (file: File | null) => void
 }
 
-const AvatarPreview = ({
-    hoverRef,
-    value,
-    handleImageLoad,
-    onChange,
-}: {
-    hoverRef: RefObject<HTMLInputElement>
-    value: string
-    handleImageLoad: (e: React.MouseEvent) => void
-    onChange: (value: string | null) => void
-}) => {
-    const previewUrl = value
-    return (
-        <div
-            className='relative size-[109px] items-center justify-center overflow-hidden rounded-full'
-            onTouchStart={() => {
-                if (hoverRef.current) hoverRef.current.hidden = false
-            }}
-            onMouseEnter={() => {
-                if (hoverRef.current) hoverRef.current.hidden = false
-            }}
-            onMouseLeave={() => {
-                if (hoverRef.current) hoverRef.current.hidden = true
-            }}>
-            <Image alt='image' src={previewUrl} className='rounded-full object-cover object-center' fill priority />
-            <div ref={hoverRef} hidden>
-                <div className='absolute inset-0 flex size-[109px] flex-col items-center justify-center rounded-full bg-black/50'>
-                    <Button
-                        size='icon'
-                        variant='outline'
-                        className='m-2 rounded-full bg-white'
-                        onClick={handleImageLoad}>
-                        <CameraIcon />
-                    </Button>
-                    <Button
-                        size='icon'
-                        variant='destructive'
-                        className='m-2 rounded-full'
-                        onClick={() => onChange(null)}>
-                        <Trash2Icon />
-                    </Button>
-                </div>
-            </div>
-        </div>
-    )
-}
+export default function AvatarUploader({ name, onChange }: AvatarUploaderProps) {
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
 
-const UploadAvatarPlaceholder = ({ handleImageLoad }: { handleImageLoad: (e: React.MouseEvent) => void }) => {
-    return (
-        <div
-            className='flex size-[109px] flex-col items-center justify-around rounded-full bg-[#2989EC] p-8 hover:cursor-pointer'
-            onClick={handleImageLoad}>
-            <AvatarUploadIcon />
-        </div>
-    )
-}
-
-export default function AvatarUploader({ name, value, onChange }: AvatarUploaderProps) {
-    const hoverRef = useRef<HTMLInputElement>(null)
-    const inputRef = useRef<HTMLInputElement>(null)
-
-    const handleImageLoad = (e: React.MouseEvent) => {
-        e.preventDefault()
-        if (!inputRef.current) return
-        inputRef.current.click()
-    }
-
-    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-        const file = event.target.files?.[0] || null
+    const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
         if (file) {
-            const base64 = await convertToBase64(file)
-            onChange(`data:image/png;base64,${base64}`)
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result as string)
+            }
+            reader.readAsDataURL(file)
+            onChange?.(file)
         } else {
-            onChange(null)
+            setAvatarPreview(null)
+            onChange?.(null)
         }
-        if (hoverRef.current) hoverRef.current.hidden = true
+    }
 
-        // Reset the input value so that the same image can be selected again
-        if (event.target) event.target.value = ''
+    const handleRemove = () => {
+        setAvatarPreview(null)
+        onChange?.(null)
     }
 
     return (
-        <>
-            {value ? (
-                <AvatarPreview
-                    hoverRef={hoverRef}
-                    value={value}
-                    handleImageLoad={handleImageLoad}
-                    onChange={onChange}
-                />
-            ) : (
-                <UploadAvatarPlaceholder handleImageLoad={handleImageLoad} />
-            )}
-            <input title='image upload control' className='hidden' value={value || ''} name={name} type='text' />
+        <div className='flex flex-col items-center'>
             <input
-                title='avatar upload control'
-                className='hidden'
-                ref={inputRef}
-                onChange={handleImageChange}
+                placeholder='Choose an image'
+                title='Choose an image'
+                id={name}
+                name={name}
                 type='file'
                 accept='image/*'
+                className='hidden'
+                onChange={handleImageChange}
             />
-        </>
+            {avatarPreview ? (
+                <div className='relative size-[109px]'>
+                    <Image src={avatarPreview} alt='Avatar preview' className='rounded-full object-cover' fill />
+                    <div className='absolute inset-0 flex items-center justify-center opacity-0 transition-opacity hover:opacity-100'>
+                        <div className='absolute inset-0 rounded-full bg-black opacity-50'></div>
+                        <Button
+                            size='icon'
+                            variant='outline'
+                            className='z-10 m-1 bg-white'
+                            onClick={() => document.getElementById(name)?.click()}>
+                            <CameraIcon />
+                        </Button>
+                        <Button size='icon' variant='destructive' className='z-10 m-1' onClick={handleRemove}>
+                            <Trash2Icon />
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <label
+                    htmlFor={name}
+                    className='flex size-[109px] cursor-pointer flex-col items-center justify-center rounded-full bg-[#2989EC]'>
+                    <AvatarUploadIcon />
+                </label>
+            )}
+        </div>
     )
 }

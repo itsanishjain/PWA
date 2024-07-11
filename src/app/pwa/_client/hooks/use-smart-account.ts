@@ -14,7 +14,7 @@ export const useSmartAccount = () => {
     const { ready } = usePrivy()
     const { login } = useLogin({
         onComplete(user, isNewUser, wasAlreadyAuthenticated, _loginMethod, _loginAccount) {
-            console.log('onComplete called with:', { user, isNewUser, wasAlreadyAuthenticated })
+            // console.log('onComplete called with:', { user, isNewUser, wasAlreadyAuthenticated })
         },
     })
     // const router = useRouter()

@@ -1,13 +1,10 @@
-import type { Abi, Address } from 'viem'
 import { useAccount, useWriteContract } from 'wagmi'
-import { useCallsStatus, useCapabilities, useWriteContracts } from 'wagmi/experimental'
+import { useWriteContracts, useCapabilities, useCallsStatus } from 'wagmi/experimental'
 
 interface ContractCall {
-    address: Address
-    // eslint-disable-next-line
-    abi: Abi
+    address: `0x${string}`
+    abi: any
     functionName: string
-    // eslint-disable-next-line
     args: any[]
 }
 
@@ -34,14 +31,12 @@ export const useSponsoredTxn = () => {
     const sponsoredTxn = (args: ContractCalls) => {
         if (!availableCapabilities || !account.chainId) return {}
         const capabilitiesForChain = availableCapabilities[account.chainId]
-        // eslint-disable-next-line
         if (capabilitiesForChain['paymasterService'] && capabilitiesForChain['paymasterService'].supported) {
             const capabilities = {
                 paymasterService: {
                     url: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL,
                 },
             }
-            // eslint-disable-next-line
             if (capabilitiesForChain['atomicBatch'] && capabilitiesForChain['atomicBatch'].supported) {
                 writeContracts({ contracts: args, capabilities })
             } else {

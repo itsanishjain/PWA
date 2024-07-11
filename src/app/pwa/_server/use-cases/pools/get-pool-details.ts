@@ -21,7 +21,34 @@ function processPoolDetails(
     userInfo: ParticipantDetail | null,
 ): PoolDetailsDTO {
     if (!poolInfo) {
-        throw new Error(`Pool with ID ${contractPool.id} not found in database`)
+        //  TODO: Handle creation of pool in DB if not found
+        // throw new Error(`Pool with ID ${contractPool.id} not found in database`)
+        console.log('Pool not found in database with id:', contractPool.id)
+        return {
+            hostName: 'Unknown',
+            contractId: BigInt(contractPool.id),
+            claimableAmount: Number(claimableAmount),
+            participants: participantsInfo.participants.map((user: { name: string; avatarUrl: string }) => ({
+                name: user.name,
+                avatarUrl: user.avatarUrl,
+            })),
+            // userDeposit: Number(userInfo?.deposit) ?? 0,
+            goal: 0,
+            progress: Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
+            name: contractPool.name,
+            startDate: contractPool.startDate,
+            endDate: contractPool.endDate,
+            numParticipants: participantsInfo.count,
+            price: contractPool.price,
+            tokenSymbol: contractPool.tokenSymbol,
+            tokenDecimals: contractPool.tokenDecimals,
+            status: contractPool.status,
+            imageUrl: 'Unknown',
+            winnerTitle: contractPool.status === POOLSTATUS.ENDED ? 'Winner' : undefined,
+            softCap: 0,
+            description: 'Unknown',
+            termsUrl: 'Unknown',
+        }
     }
     // console.info('[get-pool-details] terms:', poolInfo.terms)
     return {
@@ -63,6 +90,7 @@ export async function getPoolDetailsUseCase(poolId: string, userAddress?: Addres
     ])
 
     if (!poolInfo) {
+        // TODO: Handle creation of pool in DB
         console.log('Pool not found in database with id:', poolId)
         // throw new Error(`Pool with ID ${poolId} not found in database`)
     }

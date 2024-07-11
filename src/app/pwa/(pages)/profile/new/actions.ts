@@ -24,7 +24,7 @@ export async function createProfileAction(_prevState: FormState, formData: FormD
         }
     }
 
-    const avatarFile = formData.get('avatar') as string
+    const avatarFile = formData.get('avatar') as File
     const displayName = formData.get('displayName') as string
 
     // Validate fields
