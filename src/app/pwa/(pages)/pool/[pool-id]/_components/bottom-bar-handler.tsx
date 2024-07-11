@@ -3,6 +3,8 @@
 import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
 import {
+    poolAbi,
+    poolAddress,
     useReadDropletBalanceOf,
     useWritePoolDeposit,
     useWritePoolEnableDeposit,
@@ -16,6 +18,8 @@ import { useSmartAccount } from '@/app/pwa/_client/hooks/use-smart-account'
 import { usePrivy } from '@privy-io/react-auth'
 import { revalidatePath } from 'next/cache'
 import { Address, parseUnits } from 'viem'
+import useSmartTransaction from '@/app/pwa/_client/hooks/use-smart-transaction'
+import { currentPoolAddress } from '@/app/pwa/_server/blockchain/server-config'
 
 export default function BottomBarHandler({
     isAdmin,
@@ -37,37 +41,49 @@ export default function BottomBarHandler({
     const { login } = useSmartAccount()
     const { ready, authenticated } = usePrivy()
     const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
-    const { writeContractAsync: enableDeposits } = useWritePoolEnableDeposit()
-    const { writeContractAsync: startPool } = useWritePoolStartPool()
-    const { writeContractAsync: endPool } = useWritePoolEndPool()
-    const { writeContractAsync: joinPool } = useWritePoolDeposit()
+    const { executeTransaction, result } = useSmartTransaction()
 
     const { data: userBalance, error: balanceError } = useReadDropletBalanceOf({ args: [walletAddress || '0x'] })
 
     const handleEnableDeposits = async () => {
         toast('Enabling deposits...')
 
-        await enableDeposits({
-            args: [poolId],
-        })
+        await executeTransaction([
+            {
+                address: currentPoolAddress,
+                abi: poolAbi,
+                functionName: 'enableDeposits',
+                args: [poolId],
+            },
+        ])
         revalidatePath(`/pool/${poolId}`)
     }
 
     const handleStartPool = async () => {
         toast('Starting pool...')
 
-        await startPool({
-            args: [poolId],
-        })
+        await executeTransaction([
+            {
+                address: currentPoolAddress,
+                abi: poolAbi,
+                functionName: 'startPool',
+                args: [poolId],
+            },
+        ])
         revalidatePath(`/pool/${poolId}`)
     }
 
     const handleEndPool = async () => {
         toast('Ending pool...')
 
-        await endPool({
-            args: [poolId],
-        })
+        await executeTransaction([
+            {
+                address: currentPoolAddress,
+                abi: poolAbi,
+                functionName: 'endPool',
+                args: [poolId],
+            },
+        ])
         revalidatePath(`/pool/${poolId}`)
     }
 
@@ -81,15 +97,14 @@ export default function BottomBarHandler({
         if (ready && authenticated) {
             console.log('Check funds')
 
-            // convert prize to correct format with decimals:
             const bigIntPrice = parseUnits(poolPrice.toString(), tokenDecimals)
 
-            if (balanceError || userBalance === undefined) {
+            if (balanceError) {
                 console.error('Error reading balance', balanceError)
                 return
             }
 
-            if (userBalance < bigIntPrice) {
+            if (Number(userBalance || 0) < bigIntPrice) {
                 toast('Insufficient funds, please top up your account.')
                 return
             }
@@ -99,10 +114,14 @@ export default function BottomBarHandler({
             console.log('Join pool')
             toast('Joining pool...')
 
-            const result = await joinPool({
-                args: [poolId, bigIntPrice],
-            })
-            console.log('result', result)
+            await executeTransaction([
+                {
+                    address: currentPoolAddress,
+                    abi: poolAbi,
+                    functionName: 'deposit',
+                    args: [poolId, bigIntPrice],
+                },
+            ])
             revalidatePath(`/pool/${poolId}`)
         }
     }
