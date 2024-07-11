@@ -40,7 +40,7 @@ export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
                     <PoolDetailsBanner
                         name={pool.name}
                         imageUrl={pool.imageUrl}
-                        buttons={<PoolDetailsBannerButtons />}
+                        buttons={<PoolDetailsBannerButtons isAdmin={isAdmin} />}
                         status={<PoolDetailsBannerStatus />}
                     />
                     <PoolDetailsHeading
