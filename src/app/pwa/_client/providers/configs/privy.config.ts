@@ -40,7 +40,7 @@ export default {
             termsAndConditionsUrl: '/terms',
         },
         loginMethodsAndOrder: {
-            primary: ['coinbase_wallet', 'detected_wallets'],
+            primary: ['coinbase_wallet', 'detected_wallets', 'metamask'],
         },
         fiatOnRamp: { useSandbox: true },
     },
