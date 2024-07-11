@@ -27,7 +27,7 @@ const PoolDetailsDTOSchema = z.object({
     winnerTitle: z.string().optional(),
     softCap: z.number().int().positive(),
     description: z.string(),
-    termsUrl: z.string().optional().or(z.literal('')),
+    termsUrl: z.string().optional().or(z.literal('')).optional(),
     hostName: z.string(),
     //TODO: enforce string().url() for terms
 
