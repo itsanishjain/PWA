@@ -5,6 +5,7 @@ import { Drawer, DrawerContent, DrawerOverlay } from '@/app/pwa/_components/ui/d
 import { loadStripeOnramp } from '@stripe/crypto'
 import { useEffect, useRef, useState } from 'react'
 import { getSession } from './get-session'
+import { Dialog } from '@/app/pwa/_components/ui/dialog'
 
 interface StripeOnrampAppearance {
     theme: 'light' | 'dark'
@@ -29,11 +30,12 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST) {
     throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST not set')
 }
 
-export const OnrampWithStripe: React.FC<OrampWithStripeProps> = ({ appearance }) => {
+export const OnrampWithStripe: React.FC<OrampWithStripeProps> = ({ appearance, ...props }) => {
     const [stripeOnramp, setStripeOnramp] = useState<StripeOnramp | null>(null)
     const onrampElementRef = useRef<HTMLDivElement>(null)
     const [clientSecret, setClientSecret] = useState('')
     const [showButton, setShowButton] = useState(true)
+    const [open, setOpen] = useState(false)
 
     useEffect(() => {
         loadStripeOnramp(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST!)
@@ -66,18 +68,24 @@ export const OnrampWithStripe: React.FC<OrampWithStripeProps> = ({ appearance })
 
     return (
         <>
-            {showButton && (
-                <Button
-                    className='h-[30px] w-[46px] rounded-mini bg-cta px-[10px] py-[5px] text-[10px]'
-                    onClick={() => void createSession()}>
-                    Stripe
-                </Button>
-            )}
-            <div ref={onrampElementRef} />
-            <Drawer>
-                <DrawerOverlay />
-                <DrawerContent ref={onrampElementRef} />
-            </Drawer>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <Dialog.Trigger asChild>
+                    <Button
+                        className='h-10 w-20 rounded-[2rem] bg-cta text-center text-xs font-semibold leading-normal text-white shadow-button active:shadow-button-push'
+                        onClick={createSession}>
+                        On Ramp
+                    </Button>
+                </Dialog.Trigger>
+                <Dialog.Content className='bg-white sm:max-w-[425px]'>
+                    <Dialog.Header>
+                        <Dialog.Title>Buy with Stripe</Dialog.Title>
+                        <Dialog.Description>Using cards, banks and international options.</Dialog.Description>
+                    </Dialog.Header>
+                    <div {...props} ref={onrampElementRef}></div>
+
+                    <div ref={onrampElementRef} {...props}></div>
+                </Dialog.Content>
+            </Dialog>
         </>
     )
 }

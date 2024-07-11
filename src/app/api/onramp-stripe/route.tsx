@@ -1,10 +1,12 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextResponse } from 'next/server'
+
 import 'server-only'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function GET(req: Request) {
     console.log('req', req)
+    console.log('stripe onramp API Hit')
     try {
-        await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
+        const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY_TEST}`,
@@ -15,10 +17,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 destination_network: 'base',
             }).toString(),
         })
-            .then(response => response.json())
-            .then(json => {
-                res.status(200).json(json)
-            })
+
+        const json = await response.json()
+        return NextResponse.json(json, { status: 200 })
     } catch (error) {
         console.error('There was a problem with the post operation:', error)
     }
