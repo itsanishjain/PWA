@@ -21,20 +21,20 @@ export default function Balance({ initialBalance }: BalanceProps) {
     )
     const [isEncoded, setIsEncoded] = useState(false)
 
-    // const pollBalance = async () => {
-    //     const [refreshBalance] = await getAddressBalanceAction()
-    //     if (refreshBalance && 'balance' in refreshBalance) setBalanceInfo(refreshBalance)
-    // }
+    const pollBalance = async () => {
+        const [refreshBalance] = await getAddressBalanceAction()
+        if (refreshBalance && 'balance' in refreshBalance) setBalanceInfo(refreshBalance)
+    }
 
-    // useEffect(() => {
-    //     if (!loading) {
-    //         void pollBalance() // Fetch balance immediately
+    useEffect(() => {
+        if (!loading) {
+            void pollBalance() // Fetch balance immediately
 
-    //         const intervalId = setInterval(() => void pollBalance(), 5000) // Poll every 5 seconds
+            const intervalId = setInterval(() => void pollBalance(), 5000) // Poll every 5 seconds
 
-    //         return () => clearInterval(intervalId) // Clean up on unmount
-    //     }
-    // }, [loading])
+            return () => clearInterval(intervalId) // Clean up on unmount
+        }
+    }, [loading])
 
     useEffect(() => {
         const fetchBalance = async () => {

@@ -23,24 +23,24 @@ export default function Balance({ initialBalance }: BalanceProps) {
     const [isEncoded, setIsEncoded] = useState(false)
     const prevBalanceRef = useRef<bigint | null>(null)
 
-    // const pollBalance = async () => {
-    //     const [refreshBalance] = await getAddressBalanceAction()
-    //     if (refreshBalance && 'balance' in refreshBalance) {
-    //         if (!prevBalanceRef.current || refreshBalance.balance !== prevBalanceRef.current) {
-    //             setBalanceInfo(refreshBalance)
-    //             prevBalanceRef.current = refreshBalance.balance
-    //         }
-    //     }
-    // }
+    const pollBalance = async () => {
+        const [refreshBalance] = await getAddressBalanceAction()
+        if (refreshBalance && 'balance' in refreshBalance) {
+            if (!prevBalanceRef.current || refreshBalance.balance !== prevBalanceRef.current) {
+                setBalanceInfo(refreshBalance)
+                prevBalanceRef.current = refreshBalance.balance
+            }
+        }
+    }
 
     // TODO: replace polling with pubsub model
-    // useEffect(() => {
-    //     if (!loading) {
-    //         void pollBalance().finally(() => setIsInitialLoading(false))
-    //         const intervalId = setInterval(() => void pollBalance(), 20000)
-    //         return () => clearInterval(intervalId)
-    //     }
-    // }, [loading])
+    useEffect(() => {
+        if (!loading) {
+            void pollBalance().finally(() => setIsInitialLoading(false))
+            const intervalId = setInterval(() => void pollBalance(), 20000)
+            return () => clearInterval(intervalId)
+        }
+    }, [loading])
 
     useEffect(() => {
         const fetchBalance = async () => {
