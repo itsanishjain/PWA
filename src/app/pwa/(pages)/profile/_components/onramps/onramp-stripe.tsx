@@ -71,7 +71,7 @@ export const OnrampWithStripe: React.FC<OrampWithStripeProps> = ({ appearance, .
             <Dialog open={open} onOpenChange={setOpen}>
                 <Dialog.Trigger asChild>
                     <Button
-                        className='h-10 w-20 rounded-[2rem] bg-cta text-center text-xs font-semibold leading-normal text-white shadow-button active:shadow-button-push'
+                        className='h-10 rounded-[2rem] bg-cta text-center text-xs font-semibold leading-normal text-white shadow-button active:shadow-button-push'
                         onClick={createSession}>
                         On Ramp
                     </Button>
