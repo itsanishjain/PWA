@@ -25,7 +25,7 @@ export default function MainContentWrapper({ children, title = null }: MainConte
     return (
         <main
             className={cn(
-                'mx-auto flex h-full w-dvw max-w-screen-md flex-1 flex-col pt-safe-offset-24 mb-safe-or-24 px-safe-or-6',
+                'relative mx-auto flex h-full w-dvw max-w-screen-md flex-1 flex-col pt-safe-offset-24 mb-safe-or-24 px-safe-or-6',
                 isBottomBarVisible ? 'pb-6' : '',
             )}>
             {children}

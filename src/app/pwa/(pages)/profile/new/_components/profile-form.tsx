@@ -27,6 +27,7 @@ const formFields = [
         label: 'User Image',
         description: 'Choose your account image',
         component: AvatarUploader,
+        propName: 'avatar',
     },
     {
         key: 'displayName' as const,
@@ -34,6 +35,7 @@ const formFields = [
         label: 'User Name',
         description: 'Choose a user name',
         component: Text,
+        propName: 'name',
     },
 ] as const
 
@@ -93,12 +95,19 @@ const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
         <form id='profile-form' action={formAction} className='mx-auto flex w-full max-w-full flex-col'>
             {formFields.map(field => {
                 const errors = state?.errors && field.key in state.errors ? state.errors[field.key as FormFieldKey] : []
+                let defaultValue: string | undefined
+
+                if (field.key === 'displayName') {
+                    defaultValue = name || undefined
+                } else if (field.key === 'avatar') {
+                    defaultValue = avatar || undefined
+                }
 
                 return (
                     <section key={field.key} className='flex flex-1 flex-col'>
                         <Label className='text-base font-medium text-[#090909]'>{field.label}</Label>
                         <p className='mb-4 mt-1.5 text-xs font-medium text-[#b2b2b2]'>{field.description}</p>
-                        <field.component name={field.name} />
+                        <field.component name={field.name} defaultValue={defaultValue} />
                         {errors && errors.length > 0 && (
                             <p className='mt-1 text-xs text-red-500'>{errors.join(', ')}</p>
                         )}

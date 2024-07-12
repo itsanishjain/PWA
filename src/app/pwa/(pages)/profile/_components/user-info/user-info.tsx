@@ -16,12 +16,12 @@ interface UserItem {
 }
 
 interface UserInfoProps {
-    initialUserInfo: UserItem | { needsRefresh: boolean }
+    initialUserInfo: (UserItem | { needsRefresh: boolean }) | null
 }
 
 export default function UserInfo({ initialUserInfo }: UserInfoProps) {
     const account = useAccount()
-    const [userInfo, setUserInfo] = useState<UserItem>(
+    const [userInfo, setUserInfo] = useState<UserItem | null>(
         initialUserInfo && 'needsRefresh' in initialUserInfo ? { avatar: null, displayName: null } : initialUserInfo,
     )
 
@@ -48,7 +48,7 @@ export default function UserInfo({ initialUserInfo }: UserInfoProps) {
     return (
         <section className='detail_card inline-flex w-full gap-[0.69rem] rounded-3xl p-6'>
             <Avatar className='size-[3.125rem] cursor-pointer' aria-label='User Avatar'>
-                {'avatar' in initialUserInfo && initialUserInfo.avatar && (
+                {initialUserInfo && 'avatar' in initialUserInfo && initialUserInfo.avatar && (
                     <AvatarImage alt='User Avatar' src={initialUserInfo.avatar} />
                 )}
                 <AvatarFallback className='bg-[#d9d9d9]/40 backdrop-blur-xl' />
