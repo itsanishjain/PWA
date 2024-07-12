@@ -56,7 +56,6 @@ export default function BottomBarHandler({
                 args: [poolId],
             },
         ])
-        revalidatePath(`/pool/${poolId}`)
     }
 
     const handleStartPool = async () => {
@@ -70,7 +69,6 @@ export default function BottomBarHandler({
                 args: [poolId],
             },
         ])
-        revalidatePath(`/pool/${poolId}`)
     }
 
     const handleEndPool = async () => {
@@ -84,14 +82,12 @@ export default function BottomBarHandler({
                 args: [poolId],
             },
         ])
-        revalidatePath(`/pool/${poolId}`)
     }
 
     const handleJoinPool = async () => {
         if (ready && !authenticated) {
             console.log('Login first')
             login()
-            revalidatePath(`/pool/${poolId}`)
         }
 
         if (ready && authenticated) {
@@ -122,7 +118,6 @@ export default function BottomBarHandler({
                     args: [poolId, bigIntPrice],
                 },
             ])
-            revalidatePath(`/pool/${poolId}`)
         }
     }
 
