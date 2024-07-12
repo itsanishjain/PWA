@@ -98,13 +98,12 @@ const OnRampDialog = ({ open, setOpen, balance, decimalPlaces, amount }: OnRampD
                         </div>
 
                         <div className='mb-6 flex w-full flex-row items-center justify-between'>
-                            <div className='flex w-full flex-col'>
-                                <div className='w-full font-semibold'>Buy with Stripe</div>
-                                <div className='w-full text-sm text-gray-500'>
+                            <div className='flex flex-col'>
+                                <div className='font-semibold'>Buy with Stripe</div>
+                                <div className='text-sm text-gray-500'>
                                     Using cards, banks and international options
                                 </div>
                             </div>
-
                             <OnrampWithStripe />
                         </div>
                         <div className='mb-6 flex w-full flex-row items-center justify-between'>
