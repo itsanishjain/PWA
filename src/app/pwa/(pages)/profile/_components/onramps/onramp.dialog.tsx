@@ -72,7 +72,9 @@ const OnRampDialog = ({ open, setOpen, balance, decimalPlaces, amount }: OnRampD
                         <div className='mb-6 flex w-full flex-row items-center justify-between'>
                             <div className='flex flex-col'>
                                 <div className='font-semibold'>Buy with Unlimit</div>
-                                <div className='text-sm text-gray-500'>Recommended Option</div>
+                                <div className='text-sm text-gray-500'>
+                                    Using cards, banks and international options
+                                </div>
                             </div>
                             <Unlimit
                                 amount={amount}
@@ -96,13 +98,12 @@ const OnRampDialog = ({ open, setOpen, balance, decimalPlaces, amount }: OnRampD
                         </div>
 
                         <div className='mb-6 flex w-full flex-row items-center justify-between'>
-                            <div className='flex w-full flex-col'>
-                                <div className='w-full font-semibold'>Buy with Stripe</div>
-                                <div className='w-full text-sm text-gray-500'>
+                            <div className='flex flex-col'>
+                                <div className='font-semibold'>Buy with Stripe</div>
+                                <div className='text-sm text-gray-500'>
                                     Using cards, banks and international options
                                 </div>
                             </div>
-
                             <OnrampWithStripe />
                         </div>
                         <div className='mb-6 flex w-full flex-row items-center justify-between'>
@@ -116,7 +117,7 @@ const OnRampDialog = ({ open, setOpen, balance, decimalPlaces, amount }: OnRampD
                             <Button
                                 onClick={fundWithMoonpay}
                                 className='h-10 w-20 rounded-[2rem] bg-cta text-center text-xs font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
-                                Receive
+                                On Ramp
                             </Button>
                         </div>
                         <div className='mb-6 flex w-full flex-row items-center justify-between'>

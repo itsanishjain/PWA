@@ -81,9 +81,9 @@ export const OnrampWithStripe: React.FC<OrampWithStripeProps> = ({ appearance, .
                         <Dialog.Title>Buy with Stripe</Dialog.Title>
                         <Dialog.Description>Using cards, banks and international options.</Dialog.Description>
                     </Dialog.Header>
-                    <div {...props} ref={onrampElementRef}></div>
+                    <div className='w-20' {...props} ref={onrampElementRef}></div>
 
-                    <div ref={onrampElementRef} {...props}></div>
+                    {/* <div ref={onrampElementRef} {...props}></div> */}
                 </Dialog.Content>
             </Dialog>
         </>
