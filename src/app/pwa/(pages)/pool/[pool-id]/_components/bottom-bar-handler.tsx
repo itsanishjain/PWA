@@ -52,7 +52,7 @@ export default function BottomBarHandler({
             {
                 address: currentPoolAddress,
                 abi: poolAbi,
-                functionName: 'enableDeposits',
+                functionName: 'enableDeposit',
                 args: [poolId],
             },
         ])
