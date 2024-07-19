@@ -88,7 +88,7 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
         name,
         bannerImage,
         description,
-        termsURL,
+        termsURL: termsURL || undefined,
         dateRange,
         softCap: Number(softCap),
         price: Number(price),
