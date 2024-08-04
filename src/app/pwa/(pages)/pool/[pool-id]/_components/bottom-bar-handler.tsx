@@ -1,25 +1,16 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
-import {
-    poolAbi,
-    poolAddress,
-    useReadDropletBalanceOf,
-    useWritePoolDeposit,
-    useWritePoolEnableDeposit,
-    useWritePoolEndPool,
-    useWritePoolStartPool,
-} from '@/types/contracts'
+import { poolAbi, useReadDropletBalanceOf } from '@/types/contracts'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { POOLSTATUS } from '../_lib/definitions'
-import { useSmartAccount } from '@/app/pwa/_client/hooks/use-smart-account'
-import { usePrivy } from '@privy-io/react-auth'
-import { revalidatePath } from 'next/cache'
 import { Address, parseUnits } from 'viem'
 import useSmartTransaction from '@/app/pwa/_client/hooks/use-smart-transaction'
 import { currentPoolAddress } from '@/app/pwa/_server/blockchain/server-config'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
+import { useAuth } from '@/app/pwa/_client/hooks/use-auth'
+import { POOLSTATUS } from '../_lib/definitions'
+import { usePoolActions } from '@/app/pwa/_client/hooks/use-pool-actions'
 
 export default function BottomBarHandler({
     isAdmin,
@@ -38,88 +29,110 @@ export default function BottomBarHandler({
     tokenDecimals: number
     walletAddress: Address | null
 }) {
-    const { login } = useSmartAccount()
-    const { ready, authenticated } = usePrivy()
-    const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
-    const { executeTransaction, result } = useSmartTransaction()
+    const { setBottomBarContent } = useAppStore(state => ({
+        setBottomBarContent: state.setBottomBarContent,
+    }))
 
-    const { data: userBalance, error: balanceError } = useReadDropletBalanceOf({ args: [walletAddress || '0x'] })
+    // const { login, authenticated: isAuthenticated } = useAuth()
+    // const { executeTransaction, isReady } = useSmartTransaction()
+    // const { data: userBalance, error: balanceError } = useReadDropletBalanceOf({ args: [walletAddress || '0x'] })
 
-    const handleEnableDeposits = async () => {
-        toast('Enabling deposits...')
+    const { handleEnableDeposits, handleEndPool, handleJoinPool, handleStartPool, ready } = usePoolActions(
+        poolId,
+        poolPrice,
+        tokenDecimals,
+    )
 
-        await executeTransaction([
-            {
-                address: currentPoolAddress,
-                abi: poolAbi,
-                functionName: 'enableDeposit',
-                args: [poolId],
-            },
-        ])
-    }
-
-    const handleStartPool = async () => {
-        toast('Starting pool...')
-
-        await executeTransaction([
-            {
-                address: currentPoolAddress,
-                abi: poolAbi,
-                functionName: 'startPool',
-                args: [poolId],
-            },
-        ])
-    }
-
-    const handleEndPool = async () => {
-        toast('Ending pool...')
-
-        await executeTransaction([
-            {
-                address: currentPoolAddress,
-                abi: poolAbi,
-                functionName: 'endPool',
-                args: [poolId],
-            },
-        ])
-    }
-
-    const handleJoinPool = async () => {
-        if (ready && !authenticated) {
-            console.log('Login first')
-            login()
+    useEffect(() => {
+        ready && handleBottomBarContent(poolStatus, isAdmin)
+        return () => {
+            setBottomBarContent(null)
         }
+    }, [poolStatus, isAdmin, setBottomBarContent, ready])
 
-        if (ready && authenticated) {
-            console.log('Check funds')
+    // const handleEnableDeposits = async () => {
+    //     toast('Enabling deposits...')
 
-            const bigIntPrice = parseUnits(poolPrice.toString(), tokenDecimals)
+    //     await executeTransaction([
+    //         {
+    //             address: currentPoolAddress,
+    //             abi: poolAbi,
+    //             functionName: 'enableDeposit',
+    //             args: [poolId],
+    //         },
+    //     ])
+    // }
 
-            if (balanceError) {
-                console.error('Error reading balance', balanceError)
-                return
-            }
+    // const handleStartPool = async () => {
+    //     toast('Starting pool...')
 
-            if (Number(userBalance || 0) < bigIntPrice) {
-                toast('Insufficient funds, please top up your account.')
-                return
-            }
+    //     await executeTransaction([
+    //         {
+    //             address: currentPoolAddress,
+    //             abi: poolAbi,
+    //             functionName: 'startPool',
+    //             args: [poolId],
+    //         },
+    //     ])
+    // }
 
-            console.log('Onramp funds if needed')
+    // const handleEndPool = async () => {
+    //     toast('Ending pool...')
 
-            console.log('Join pool')
-            toast('Joining pool...')
+    //     await executeTransaction([
+    //         {
+    //             address: currentPoolAddress,
+    //             abi: poolAbi,
+    //             functionName: 'endPool',
+    //             args: [poolId],
+    //         },
+    //     ])
+    // }
 
-            await executeTransaction([
-                {
-                    address: currentPoolAddress,
-                    abi: poolAbi,
-                    functionName: 'deposit',
-                    args: [poolId, bigIntPrice],
-                },
-            ])
-        }
-    }
+    // const handleJoinPool = async () => {
+    //     console.log('Join pool button clicked')
+
+    //     if (!isReady) {
+    //         console.log('Wallet not ready')
+    //         return
+    //     }
+
+    //     if (isReady && !isAuthenticated) {
+    //         console.log('Login first')
+    //         login()
+    //     }
+
+    //     if (isReady && isAuthenticated) {
+    //         console.log('Check funds')
+
+    //         const bigIntPrice = parseUnits(poolPrice.toString(), tokenDecimals)
+    //         console.log('Big int price:', bigIntPrice.toString())
+
+    //         if (balanceError) {
+    //             console.error('Error reading balance', balanceError)
+    //             return
+    //         }
+
+    //         if (Number(userBalance || 0) < bigIntPrice) {
+    //             toast('Insufficient funds, please top up your account.')
+    //             return
+    //         }
+
+    //         console.log('Onramp funds if needed')
+
+    //         console.log('Join pool')
+    //         toast('Joining pool...')
+
+    //         await executeTransaction([
+    //             {
+    //                 address: currentPoolAddress,
+    //                 abi: poolAbi,
+    //                 functionName: 'deposit',
+    //                 args: [poolId, bigIntPrice],
+    //             },
+    //         ])
+    //     }
+    // }
 
     const handleBottomBarContent = (poolStatus: POOLSTATUS, isAdmin: boolean) => {
         switch (poolStatus) {
@@ -188,13 +201,6 @@ export default function BottomBarHandler({
                 )
         }
     }
-
-    useEffect(() => {
-        handleBottomBarContent(poolStatus, isAdmin)
-        return () => {
-            setBottomBarContent(null)
-        }
-    }, [poolStatus, isAdmin])
 
     return null
 }
