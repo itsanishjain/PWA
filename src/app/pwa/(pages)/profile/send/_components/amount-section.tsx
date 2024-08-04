@@ -1,7 +1,6 @@
 'use client'
 
 import { wagmi } from '@/app/pwa/_client/providers/configs'
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
 import { Input } from '@/app/pwa/_components/ui/input'
 import { dropletAbi, dropletAddress } from '@/types/contracts'
@@ -13,6 +12,7 @@ import { useBalance, useWriteContract } from 'wagmi'
 import Container from '../../claim-winning/_components/container'
 import SectionContent from '../../claim-winning/_components/section-content'
 import { useTokenDecimals } from './use-token-decimals'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
 
 export default function AmountSection() {
     const { wallets } = useWallets()
@@ -35,7 +35,7 @@ export default function AmountSection() {
     const handleWithdrawAddressInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setWithdrawAddress(event.target.value)
     }
-    const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
+    const setBottomBarContent = useAppStore(state => state.setBottomBarContent)
     // const { data: hash, sendTransaction } = useSendTransaction()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data: hash, isPending, isSuccess, writeContract } = useWriteContract()

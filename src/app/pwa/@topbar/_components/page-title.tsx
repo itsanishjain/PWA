@@ -1,12 +1,12 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import PoolTopLogo from '@/app/pwa/_components/icons/pool-top-logo'
 import { Route } from 'next'
 import Link from 'next/link'
+import { useAppStore } from '../../_client/providers/app-store.provider'
 
 export default function PageTitle() {
-    const topBarTitle = useSettingsStore(state => state.topBarTitle)
+    const topBarTitle = useAppStore(state => state.topBarTitle)
 
     return (
         <Link href={'/' as Route}>

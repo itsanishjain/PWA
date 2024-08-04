@@ -1,6 +1,5 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
 import route from '@/lib/utils/routes'
 import Link from 'next/link'
@@ -9,10 +8,11 @@ import { useCallback, useEffect, useRef } from 'react'
 import MyPoolsTabs from './my-pools.tabs'
 import type { MyPoolsTab } from './my-pools.tabs.config'
 import { Route } from 'next'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
 
 const MyPools: React.FC = (): JSX.Element => {
     const searchParams = useSearchParams()
-    const { myPoolsTab, setMyPoolsTab, setBottomBarContent } = useSettingsStore(state => ({
+    const { myPoolsTab, setMyPoolsTab, setBottomBarContent } = useAppStore(state => ({
         myPoolsTab: state.myPoolsTab,
         setMyPoolsTab: state.setMyPoolsTab,
         setBottomBarContent: state.setBottomBarContent,

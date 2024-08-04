@@ -1,14 +1,13 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
-import route from '@/lib/utils/routes'
 import { Route } from 'next'
 import Link from 'next/link'
 import { useEffect } from 'react'
 
 export default function RenderBottomBar({ isAdmin = false }: { isAdmin?: boolean | null }) {
-    const setBottomBar = useSettingsStore(state => state.setBottomBarContent)
+    const setBottomBar = useAppStore(state => state.setBottomBarContent)
 
     useEffect(() => {
         if (isAdmin) {

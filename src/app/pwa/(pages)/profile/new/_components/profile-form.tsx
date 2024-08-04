@@ -1,6 +1,5 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
 import { Label } from '@/app/pwa/_components/ui/label'
 import { usePrivy } from '@privy-io/react-auth'
@@ -11,6 +10,7 @@ import { useFormState } from 'react-dom'
 import { toast } from 'sonner'
 import { createProfileAction } from '../actions'
 import { Tables } from '@/types/db'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
 
 const AvatarUploader = dynamic(() => import('./avatar-uploader'), {
     ssr: false,
@@ -55,7 +55,7 @@ interface ProfileFormProps {
 
 const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
     const router = useRouter()
-    const { setBottomBarContent, setTopBarTitle } = useSettingsStore(s => ({
+    const { setBottomBarContent, setTopBarTitle } = useAppStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
         setTopBarTitle: s.setTopBarTitle,
     }))

@@ -1,6 +1,5 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
 import { Label } from '@/app/pwa/_components/ui/label'
 import dynamic from 'next/dynamic'
@@ -8,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { useFormState, useFormStatus } from 'react-dom'
 import { toast } from 'sonner'
 import { createPoolAction } from './actions'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
 
 // Dynamic imports for form components
 const CurrencyAmount = dynamic(() => import('@/app/pwa/_components/forms-controls/currency-amount.control'), {
@@ -95,7 +95,7 @@ const initialState = {
 export default function CreatePool() {
     const [toastId, setToastId] = useState<string | number>()
 
-    const { setBottomBarContent, setTopBarTitle } = useSettingsStore(s => ({
+    const { setBottomBarContent, setTopBarTitle } = useAppStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
         setTopBarTitle: s.setTopBarTitle,
     }))

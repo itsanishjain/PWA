@@ -2,7 +2,6 @@
 
 import { useSponsoredTxn } from '@/app/pwa/_client/hooks/use-sponsored-txn'
 import { wagmi } from '@/app/pwa/_client/providers/configs'
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Button } from '@/app/pwa/_components/ui/button'
 import { poolAbi, poolAddress } from '@/types/contracts'
 import { useWallets } from '@privy-io/react-auth'
@@ -15,9 +14,10 @@ import PoolCardRow from './pool-card-row'
 import SectionContent from './section-content'
 import SectionTitle from './section-title'
 import { useClaimablePools } from './use-claimable-pools'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
 
 export default function ClaimablePrizesList() {
-    const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
+    const setBottomBarContent = useAppStore(state => state.setBottomBarContent)
     const { wallets } = useWallets()
     const { writeContract } = useWriteContract()
     const walletAddress = wallets?.[0]?.address

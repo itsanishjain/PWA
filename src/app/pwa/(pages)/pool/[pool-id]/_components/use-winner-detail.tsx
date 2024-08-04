@@ -1,6 +1,6 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
 import { cn } from '@/lib/utils/tailwind'
 import { useEffect } from 'react'
 
@@ -10,7 +10,7 @@ interface MainContentWrapperProps {
 }
 
 export default function MainContentWrapper({ children, title = null }: MainContentWrapperProps) {
-    const { isBottomBarVisible, setTopBarTitle } = useSettingsStore(state => ({
+    const { isBottomBarVisible, setTopBarTitle } = useAppStore(state => ({
         isBottomBarVisible: Boolean(state.bottomBarContent),
         setTopBarTitle: state.setTopBarTitle,
     }))

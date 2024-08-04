@@ -1,10 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { useSettingsStore } from '../_client/providers/settings.provider'
+import { useAppStore } from '../_client/providers/app-store.provider'
 
 export default function BottomBar() {
-    const content = useSettingsStore(s => s.bottomBarContent)
+    const content = useAppStore(s => s.bottomBarContent)
 
     if (!content) return null
 

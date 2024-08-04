@@ -1,10 +1,8 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/pwa/_components/ui/avatar'
 import { ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
-import { userInfo } from 'os'
 import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
 import { getUserInfoAction } from '../../actions'

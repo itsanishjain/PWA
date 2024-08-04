@@ -1,15 +1,15 @@
 'use client'
 
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { cn } from '@/lib/utils/tailwind'
 import { useEffect } from 'react'
+import { useAppStore } from '../_client/providers/app-store.provider'
 
 interface Title {
     title?: string | null
 }
 
 export default function Title({ title = null }: Title) {
-    const setTopBarTitle = useSettingsStore(state => state.setTopBarTitle)
+    const setTopBarTitle = useAppStore(state => state.setTopBarTitle)
 
     useEffect(() => {
         setTopBarTitle(title)

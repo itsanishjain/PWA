@@ -6,12 +6,12 @@ import { useCreatePool } from './use-create-pool'
 import { FormFieldKey, formFields } from './form-fields'
 import { Button } from '@/app/pwa/_components/ui/button'
 import { Label } from '@/app/pwa/_components/ui/label'
-import { useSettingsStore } from '@/app/pwa/_client/providers/settings.provider'
 import { Steps, usePoolCreationStore } from '@/app/pwa/_client/stores/pool-creation-store'
+import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
 
 export default function CreatePoolForm() {
     const { formAction, state, createPoolOnChain, isPending, isConfirming } = useCreatePool()
-    const { setBottomBarContent, setTopBarTitle } = useSettingsStore(s => ({
+    const { setBottomBarContent, setTopBarTitle } = useAppStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
         setTopBarTitle: s.setTopBarTitle,
     }))
