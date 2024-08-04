@@ -1,12 +1,12 @@
 'use client'
 
-import { useSmartAccount } from '@/app/pwa/_client/hooks/use-smart-account'
 import { formatBalance } from '@/app/pwa/_lib/utils/balance'
 import { useEffect, useRef, useState } from 'react'
 import { getAddressBalanceAction } from '../../profile/actions'
 import BalanceSkeleton from './balance-skeleton'
 import EncryptText from './encrypt-text'
 import FormattedBalance from './formatted-balance'
+import { useWallets } from '@privy-io/react-auth'
 
 type BalanceInfo = { balance: bigint; symbol: string; decimals: number } | null
 
@@ -15,7 +15,7 @@ interface BalanceProps {
 }
 
 export default function Balance({ initialBalance }: BalanceProps) {
-    const { loading } = useSmartAccount()
+    const { ready } = useWallets()
     const [isInitialLoading, setIsInitialLoading] = useState(true)
     const [balanceInfo, setBalanceInfo] = useState<BalanceInfo>(
         initialBalance && 'balance' in initialBalance ? initialBalance : null,
@@ -35,12 +35,13 @@ export default function Balance({ initialBalance }: BalanceProps) {
 
     // TODO: replace polling with pubsub model
     useEffect(() => {
-        if (!loading) {
+        if (ready) {
             void pollBalance().finally(() => setIsInitialLoading(false))
-            const intervalId = setInterval(() => void pollBalance(), 20000)
-            return () => clearInterval(intervalId)
+            // TODO: for some reason this is causing pools poll as well
+            // const intervalId = setInterval(() => void pollBalance(), 20000)
+            // return () => clearInterval(intervalId)
         }
-    }, [loading])
+    }, [ready])
 
     useEffect(() => {
         const fetchBalance = async () => {
@@ -52,13 +53,13 @@ export default function Balance({ initialBalance }: BalanceProps) {
             setIsInitialLoading(false)
         }
 
-        if (!loading && initialBalance && 'needsRefresh' in initialBalance) {
+        if (ready && initialBalance && 'needsRefresh' in initialBalance) {
             void fetchBalance()
         }
-    }, [initialBalance, loading])
+    }, [initialBalance, ready])
 
     const showSkeleton =
-        isInitialLoading || loading || !balanceInfo || (initialBalance && 'needsRefresh' in initialBalance)
+        isInitialLoading || !ready || !balanceInfo || (initialBalance && 'needsRefresh' in initialBalance)
 
     const formattedBalance = balanceInfo
         ? formatBalance(balanceInfo.balance, balanceInfo.decimals)

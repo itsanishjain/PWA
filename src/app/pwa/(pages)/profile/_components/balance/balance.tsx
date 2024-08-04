@@ -1,12 +1,12 @@
 'use client'
 
-import { useSmartAccount } from '@/app/pwa/_client/hooks/use-smart-account'
 import { formatBalance } from '@/app/pwa/_lib/utils/balance'
 import { useEffect, useState } from 'react'
 import BalanceSkeleton from '../../../pools/_components/balance-skeleton'
 import EncryptText from '../../../pools/_components/encrypt-text'
 import FormattedBalance from '../../../pools/_components/formatted-balance'
 import { getAddressBalanceAction } from '../../actions'
+import { useWallets } from '@privy-io/react-auth'
 
 type BalanceInfo = { balance: bigint; symbol: string; decimals: number } | null
 
@@ -15,7 +15,7 @@ interface BalanceProps {
 }
 
 export default function Balance({ initialBalance }: BalanceProps) {
-    const { loading } = useSmartAccount()
+    const { ready } = useWallets()
     const [balanceInfo, setBalanceInfo] = useState<BalanceInfo>(
         initialBalance && 'balance' in initialBalance ? initialBalance : null,
     )
@@ -27,14 +27,13 @@ export default function Balance({ initialBalance }: BalanceProps) {
     }
 
     useEffect(() => {
-        if (!loading) {
+        if (ready) {
             void pollBalance() // Fetch balance immediately
-
-            const intervalId = setInterval(() => void pollBalance(), 5000) // Poll every 5 seconds
-
-            return () => clearInterval(intervalId) // Clean up on unmount
+            // TODO: for some reason this is causing pools poll as well
+            // const intervalId = setInterval(() => void pollBalance(), 5000) // Poll every 5 seconds
+            // return () => clearInterval(intervalId) // Clean up on unmount
         }
-    }, [loading])
+    }, [ready])
 
     useEffect(() => {
         const fetchBalance = async () => {
@@ -42,12 +41,12 @@ export default function Balance({ initialBalance }: BalanceProps) {
             if (refreshBalance && 'balance' in refreshBalance) setBalanceInfo(refreshBalance)
         }
 
-        if (!loading && initialBalance && 'needsRefresh' in initialBalance) {
+        if (ready && initialBalance && 'needsRefresh' in initialBalance) {
             void fetchBalance()
         }
-    }, [initialBalance, loading])
+    }, [initialBalance, ready])
 
-    const balanceLoading = loading || !balanceInfo || (initialBalance && 'needsRefresh' in initialBalance)
+    const balanceLoading = !ready || !balanceInfo || (initialBalance && 'needsRefresh' in initialBalance)
 
     const formattedBalance = balanceInfo
         ? formatBalance(balanceInfo.balance, balanceInfo.decimals)
