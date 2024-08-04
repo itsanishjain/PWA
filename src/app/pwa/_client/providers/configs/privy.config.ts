@@ -18,14 +18,7 @@ export default {
             landingHeader: 'Log in or sign up to continue',
             loginMessage: 'Pooling funds made simple.',
             showWalletLoginFirst: true,
-        },
-        embeddedWallets: {
-            createOnLogin: 'users-without-wallets',
-            noPromptOnSignature: true,
-            priceDisplay: {
-                primary: 'native-token',
-                secondary: null,
-            },
+            walletList: ['coinbase_wallet', 'detected_wallets'],
         },
         externalWallets: {
             coinbaseWallet: {
@@ -33,15 +26,31 @@ export default {
                 connectionOptions: 'all',
             },
         },
-        defaultChain: baseSepolia,
         supportedChains: [baseSepolia],
+        defaultChain: baseSepolia,
         legal: {
             privacyPolicyUrl: '/privacy-policy',
             termsAndConditionsUrl: '/terms',
         },
-        loginMethodsAndOrder: {
-            primary: ['coinbase_wallet', 'detected_wallets', 'metamask'],
-        },
-        fiatOnRamp: { useSandbox: true },
+        // walletConnectCloudProjectId: '',
+        // captchaEnabled: false,
+        // customAuth: {
+        //     getCustomAccessToken: async () => '',
+        //     isLoading: false
+        // },
+        // embeddedWallets: {
+        //     createOnLogin: 'users-without-wallets',
+        //     noPromptOnSignature: true,
+        //     priceDisplay: {
+        //         primary: 'native-token',
+        //         secondary: '',
+        //     },
+        // },
+        // loginMethodsAndOrder: {
+        //     overflow: [],
+        //     primary: ['coinbase_wallet', 'detected_wallets', 'metamask'],
+        // },
+        // fiatOnRamp: { useSandbox: true },
+        // loginMethods: []
     },
 } satisfies Omit<PrivyProviderProps, 'children'>
