@@ -11,7 +11,13 @@ function createServiceClient() {
         throw new Error('Missing Supabase URL or service key')
     }
 
-    return createServerClient<Database>(supabaseUrl, supabaseServiceKey, { cookies: {} })
+    return createServerClient<Database>(supabaseUrl, supabaseServiceKey, {
+        cookies: {
+            getAll() {
+                return null
+            },
+        },
+    })
 }
 
 export const db = createServiceClient()
