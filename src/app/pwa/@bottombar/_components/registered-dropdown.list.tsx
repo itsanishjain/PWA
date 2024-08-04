@@ -53,22 +53,13 @@ const RegisteredDropdownList: React.FC<{ setOpen: (open: boolean) => void; poolI
     setOpen,
     poolId,
 }): JSX.Element => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { disconnect } = useDisconnect()
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { logout } = usePrivy()
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const router = useRouter()
     const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
     const dropdownListRef = useRef<HTMLDivElement | null>(null)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { writeContract, data: hash, isPending } = useWriteContract()
+    const { writeContract, data: hash } = useWriteContract()
     const {
         isLoading: isConfirming,
         isSuccess: isConfirmed,
         isError,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        error: registerError,
         data: txData,
     } = useWaitForTransactionReceipt({
         hash,

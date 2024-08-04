@@ -26,7 +26,7 @@ const PoolClaimRow = (props: PoolDetailsProps) => {
     // const { winnerDetail /* isLoading, */ /* error */ } = useWinnerDetail(BigInt(props.poolId), wallets[0]?.address)
     // // const queryClient = useQueryClient()
     // // const { adminData } = useAdmin()
-    // // const setBottomBarContent = useSettingsStore(state => state.setBottomBarContent)
+    // // const setBottomBarContent = useAppStore(state => state.setBottomBarContent)
     // const { data: hash, /*isPending,*/ writeContract /* writeContractAsync*/ } = useWriteContract()
     // const { sponsoredTxn } = useSponsoredTxn()
     // const {
