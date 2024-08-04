@@ -1,4 +1,6 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs'
+'use client'
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/pwa/_components/ui/tabs'
 import { AnimatePresence, motion } from 'framer-motion'
 import { LoaderIcon } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
