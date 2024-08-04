@@ -57,7 +57,7 @@ export default function SponsoredTxn() {
         })
 
         const txHash = await smartAccountClient.sendTransaction({
-            account: smartAccountClient.account,
+            account: smartAccountClient.account.address,
             to: '0xbE92f2692f42580300fD8d0Ee198b5bBbe303e78',
             data: '0x1234567890',
             value: 0n,
