@@ -7,19 +7,17 @@
 'use client'
 
 import { dropletAddress } from '@/types/contracts'
-import { usePrivy } from '@privy-io/react-auth'
 import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
-import type { Route } from 'next'
-import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useAccount, useBalance, useDisconnect } from 'wagmi'
+import { useAccount, useBalance } from 'wagmi'
 import OnRampDialog from '../../(pages)/profile/_components/onramps/onramp.dialog'
 import { wagmi } from '../../_client/providers/configs'
 import UserDropdownItem from './user-dropdown.item'
 import type { DropdownItemConfig } from './user-dropdown.list.config'
 import { dropdownItemsConfig } from './user-dropdown.list.config'
+import { useAuth } from '../../_client/hooks/use-auth'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.
@@ -47,9 +45,7 @@ const itemVariants: Variants = {
  * @returns {JSX.Element} The rendered user dropdown list.
  */
 const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setOpen }): JSX.Element => {
-    const { disconnect } = useDisconnect()
-    const { logout } = usePrivy()
-    const router = useRouter()
+    const { logout } = useAuth()
     const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
     const dropdownListRef = useRef<HTMLDivElement | null>(null)
     const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
@@ -68,25 +64,9 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
      */
     const handleLogoutClick = async () => {
         setOpen(false)
-        router.replace('/' as Route)
-
-        disconnect(
-            {},
-            {
-                onError() {
-                    toast.error('Failed to disconnect')
-                },
-            },
-        )
-
         try {
             await logout()
-            // Update your client-side auth state here
-            // For example, if you're using React Context:
-            // setAuthState(false);
             toast.success('Disconnected successfully')
-            // Force a re-render of the page
-            router.refresh()
         } catch {
             toast.error('Failed to log out')
         }

@@ -1,11 +1,11 @@
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useWriteContracts, useCapabilities, useCallsStatus } from 'wagmi/experimental'
 import { useState, useCallback, useEffect } from 'react'
 import { Address, Hash, TransactionReceipt, decodeEventLog, keccak256, toHex } from 'viem'
-import { useWallets } from '@privy-io/react-auth'
 import { poolAbi } from '@/types/contracts'
 
-type WalletClientType = 'coinbase_smart_wallet' | 'coinbase_wallet' | 'eoa'
+import { useWallets } from '@privy-io/react-auth'
+import { wagmi } from '../providers/configs'
 
 interface ContractCall {
     address: Address
@@ -30,6 +30,9 @@ interface SmartTransactionResult {
 }
 
 const useSmartTransaction = (paymasterService?: PaymasterService) => {
+    const { wallets, ready: walletsReady } = useWallets()
+    const chainId = wagmi.config.state.chainId
+
     const [result, setResult] = useState<SmartTransactionResult>({
         hash: null,
         receipt: null,
@@ -38,11 +41,11 @@ const useSmartTransaction = (paymasterService?: PaymasterService) => {
         error: null,
     })
 
-    const account = useAccount()
-    const { wallets } = useWallets()
     const { data: id, writeContracts } = useWriteContracts()
     const { data: hash, writeContract } = useWriteContract()
-    const { data: availableCapabilities } = useCapabilities({ account: account.address })
+    const { data: availableCapabilities } = useCapabilities({
+        account: wallets[0]?.address as Address,
+    })
     const { data: callsStatus } = useCallsStatus({
         id: id as string,
         query: {
@@ -71,63 +74,61 @@ const useSmartTransaction = (paymasterService?: PaymasterService) => {
         }
     }, [hash])
 
-    const executeCoinbaseTransaction = useCallback(
-        async (args: ContractCalls) => {
-            if (!availableCapabilities || !account.chainId) {
-                throw new Error('Capabilities or chain ID not available')
-            }
+    const executeCoinbaseTransaction = async (args: ContractCalls) => {
+        if (!availableCapabilities || !chainId) {
+            throw new Error('Capabilities or chain ID not available')
+        }
 
-            const capabilitiesForChain = availableCapabilities[account.chainId]
-            if (!capabilitiesForChain['paymasterService']?.supported) {
-                throw new Error('Paymaster service not supported')
-            }
+        const capabilitiesForChain = availableCapabilities[chainId]
 
-            const capabilities = {
-                paymasterService: paymasterService || {
-                    url: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL!,
-                },
-            }
+        if (!capabilitiesForChain['paymasterService']?.supported) {
+            throw new Error('Paymaster service not supported')
+        }
 
-            if (capabilitiesForChain['atomicBatch']?.supported) {
-                console.log('Executing atomic batch transaction')
-                writeContracts({ contracts: args, capabilities })
+        const capabilities = {
+            paymasterService: paymasterService || {
+                url: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL,
+            },
+        }
+
+        if (capabilitiesForChain['atomicBatch']?.supported) {
+            console.log('Executing atomic batch transaction')
+            writeContracts({ contracts: args, capabilities })
+        } else {
+            console.log('Executing individual transactions')
+            for (const call of args) {
+                writeContracts({ contracts: [call], capabilities })
+            }
+        }
+    }
+
+    const executeEOATransaction = (args: ContractCalls) => {
+        console.log('Executing EOA transaction')
+        writeContract(args[args.length - 1])
+    }
+
+    const executeTransaction = async (args: ContractCalls) => {
+        if (!walletsReady || !availableCapabilities) {
+            console.error('Wallets not ready')
+            return
+        }
+
+        const walletType = wallets[0].walletClientType
+
+        setResult(prev => ({ ...prev, isLoading: true, isError: false, error: null }))
+
+        try {
+            if (walletType === 'coinbase_smart_wallet' || walletType === 'coinbase_wallet') {
+                executeCoinbaseTransaction(args)
             } else {
-                console.log('Executing individual transactions')
-                for (const call of args) {
-                    writeContracts({ contracts: [call], capabilities })
-                }
+                executeEOATransaction(args)
             }
-        },
-        [account, availableCapabilities, writeContracts, paymasterService],
-    )
-
-    const executeEOATransaction = useCallback(
-        (args: ContractCalls) => {
-            console.log('Executing EOA transaction')
-            writeContract(args[args.length - 1])
-        },
-        [writeContract],
-    )
-
-    const executeTransaction = useCallback(
-        async (args: ContractCalls) => {
-            const walletClientType: WalletClientType = wallets[0].walletClientType
-            setResult(prev => ({ ...prev, isLoading: true, isError: false, error: null }))
-
-            try {
-                if (walletClientType === 'coinbase_smart_wallet' || walletClientType === 'coinbase_wallet') {
-                    executeCoinbaseTransaction(args)
-                } else {
-                    executeEOATransaction(args)
-                }
-                setResult(prev => ({ ...prev, isLoading: false }))
-            } catch (error) {
-                console.error('Transaction execution error:', error)
-                setResult(prev => ({ ...prev, isLoading: false, isError: true, error: error as Error }))
-            }
-        },
-        [wallets, executeCoinbaseTransaction, executeEOATransaction],
-    )
+            setResult(prev => ({ ...prev, isLoading: false }))
+        } catch (error) {
+            console.error('Transaction execution error:', error)
+            setResult(prev => ({ ...prev, isLoading: false, isError: true, error: error as Error }))
+        }
+    }
 
     useEffect(() => {
         if (receipt) {
@@ -171,6 +172,7 @@ const useSmartTransaction = (paymasterService?: PaymasterService) => {
             isConfirming,
             callsStatus,
         },
+        isReady: walletsReady,
     }
 }
 
