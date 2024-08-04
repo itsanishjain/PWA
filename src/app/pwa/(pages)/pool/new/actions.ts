@@ -155,6 +155,7 @@ export async function updatePoolStatus(
 
     const { error } = await db.from('pools').update({ status, contract_id }).eq('internal_id', poolId)
 
+    // TODO: move this to persistence layer
     const { data: userId, error: userError } = await db.from('users').select('id').eq('privyId', user?.id).single()
 
     if (userError) {
