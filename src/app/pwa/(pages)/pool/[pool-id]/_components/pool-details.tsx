@@ -8,7 +8,6 @@ import PoolDetailsBannerButtons from './pool-details-banner-button'
 import PoolDetailsBannerStatus from './pool-details-banner-status'
 import PoolDetailsInfo from './pool-details-info'
 import { checkAuthStatusAction } from '../../../pools/actions'
-import AuthenticatedContent from './authenticated-pool-details'
 import BottomBarHandler from './bottom-bar-handler'
 
 export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
