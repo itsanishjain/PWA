@@ -16,7 +16,7 @@ const PoolDetailsDTOSchema = z.object({
     endDate: z.string().datetime(),
     claimableAmount: z.number().nonnegative().default(0),
     numParticipants: z.number().int().nonnegative(),
-    price: z.number().positive().multipleOf(0.01),
+    price: z.number().nonnegative().multipleOf(0.01),
     tokenSymbol: z.string(),
     tokenDecimals: z.number().int().nonnegative(),
     status: z.nativeEnum(POOLSTATUS),
@@ -41,7 +41,7 @@ const PoolDetailsDTOSchema = z.object({
     // userDeposit: z.number().nonnegative(),
 
     // Calculated fields
-    goal: z.number().positive(),
+    goal: z.number().nonnegative(),
     progress: z.number().nonnegative(),
 })
 
