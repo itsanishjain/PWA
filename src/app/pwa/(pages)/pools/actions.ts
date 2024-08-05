@@ -14,6 +14,7 @@ interface PoolItem {
     numParticipants: number
     status: string
     image: string
+    softCap: number
 }
 
 export async function getAllPoolsAction(): Promise<PoolItem[]> {

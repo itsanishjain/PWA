@@ -7,12 +7,13 @@ interface PoolItem {
     id: string
     image: string
     status: string
+    softCap: number
 }
 
 export async function getDbPools(): Promise<PoolItem[]> {
     const { data: poolsData, error } = await db
         .from('pools')
-        .select('name, contract_id, description, status, bannerImage')
+        .select('name, contract_id, description, status, bannerImage, softCap')
         .order('startDate', { ascending: true })
 
     if (error) {
@@ -31,6 +32,7 @@ export async function getDbPools(): Promise<PoolItem[]> {
                 id: pool.contract_id.toString(),
                 image: pool.bannerImage,
                 status: pool.status,
+                softCap: pool.softCap,
             }
         })
         .filter(Boolean) as PoolItem[]

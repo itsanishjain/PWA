@@ -9,6 +9,7 @@ interface PoolItem {
     id: string
     status: string
     numParticipants: number
+    softCap: number
 }
 
 const PoolCardSkeleton = () => {

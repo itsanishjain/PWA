@@ -12,6 +12,7 @@ interface PoolItem {
     numParticipants: number
     status: string
     image: string
+    softCap: number
 }
 
 export const getAllPoolsUseCase = cache(async (): Promise<PoolItem[]> => {

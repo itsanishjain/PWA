@@ -14,6 +14,7 @@ interface PoolItem {
     endDate: Date
     status: string
     numParticipants: number
+    softCap: number
 }
 
 const statusMap: Record<number, string> = {
@@ -48,6 +49,7 @@ export const getUserNextPoolUseCase = cache(async (userAddress: Address): Promis
                 endDate: new Date(pool.timeEnd * 1000),
                 status: statusMap[pool.status] || 'UNKNOWN',
                 numParticipants: pool.numParticipants,
+                softCap: dbPool?.softCap ?? 0,
             }
         })
 

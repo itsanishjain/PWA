@@ -17,9 +17,19 @@ interface PoolItem {
     endDate: Date
     status: string
     numParticipants: number
+    softCap: number
 }
 
-export default function PoolListCard({ name, startDate, endDate, id, status, image }: PoolItem) {
+export default function PoolListCard({
+    name,
+    startDate,
+    endDate,
+    id,
+    status,
+    image,
+    numParticipants,
+    softCap,
+}: PoolItem) {
     const statusIndicator = getPoolStatus({ startDate, endDate })
 
     const resolvedImage = image || frog.src
@@ -44,7 +54,7 @@ export default function PoolListCard({ name, startDate, endDate, id, status, ima
                 </div>
                 <div className='flex flex-col gap-[5px] truncate'>
                     <h1 className='truncate text-sm font-semibold'>{name}</h1>
-                    <span className='truncate text-xs font-medium tracking-tight'>0/200 Registered</span>
+                    <span className='truncate text-xs font-medium tracking-tight'>{`${numParticipants}/${softCap} Registered`}</span>
                     <span className='truncate text-xs font-medium tracking-tight'>
                         {getStatusString({ status: statusIndicator, startDate, endDate })}
                     </span>
