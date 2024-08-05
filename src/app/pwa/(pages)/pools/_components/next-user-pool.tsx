@@ -1,4 +1,3 @@
-import route from '@/lib/utils/routes'
 import { ChevronRightIcon } from 'lucide-react'
 import Link from 'next/link'
 import { getUserNextPoolAction } from '../actions'
