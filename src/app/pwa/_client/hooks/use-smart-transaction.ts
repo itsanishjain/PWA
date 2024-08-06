@@ -1,6 +1,6 @@
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useWriteContracts, useCapabilities, useCallsStatus } from 'wagmi/experimental'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Address, Hash, TransactionReceipt, decodeEventLog, keccak256, toHex } from 'viem'
 import { poolAbi } from '@/types/contracts'
 
@@ -92,13 +92,8 @@ const useSmartTransaction = (paymasterService?: PaymasterService) => {
         }
 
         if (capabilitiesForChain['atomicBatch']?.supported) {
-            console.log('Executing atomic batch transaction')
+            console.log('Executing atomic batch transaction', args, capabilities, chainId)
             writeContracts({ contracts: args, capabilities })
-        } else {
-            console.log('Executing individual transactions')
-            for (const call of args) {
-                writeContracts({ contracts: [call], capabilities })
-            }
         }
     }
 
@@ -108,7 +103,7 @@ const useSmartTransaction = (paymasterService?: PaymasterService) => {
     }
 
     const executeTransaction = async (args: ContractCalls) => {
-        if (!walletsReady || !availableCapabilities) {
+        if (!walletsReady) {
             console.error('Wallets not ready')
             return
         }

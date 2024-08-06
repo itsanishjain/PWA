@@ -48,19 +48,22 @@ function processPoolDetails(
             softCap: 0,
             description: 'Unknown',
             termsUrl: 'Unknown',
+            poolBalance: Number(contractPool.poolBalance),
         }
     }
     // console.info('[get-pool-details] terms:', poolInfo.terms)
     return {
         hostName: poolInfo.hostName,
         contractId: BigInt(contractPool.id),
-        claimableAmount: Number(claimableAmount),
+        claimableAmount: Number(claimableAmount) / 10 ** contractPool.tokenDecimals,
         participants: participantsInfo.participants.map((user: { name: string; avatarUrl: string }) => ({
             name: user.name,
             avatarUrl: user.avatarUrl,
         })),
         // userDeposit: Number(userInfo?.deposit) ?? 0,
-        goal: poolInfo.softCap * contractPool.price,
+        goal:
+            poolInfo.softCap * contractPool.price ||
+            Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
         progress: Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
         name: contractPool.name,
         startDate: contractPool.startDate,
@@ -75,6 +78,7 @@ function processPoolDetails(
         softCap: poolInfo.softCap,
         description: poolInfo.description,
         termsUrl: poolInfo.terms || undefined,
+        poolBalance: Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
     }
 }
 
@@ -86,7 +90,7 @@ export async function getPoolDetailsUseCase(poolId: string, userAddress?: Addres
     }
     const [poolInfo, usersInfo] = await Promise.all([
         getDbPool(poolId),
-        getDbParticipantsInfo(poolId, contractPool.participantAddresses),
+        getDbParticipantsInfo(contractPool.participantAddresses),
     ])
 
     if (!poolInfo) {

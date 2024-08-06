@@ -1,11 +1,13 @@
 'use client'
 
+import useSmartTransaction from '@/app/pwa/_client/hooks/use-smart-transaction'
+import { wagmi } from '@/app/pwa/_client/providers/configs'
 import { Button } from '@/app/pwa/_components/ui/button'
 import { serverConfig } from '@/app/pwa/_server/blockchain/server-config'
-import { useWritePoolClaimWinning } from '@/types/contracts'
+import { poolAbi, poolAddress, useWritePoolClaimWinning } from '@/types/contracts'
 import { CheckCircleIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { Address } from 'viem'
+import { Address, getAbiItem } from 'viem'
 import { useAccount } from 'wagmi'
 
 interface PoolDetailsClaimableWinningsProps {
@@ -24,13 +26,29 @@ export default function PoolDetailsClaimableWinnings({
 }: PoolDetailsClaimableWinningsProps) {
     const { address } = useAccount() as { address: Address }
 
-    const { writeContract } = useWritePoolClaimWinning({
-        config: serverConfig,
-    })
+    const { executeTransaction } = useSmartTransaction()
 
     const handleClaimWinnings = async () => {
         toast('Claiming winnings...')
-        void writeContract({ args: [poolId, address] })
+        const ClaimWinningFunction = getAbiItem({
+            abi: poolAbi,
+            name: 'claimWinning',
+        })
+
+        const args = [
+            {
+                address: poolAddress[wagmi.config.state.chainId as ChainId],
+                abi: [ClaimWinningFunction],
+                functionName: 'claimWinning',
+                args: [poolId, address],
+            },
+        ]
+
+        try {
+            executeTransaction(args)
+        } catch (error) {
+            console.log('claimWinning Error', error)
+        }
     }
 
     if (claimableAmount <= 0) return null

@@ -45,7 +45,7 @@ export default function BottomBarHandler({
 
     useEffect(() => {
         if (ready) {
-            if (isParticipant) {
+            if (isParticipant && !isAdmin && poolStatus !== POOLSTATUS.ENDED) {
                 setBottomBarContent(
                     <Button
                         className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
@@ -67,6 +67,7 @@ export default function BottomBarHandler({
     }
 
     const handleBottomBarContent = (poolStatus: POOLSTATUS, isAdmin: boolean) => {
+        console.log('poolStatus', poolStatus)
         switch (poolStatus) {
             case POOLSTATUS.INACTIVE: {
                 if (isAdmin) {
@@ -123,14 +124,14 @@ export default function BottomBarHandler({
             }
             case POOLSTATUS.ENDED:
                 setBottomBarContent(null)
-            default:
-                setBottomBarContent(
-                    <Button
-                        className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
-                        onClick={handleJoinPool}>
-                        {`Register for ${poolPrice} ${poolTokenSymbol}`}
-                    </Button>,
-                )
+            // default:
+            //     setBottomBarContent(
+            //         <Button
+            //             className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
+            //             onClick={handleJoinPool}>
+            //             {`Register for ${poolPrice} ${poolTokenSymbol}`}
+            //         </Button>,
+            //     )
         }
     }
 

@@ -16,8 +16,7 @@ export default function PoolDetailsParticipants({
 }: PoolDetailsParticipantsProps) {
     return (
         <div className='space-y-2'>
-            {/* the first participant is the creator */}
-            {numParticipants > 1 ? (
+            {numParticipants > 0 ? (
                 <>
                     <Link href={`/pool/${poolId}/participants` as Route}>
                         <div className='text-xs'>Participants</div>

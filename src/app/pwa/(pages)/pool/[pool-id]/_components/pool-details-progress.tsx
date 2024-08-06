@@ -1,3 +1,4 @@
+import ShineBorder from '@/app/pwa/_components/shine-border'
 import { Progress } from '@/app/pwa/_components/ui/progress'
 
 interface PoolDetailsProgressProps {
@@ -6,6 +7,8 @@ interface PoolDetailsProgressProps {
 }
 
 export default function PoolDetailsProgress({ current, goal }: PoolDetailsProgressProps) {
+    const isComplete = current >= goal
+
     return (
         <div className='space-y-2'>
             <div className='inline-flex w-full justify-between'>
@@ -15,7 +18,17 @@ export default function PoolDetailsProgress({ current, goal }: PoolDetailsProgre
                 </div>
                 <div className='text-xs'>{`Goal of $${goal} Prize Pool`}</div>
             </div>
-            <Progress value={(current / goal) * 100} />
+            {isComplete ? (
+                <ShineBorder className='overflow-hidden' color={['#5472E9', '#5D7AF2', '#5A77EE']} borderWidth={2}>
+                    <div className='bg-background'>
+                        <Progress value={100} className='border-none' />
+                    </div>
+                </ShineBorder>
+            ) : (
+                <div className='overflow-hidden rounded-lg bg-background'>
+                    <Progress value={(current / goal) * 100} />
+                </div>
+            )}
         </div>
     )
 }

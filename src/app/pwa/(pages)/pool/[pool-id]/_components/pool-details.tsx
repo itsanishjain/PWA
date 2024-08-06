@@ -17,6 +17,8 @@ export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
     const isAdmin = (result && 'isAdmin' in result && result.isAdmin) || false
     const walletAddress = result && 'address' in result ? result.address : null
 
+    console.log('pool', { poolBalance, avatarUrls, result, isAdmin, walletAddress })
+
     return (
         <div className='space-y-3 bg-white p-2'>
             <section className='detail_card rounded-[2.875rem] p-[1.12rem]'>
@@ -39,7 +41,7 @@ export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
                 />
 
                 <div className='space-y-3 rounded-[2rem] bg-[#F4F4F4] p-5'>
-                    <PoolDetailsProgress current={poolBalance} goal={pool.goal} />
+                    <PoolDetailsProgress current={pool.poolBalance} goal={pool.goal} />
                     <PoolDetailsParticipants
                         poolId={pool.contractId.toString()}
                         numParticipants={pool.numParticipants}
