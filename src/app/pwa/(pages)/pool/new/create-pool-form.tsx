@@ -8,6 +8,7 @@ import { Button } from '@/app/pwa/_components/ui/button'
 import { Label } from '@/app/pwa/_components/ui/label'
 import { Steps, usePoolCreationStore } from '@/app/pwa/_client/stores/pool-creation-store'
 import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
+import { toast } from 'sonner'
 
 export default function CreatePoolForm() {
     const { formAction, state, createPoolOnChain, isPending, isConfirming } = useCreatePool()
@@ -46,10 +47,21 @@ export default function CreatePoolForm() {
     }, [setBottomBarContent, setTopBarTitle, isPending, isConfirming, handleSubmit])
 
     useEffect(() => {
+        console.log(
+            'state.message:',
+            state.message,
+            'state.internalPoolId:',
+            state.internalPoolId,
+            'hasCreatedPool.current:',
+            hasCreatedPool.current,
+        )
         if (state.message === 'Pool created successfully' && state.internalPoolId && !hasCreatedPool.current) {
             hasCreatedPool.current = true
             createPoolOnChain()
             console.log('createPoolOnChain called, current state:', state)
+        }
+        if (state.message?.includes('Error')) {
+            console.log('Pool creation failed:', state.message)
         }
     }, [state.message, state.internalPoolId, createPoolOnChain])
 
