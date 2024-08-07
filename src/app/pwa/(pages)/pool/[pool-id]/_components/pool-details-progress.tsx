@@ -7,7 +7,7 @@ interface PoolDetailsProgressProps {
 }
 
 export default function PoolDetailsProgress({ current, goal }: PoolDetailsProgressProps) {
-    const isComplete = current >= goal
+    const isComplete = current >= goal && current > 0
 
     return (
         <div className='space-y-2'>
@@ -16,7 +16,7 @@ export default function PoolDetailsProgress({ current, goal }: PoolDetailsProgre
                     <span className='font-bold'>{`$${current}`}</span>
                     <span>USDC</span>
                 </div>
-                <div className='text-xs'>{`Goal of $${goal} Prize Pool`}</div>
+                <div className='text-xs'>{`Goal of $${goal || '🎁'} Prize Pool`}</div>
             </div>
             {isComplete ? (
                 <ShineBorder className='overflow-hidden' color={['#5472E9', '#5D7AF2', '#5A77EE']} borderWidth={2}>
