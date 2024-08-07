@@ -8,7 +8,6 @@ import { checkAuthStatusAction, getAllPoolsAction } from './actions'
 export default async function PoolsPage() {
     const [result] = await checkAuthStatusAction()
     const isAdmin = result && 'isAdmin' in result && result?.isAdmin
-    const pools = await getAllPoolsAction()
 
     return (
         <div className='space-y-6'>
