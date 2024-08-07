@@ -3,8 +3,9 @@ import PoolList from './pool-list'
 
 export default async function UpcomingPools() {
     const pools = await getAllPoolsAction()
+    const upcomingPools = pools.filter(pool => pool.startDate > new Date())
 
-    if (pools.length === 0) {
+    if (upcomingPools.length === 0) {
         return (
             <div className='flex-center h-96 flex-col'>
                 <h1 className='mb-4 text-lg font-semibold'>No upcoming pools</h1>
@@ -16,7 +17,7 @@ export default async function UpcomingPools() {
     return (
         <>
             <h1 className='mb-4 text-lg font-semibold'>Upcoming Pools</h1>
-            <PoolList pools={pools} />
+            <PoolList pools={upcomingPools} />
         </>
     )
 }
