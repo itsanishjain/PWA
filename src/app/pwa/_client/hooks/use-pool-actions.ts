@@ -1,7 +1,7 @@
 import { currentPoolAddress } from '@/app/pwa/_server/blockchain/server-config'
 import { useAuth } from './use-auth'
 import useTransactions from './use-smart-transaction'
-import { poolAbi, useReadDropletBalanceOf } from '@/types/contracts'
+import { poolAbi, useReadDropletBalanceOf, dropletAbi, dropletAddress, poolAddress } from '@/types/contracts'
 import { useWallets } from '@privy-io/react-auth'
 import { Address, parseUnits } from 'viem'
 import { toast } from 'sonner'
@@ -88,6 +88,12 @@ export function usePoolActions(poolId: bigint, poolPrice: number, tokenDecimals:
             toast('Joining pool...')
 
             executeTransactions([
+                {
+                    address: dropletAddress[84532],
+                    abi: dropletAbi,
+                    functionName: 'approve',
+                    args: [poolAddress[84532], bigIntPrice],
+                },
                 {
                     address: currentPoolAddress,
                     abi: poolAbi,
