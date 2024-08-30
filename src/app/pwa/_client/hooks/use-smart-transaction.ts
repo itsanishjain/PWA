@@ -1,10 +1,10 @@
 import { useWallets } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
-import { Abi, Address, ContractFunctionArgs, Hash, TransactionReceipt } from 'viem'
+import type { Abi, Address, Hash, TransactionReceipt } from 'viem'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { useCallsStatus, useWriteContracts } from 'wagmi/experimental'
 
-type ContractCall = {
+export type ContractCall = {
     address: Address
     abi: Abi
     functionName: string
@@ -29,13 +29,13 @@ export default function useTransactions() {
             onMutate(variables) {
                 console.log('Optimistic update here', variables)
             },
-            onSuccess(data, variables, context) {},
+            // onSuccess(data, variables, context) {},
         },
     })
     const { data: hash, writeContractAsync } = useWriteContract()
 
     const { wallets, ready: walletsReady } = useWallets()
-    const walletType = walletsReady && wallets[0].walletClientType
+    const walletType = walletsReady ? wallets[0].connectorType : null
 
     const [result, setResult] = useState<SmartTransactionResult>({
         hash: null,
@@ -99,14 +99,14 @@ export default function useTransactions() {
     }
 
     return {
-        async executeTransactions(contractCalls: ContractCall[]) {
+        executeTransactions: async (contractCalls: ContractCall[]) => {
             console.log('Executing transactions', contractCalls)
             if (walletType === 'coinbase_wallet') {
                 console.log('Coinbase wallet detected', wallets[0].connectorType)
-                executeCoinbaseTransactions(contractCalls)
+                await executeCoinbaseTransactions(contractCalls)
             } else {
                 console.log('Non-Coinbase wallet detected')
-                executeEoaTransactions(contractCalls)
+                await executeEoaTransactions(contractCalls)
             }
         },
         isConfirmed: callsStatus?.status === 'CONFIRMED',
