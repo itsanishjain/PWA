@@ -6,7 +6,7 @@ export default async function CreatePoolPage() {
     const isAuthorized = authStatus.isAuthenticated && authStatus.isAdmin
 
     if (!isAuthorized) {
-        return <div>You are not authorized to create a pool.</div>
+        return <div className={'mt-4 w-full text-center'}>You are not authorized to create a pool.</div>
     }
 
     return <CreatePoolForm />
