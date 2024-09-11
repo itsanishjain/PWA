@@ -1,7 +1,7 @@
-import type { ContractCall } from '@/app/pwa/_client/hooks/use-smart-transaction'
 import { currentPoolAddress } from '@/app/pwa/_server/blockchain/server-config'
 import { poolAbi } from '@/types/contracts'
 import { getAbiItem } from 'viem'
+import { ContractCall } from '@/app/pwa/_lib/entities/models/contract-call'
 
 const DepositFunction = getAbiItem({
     abi: poolAbi,
@@ -20,7 +20,7 @@ export function deposit({ poolId, amount }: DepositInputs): ContractCall {
     return {
         address: currentPoolAddress,
         abi: [DepositFunction],
-        functionName: 'deposit',
+        functionName: DepositFunction.name,
         args: [poolId, amount],
     }
 }
