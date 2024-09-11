@@ -1,15 +1,9 @@
 import { useWallets } from '@privy-io/react-auth'
 import { useEffect, useState, useCallback } from 'react'
-import type { Abi, Address, Hash, TransactionReceipt } from 'viem'
+import type { Hash, TransactionReceipt } from 'viem'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { useCallsStatus, useWriteContracts } from 'wagmi/experimental'
-
-export type ContractCall = {
-    address: Address
-    abi: Abi
-    functionName: string
-    args: unknown[] // ContractFunctionArgs[]
-}
+import { ContractCall } from '@/app/pwa/_lib/entities/models/contract-call'
 
 interface SmartTransactionResult {
     hash: Hash | null
