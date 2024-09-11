@@ -1,4 +1,3 @@
-// src/app/pwa/(pages)/pool/new/create-pool-form.tsx
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
@@ -8,7 +7,6 @@ import { Button } from '@/app/pwa/_components/ui/button'
 import { Label } from '@/app/pwa/_components/ui/label'
 import { Steps, usePoolCreationStore } from '@/app/pwa/_client/stores/pool-creation-store'
 import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
-import { toast } from 'sonner'
 
 export default function CreatePoolForm() {
     const { formAction, state, createPoolOnChain, isPending, isConfirming } = useCreatePool()
