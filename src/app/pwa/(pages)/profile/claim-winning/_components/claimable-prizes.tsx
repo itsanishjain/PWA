@@ -93,7 +93,7 @@ export default function ClaimablePrizesList() {
         }
     }
     useEffect(() => {
-        if (claimablePools?.[0].length === 0) {
+        if (!claimablePools || claimablePools?.[0].length === 0) {
             setBottomBarContent(undefined)
         } else {
             setBottomBarContent(
@@ -105,10 +105,14 @@ export default function ClaimablePrizesList() {
                 </Button>,
             )
         }
+
+        return () => {
+            setBottomBarContent(undefined)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [claimablePools, wallets])
 
-    if (claimablePools?.[0].length === 0) {
+    if (!claimablePools || claimablePools?.[0].length === 0) {
         return <div className='flex-center p-6'>Prizes you win may appear here.</div>
     }
 
