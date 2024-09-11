@@ -6,7 +6,7 @@ import { db } from '../../../database/db'
 
 type UserRow = Pick<Tables<'users'>, 'avatar' | 'displayName'>
 
-export async function getDbUser(privyId: string): Promise<UserRow | null> {
+export async function getDbUser(privyId: string): Promise<UserRow | undefined> {
     const { data: userData, error }: PostgrestSingleResponse<UserRow> = await db
         .from('users')
         .select('avatar, displayName')
@@ -15,7 +15,7 @@ export async function getDbUser(privyId: string): Promise<UserRow | null> {
 
     if (error) {
         if (error.code === 'PGRST116') {
-            return null // Pool not found
+            return // Pool not found
         }
         throw new Error(`Error fetching user from database: ${error.message}`)
     }

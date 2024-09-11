@@ -3,22 +3,16 @@
 import { Button } from '@/app/pwa/_components/ui/button'
 import { Label } from '@/app/pwa/_components/ui/label'
 import { usePrivy } from '@privy-io/react-auth'
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useFormState } from 'react-dom'
 import { toast } from 'sonner'
-import { createProfileAction } from '../actions'
+import { validateProfileAction } from '../actions'
 import { Tables } from '@/types/db'
 import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
-
-const AvatarUploader = dynamic(() => import('./avatar-uploader'), {
-    ssr: false,
-})
-
-const Text = dynamic(() => import('@/app/pwa/_components/forms-controls/text.control'), {
-    ssr: false,
-})
+import AvatarUploader from './avatar-uploader'
+import Text from '@/app/pwa/_components/forms-controls/text.control'
+import getQueryClientConfig from '@/app/pwa/_client/providers/configs/query-client.config'
 
 const formFields = [
     {
@@ -59,14 +53,9 @@ const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
         setBottomBarContent: s.setBottomBarContent,
         setTopBarTitle: s.setTopBarTitle,
     }))
+    const [avatarChanged, setAvatarChanged] = useState(false)
 
-    const [state, formAction] = useFormState(createProfileAction, initialState)
-
-    useEffect(() => {
-        if (state?.message) {
-            toast(state.message)
-        }
-    }, [state?.message])
+    const [state, formAction] = useFormState(validateProfileAction, initialState)
 
     useEffect(() => {
         setTopBarTitle('Create a Profile')
@@ -86,13 +75,33 @@ const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
     }, [setBottomBarContent, setTopBarTitle])
 
     useEffect(() => {
-        if (state?.message === 'Profile created successfully') {
+        if (state?.message) {
+            toast(state.message)
+        }
+
+        if (state?.message === 'Profile updated successfully') {
+            getQueryClientConfig().client.invalidateQueries({
+                queryKey: ['userInfo'],
+            })
             router.back()
         }
     }, [state?.message, router])
 
+    const handleChange = (value: string) => {
+        if (value === 'avatar') {
+            setAvatarChanged(true)
+        }
+    }
+
     return (
-        <form id='profile-form' action={formAction} className='mx-auto flex w-full max-w-full flex-col'>
+        <form
+            id='profile-form'
+            action={formData => {
+                if (!avatarChanged) formData.delete('avatar')
+                console.log('Formdata entries to send', Array.from(formData.entries()))
+                formAction(formData)
+            }}
+            className='mx-auto flex w-full max-w-full flex-col'>
             {formFields.map(field => {
                 const errors = state?.errors && field.key in state.errors ? state.errors[field.key as FormFieldKey] : []
                 let defaultValue: string | undefined
@@ -107,7 +116,7 @@ const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
                     <section key={field.key} className='flex flex-1 flex-col'>
                         <Label className='text-base font-medium text-[#090909]'>{field.label}</Label>
                         <p className='mb-4 mt-1.5 text-xs font-medium text-[#b2b2b2]'>{field.description}</p>
-                        <field.component name={field.name} defaultValue={defaultValue} />
+                        <field.component name={field.name} defaultValue={defaultValue} onChange={handleChange} />
                         {errors && errors.length > 0 && (
                             <p className='mt-1 text-xs text-red-500'>{errors.join(', ')}</p>
                         )}

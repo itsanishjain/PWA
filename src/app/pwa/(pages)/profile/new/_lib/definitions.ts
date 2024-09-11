@@ -22,11 +22,18 @@ export const CreateProfileFormSchema = z.object({
         .max(50, 'The name cannot have more than 50 characters')
         .optional(),
     avatar: z
-        .instanceof(File)
-        .refine(file => file?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
-        .refine(
-            file => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-            'Your image is not supported, please use a valid image file.'
-        )
+        .union([
+            z
+                .instanceof(File)
+                .refine(file => file.size > 0, 'File is empty')
+                .refine(file => file.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
+                .refine(
+                    file => ACCEPTED_IMAGE_TYPES.includes(file.type),
+                    'Your image is not supported, please use a valid image file.',
+                ),
+            z.custom<File>(val => val instanceof File && val.size === 0, 'Invalid file').transform(() => null),
+            z.null(),
+            z.undefined(),
+        ])
         .optional(),
 })

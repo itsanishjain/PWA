@@ -17,6 +17,7 @@ export function useAuth() {
             console.log('[use-auth] auth complete')
             if (isNewUser) {
                 console.log('[use-auth] new user', { loginMethod, loginAccount })
+                router.replace('/profile/new' as Route)
             }
 
             if (wasAlreadyAuthenticated) {

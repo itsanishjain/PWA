@@ -1,15 +1,17 @@
 import { getUserInfoAction } from '../actions'
 import ProfileForm from '../new/_components/profile-form'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewProfilePage() {
-    const { data: userData, error } = await getUserInfoAction()
+    const [userData, error] = await getUserInfoAction()
 
     if (error) {
         console.error(error)
         return <>Error loading user data</>
     }
 
-    if (userData && 'needsRefresh' in userData) {
+    if (!userData) {
         return <>Loading...</>
     }
 

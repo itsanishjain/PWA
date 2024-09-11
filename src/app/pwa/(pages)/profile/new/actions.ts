@@ -1,11 +1,12 @@
 'use server'
 
-import { validateRequest } from '@/app/pwa/_server/auth/auth'
-import { getPrivyUser } from '@/app/pwa/_server/auth/privy'
-import { authenticatedAction } from '@/app/pwa/_server/lib/safe-action'
-import { createUserUseCase } from '@/app/pwa/_server/use-cases/users/create-user'
+import { authenticatedProcedure } from '@/app/pwa/_server/procedures/authenticated'
+import { createProfileUseCase } from '@/app/pwa/_server/use-cases/users/create-user'
 import { updateProfileUseCase } from '@/app/pwa/_server/use-cases/users/update-profile'
 import { CreateProfileFormSchema } from './_lib/definitions'
+import { z } from 'zod'
+import { Address } from 'viem'
+import { isAdminUseCase } from '@/app/pwa/_server/use-cases/users/is-admin'
 
 type FormState = {
     message?: string
@@ -15,64 +16,115 @@ type FormState = {
     }
 }
 
-export async function createProfileAction(_prevState: FormState, formData: FormData): Promise<FormState> {
-    const user = await getPrivyUser()
-
-    if (!user) {
-        return {
-            message: 'Not connected with Privy',
-        }
-    }
-
-    const avatarFile = formData.get('avatar') as File
+export async function validateProfileAction(_prevState: FormState, formData: FormData): Promise<FormState> {
+    const avatarFile = formData.get('avatar') as File | null
     const displayName = formData.get('displayName') as string
 
-    // Validate fields
-    const validationResult = CreateProfileFormSchema.safeParse({
-        displayName,
-        avatar: avatarFile,
-    })
+    console.log('Validating profile form', { displayName, avatarFile })
 
-    if (!validationResult.success) {
-        return {
-            message: 'Invalid form data',
-            errors: validationResult.error.flatten().fieldErrors,
+    let avatarToUpdate: File | null | undefined
+
+    if (avatarFile instanceof File) {
+        if (avatarFile.size === 0) {
+            // If size is 0, we want to delete the avatar
+            avatarToUpdate = null
+        } else if (avatarFile.size > 0) {
+            // If size is greater than 0, we want to update the avatar
+            avatarToUpdate = avatarFile
         }
+    } else {
+        // If avatarFile is null, we don't want to touch the avatar
+        avatarToUpdate = undefined
     }
 
     try {
-        await updateProfileUseCase(user.id, { displayName, avatar: avatarFile })
-        console.log('Profile updated successfully')
+        console.log('Updating profile')
+        const [, error] = await updateProfileAction({
+            displayName,
+            avatar: avatarToUpdate,
+        })
+
+        if (error) {
+            return {
+                message: 'Error updating profile',
+                errors: {
+                    displayName: error.fieldErrors?.displayName,
+                    avatar: error.fieldErrors?.avatar,
+                },
+            }
+        }
+
         return {
-            message: 'Profile created successfully',
+            message: 'Profile updated successfully',
         }
     } catch (error) {
-        console.log('Error updating profile:', error)
         return {
             message: 'Error updating profile',
         }
     }
-    // TODO: Create session
 }
 
-export const createUserAction = authenticatedAction
+export const updateProfileAction = authenticatedProcedure
     .createServerAction()
-    .handler(async (): Promise<void | { needsRefresh: true } | null> => {
-        console.log('createUserAction called')
-        const { session, needsRefresh } = await validateRequest()
-
-        if (needsRefresh) {
-            console.log('Needs refresh')
-            return { needsRefresh: true }
+    .input(
+        CreateProfileFormSchema.extend({
+            avatar: z.union([z.instanceof(File), z.null(), z.undefined()]),
+        }),
+    )
+    .output(
+        z.object({
+            message: z.string(),
+            errors: z
+                .object({
+                    displayName: z.array(z.string()).optional(),
+                    avatar: z.array(z.string()).optional(),
+                })
+                .optional(),
+        }),
+    )
+    .handler(async ({ input, ctx: { user } }) => {
+        try {
+            await updateProfileUseCase(user.id, {
+                displayName: input.displayName,
+                avatar: input.avatar,
+            })
+            return {
+                message: 'Profile updated successfully',
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error)
+            return {
+                message: 'Error updating profile',
+                errors: {
+                    displayName: ['An unexpected error occurred'],
+                },
+            }
         }
+    })
 
-        if (!session || !session.address) {
-            console.log('User not authenticated or address not available')
-            throw new Error('User not authenticated or address not available')
+export const createProfileAction = authenticatedProcedure
+    .createServerAction()
+    .output(
+        z.object({
+            needsRefresh: z.boolean().optional(),
+        }),
+    )
+    .handler(async ({ ctx: { user } }) => {
+        const walletAddress = user.wallet?.address as Address
+        if (!walletAddress) {
+            throw new Error('User does not have a wallet address')
         }
-
-        await createUserUseCase({
-            privyId: session.id,
-            info: { walletAddress: session.address, role: session.isAdmin ? 'admin' : 'user' },
-        })
+        try {
+            await createProfileUseCase({
+                privyId: user.id,
+                info: {
+                    walletAddress,
+                    role: (await isAdminUseCase(walletAddress)) ? 'admin' : 'user',
+                },
+            })
+            return {}
+        } catch (error) {
+            console.error('Error creating user:', error)
+            throw new Error('Failed to create user')
+        }
     })

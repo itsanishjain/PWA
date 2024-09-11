@@ -8,12 +8,12 @@ import { useState, ChangeEvent } from 'react'
 
 export interface AvatarUploaderProps {
     name: string
-    onChange?: (file: File | null) => void
-    defaultValue?: string
+    defaultValue?: string // current avatar URL received from the server (if any)
+    onChange?: (data: string) => void
 }
 
-export default function AvatarUploader({ name, onChange, defaultValue }: AvatarUploaderProps) {
-    const [avatarPreview, setAvatarPreview] = useState<string | null>(defaultValue || null)
+export default function AvatarUploader({ name, defaultValue, onChange }: AvatarUploaderProps) {
+    const [avatarPreview, setAvatarPreview] = useState<string | undefined>(defaultValue)
 
     const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -23,16 +23,13 @@ export default function AvatarUploader({ name, onChange, defaultValue }: AvatarU
                 setAvatarPreview(reader.result as string)
             }
             reader.readAsDataURL(file)
-            onChange?.(file)
-        } else {
-            setAvatarPreview(null)
-            onChange?.(null)
+            onChange?.('avatar')
         }
     }
 
     const handleRemove = () => {
-        setAvatarPreview(null)
-        onChange?.(null)
+        setAvatarPreview(undefined)
+        onChange?.('avatar')
     }
 
     return (
@@ -56,10 +53,16 @@ export default function AvatarUploader({ name, onChange, defaultValue }: AvatarU
                             size='icon'
                             variant='outline'
                             className='z-10 m-1 bg-white'
+                            type='button'
                             onClick={() => document.getElementById(name)?.click()}>
                             <CameraIcon />
                         </Button>
-                        <Button size='icon' variant='destructive' className='z-10 m-1' onClick={handleRemove}>
+                        <Button
+                            size='icon'
+                            variant='destructive'
+                            className='z-10 m-1'
+                            type='button'
+                            onClick={handleRemove}>
                             <Trash2Icon />
                         </Button>
                     </div>

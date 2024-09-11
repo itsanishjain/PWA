@@ -5,19 +5,31 @@ import { Route } from 'next'
 import Link from 'next/link'
 import ReactBlockies from 'react-blockies'
 import { useAccount } from 'wagmi'
+import { useServerActionQuery } from '../../_client/hooks/server-action-hooks'
+import { getUserInfoAction } from '../../(pages)/profile/actions'
 
 interface UserAvatarProps {
     userAvatar: string | null
 }
 
 export default function UserAvatar({ userAvatar }: UserAvatarProps) {
+    const {
+        data: userInfo,
+        isLoading,
+        isSuccess,
+    } = useServerActionQuery(getUserInfoAction, {
+        queryKey: ['userInfo'],
+        initialData: userAvatar ? { displayName: '', avatar: userAvatar } : undefined,
+        input: undefined,
+    })
+
     const { address } = useAccount()
 
     return (
         <Avatar className='size-10 cursor-pointer' aria-label='Go to Profile' asChild>
             <Link href={'/profile' as Route}>
-                {userAvatar ? (
-                    <AvatarImage alt='User Avatar' src={userAvatar} />
+                {userInfo.avatar ? (
+                    <AvatarImage alt='User Avatar' src={userInfo.avatar} />
                 ) : (
                     <ReactBlockies seed={address || '0x'} size={10} />
                 )}
