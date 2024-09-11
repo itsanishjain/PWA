@@ -1,10 +1,9 @@
 import 'server-only'
-import { cache } from 'react'
 
 import { getAddressBalance } from '../../persistence/users/blockchain/get-address-balance'
+import type { Address } from 'viem'
+import { TokenBalance } from '@/app/pwa/_lib/entities/models/token-balance'
 
-export const getAddressBalanceUseCase = cache(
-    async (address: string): Promise<{ balance: bigint; symbol: string; decimals: number } | null> => {
-        return getAddressBalance(address)
-    },
-)
+export const getAddressBalanceUseCase = async (address: Address): Promise<TokenBalance | undefined> => {
+    return getAddressBalance(address)
+}

@@ -13,6 +13,6 @@ interface UserItem {
     info: UserInfo
 }
 
-export async function createUserUseCase({ privyId, info }: UserItem) {
+export async function createProfileUseCase({ privyId, info }: UserItem) {
     return createUserInDb({ privyId, info })
 }
