@@ -8,17 +8,13 @@ import PoolDetailsBanner from './pool-details-banner'
 import PoolDetailsBannerButtons from './pool-details-banner-button'
 import PoolDetailsBannerStatus from './pool-details-banner-status'
 import PoolDetailsInfo from './pool-details-info'
-import { checkAuthStatusAction } from '../../../pools/actions'
 import BottomBarHandler from './bottom-bar-handler'
+import { getAdminStatusAction, getUserAddressAction } from '../../../pools/actions'
 
 export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
-    const poolBalance = pool.numParticipants * pool.price
     const avatarUrls = pool.participants.map(participant => participant.avatarUrl)
-    const [result] = await checkAuthStatusAction()
-    const isAdmin = (result && 'isAdmin' in result && result.isAdmin) || false
-    const walletAddress = result && 'address' in result ? result.address : null
-
-    console.log('pool', { poolBalance, avatarUrls, result, isAdmin, walletAddress })
+    const [isAdmin] = (await getAdminStatusAction()) ? [true] : [false]
+    const [walletAddress] = await getUserAddressAction()
 
     return (
         <div className='space-y-3 bg-white p-2'>

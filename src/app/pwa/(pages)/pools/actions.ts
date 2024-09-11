@@ -1,66 +1,49 @@
 'use server'
 
-import type { Address } from 'viem'
-import { validateRequest } from '../../_server/auth/auth'
-import { authenticatedAction } from '../../_server/lib/safe-action'
+import { Address } from 'viem'
+import { authenticatedProcedure } from '../../_server/procedures/authenticated'
 import { getAllPoolsUseCase } from '../../_server/use-cases/pools/get-all-pools'
 import { getUserNextPoolUseCase } from '../../_server/use-cases/pools/get-user-next-pool'
+import { unauthenticatedProcedure } from '../../_server/procedures/unauthenticated'
+import { getAddressBalanceUseCase } from '../../_server/use-cases/users/get-user-balance'
+import { isAdminUseCase } from '../../_server/use-cases/users/is-admin'
+import { PoolItem } from '../../_lib/entities/models/pool-item'
 
-interface PoolItem {
-    id: string
-    name: string
-    startDate: Date
-    endDate: Date
-    numParticipants: number
-    status: string
-    image: string
-    softCap: number
-}
-
-export async function getAllPoolsAction(): Promise<PoolItem[]> {
-    return getAllPoolsUseCase()
-}
-
-export const checkAuthStatusAction = authenticatedAction
+export const getUpcomingPoolsAction = unauthenticatedProcedure
     .createServerAction()
-    .handler(
-        async (): Promise<
-            { isAdmin: boolean; authenticated: boolean; address: Address } | { needsRefresh: true } | null
-        > => {
-            const { session, needsRefresh } = await validateRequest()
-            console.log('session', session)
-            if (needsRefresh) {
-                return { needsRefresh: true }
-            }
-
-            if (!session || !session.address) {
-                throw new Error('User not authenticated or address not available')
-            }
-
-            return { isAdmin: session.isAdmin, authenticated: true, address: session.address }
-        },
-    )
-
-// export async function getUpcomingPools(): Promise<PoolItem[]> {
-//     return getUpcomingPoolsUseCase()
-// }
-
-export const getUserNextPoolAction = authenticatedAction
-    .createServerAction()
-    .handler(async (): Promise<PoolItem | { needsRefresh: true } | null> => {
-        const { session, needsRefresh } = await validateRequest()
-
-        if (needsRefresh) {
-            return { needsRefresh: true }
-        }
-
-        if (!session || !session.address) {
-            throw new Error('User not authenticated or address not available')
-        }
-
-        const nextPool = await getUserNextPoolUseCase(session.address)
-
-        console.log('next pool', nextPool)
-
-        return nextPool
+    .handler(async (): Promise<PoolItem[]> => {
+        return getAllPoolsUseCase()
     })
+
+export const getUserNextPoolAction = authenticatedProcedure
+    .createServerAction()
+    .handler(async ({ ctx: { user } }): Promise<PoolItem | undefined> => {
+        const address = user.wallet?.address as Address
+        if (!address) return
+        return getUserNextPoolUseCase(address)
+    })
+
+export const getTokenBalanceAction = authenticatedProcedure.createServerAction().handler(async ({ ctx: { user } }) => {
+    const address = user.wallet?.address as Address
+    return getAddressBalanceUseCase(address)
+})
+
+export const getAdminStatusAction = authenticatedProcedure.createServerAction().handler(async ({ ctx: { user } }) => {
+    const address = user.wallet?.address as Address
+    return isAdminUseCase(address)
+})
+
+export const getUserAddressAction = authenticatedProcedure.createServerAction().handler(async ({ ctx: { user } }) => {
+    return user.wallet?.address as Address
+})
+
+export async function getPoolsPageAction() {
+    const [[nextPool], [upcomingPools], [balance], [isAdmin]] = await Promise.all([
+        getUserNextPoolAction(),
+        getUpcomingPoolsAction(),
+        getTokenBalanceAction(),
+        getAdminStatusAction(),
+    ])
+
+    return { nextPool, balance, pools: upcomingPools, isAdmin }
+}

@@ -11,6 +11,7 @@ import type { ParticipantsInfo } from '../../persistence/pools/db/get-db-partici
 import getDbParticipantsInfo from '../../persistence/pools/db/get-db-participants-info'
 import type { PoolItem } from '../../persistence/pools/db/get-db-pool'
 import { getDbPool } from '../../persistence/pools/db/get-db-pool'
+import { User } from '@privy-io/server-auth'
 
 function processPoolDetails(
     contractPool: ContractPoolData,
@@ -81,7 +82,7 @@ function processPoolDetails(
     }
 }
 
-export async function getPoolDetailsUseCase(poolId: string, userAddress?: Address): Promise<PoolDetailsDTO> {
+export async function getPoolDetailsUseCase(poolId: string, userAddress?: string): Promise<PoolDetailsDTO> {
     const contractPool = await getContractPool(poolId)
 
     if (!contractPool) {
@@ -105,7 +106,7 @@ export async function getPoolDetailsUseCase(poolId: string, userAddress?: Addres
         userDeposit = await getContractParticipantDetail(poolId, userAddress)
 
         if (contractPool.status === POOLSTATUS.ENDED) {
-            const winnerDetail = (await getContractWinnerDetail(poolId, userAddress)) || {
+            const winnerDetail = (await getContractWinnerDetail(poolId, userAddress as Address)) || {
                 amountWon: BigInt(0),
                 amountClaimed: BigInt(0),
                 forfeited: false,

@@ -25,7 +25,7 @@ const statusMap: Record<number, string> = {
     4: 'DELETED',
 }
 
-export const getUserNextPoolUseCase = cache(async (userAddress: Address): Promise<PoolItem | null> => {
+export const getUserNextPoolUseCase = cache(async (userAddress: Address): Promise<PoolItem | undefined> => {
     const [userPools, dbPools] = await Promise.all([getUserPools(userAddress), getDbPools()])
 
     const now = Date.now() / 1000 // current timestamp in seconds
@@ -68,5 +68,7 @@ export const getUserNextPoolUseCase = cache(async (userAddress: Address): Promis
         }
     })
 
-    return sortedPools.length > 0 ? sortedPools[0] : null
+    if (sortedPools.length > 0) {
+        return sortedPools[0]
+    }
 })

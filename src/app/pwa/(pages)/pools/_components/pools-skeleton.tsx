@@ -1,11 +1,11 @@
 import { Skeleton } from '@/app/pwa/_components/ui/skeleton'
 
-export default function PoolsLoading() {
+export default function PoolSkeleton({ title, length }: { title: string; length: number }) {
     return (
         <>
-            <h1 className='animate-pulse text-lg font-semibold'>Upcoming Pools</h1>
+            <h1 className='animate-pulse text-lg font-semibold'>{title}</h1>
             <div className='mt-3 flex size-full grow flex-col space-y-4'>
-                {Array.from({ length: 7 }, (_, index) => (
+                {Array.from({ length }, (_, index) => (
                     <Skeleton
                         key={index}
                         className='flex h-24 items-center gap-[14px] rounded-[2rem] bg-[#f4f4f4] p-3 pr-4'>

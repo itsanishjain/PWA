@@ -1,21 +1,28 @@
-import { getAllPoolsAction } from '../actions'
+'use client'
+
 import PoolList from './pool-list'
+import PoolsSkeleton from './pools-skeleton'
+import { useServerActionQuery } from '@/app/pwa/_client/hooks/server-action-hooks'
+import { getUpcomingPoolsAction } from '../actions'
+import { PoolItem } from '@/app/pwa/_lib/entities/models/pool-item'
 
-export default async function UpcomingPools() {
-    const pools = await getAllPoolsAction()
-    const upcomingPools = pools.filter(pool => pool.startDate > new Date())
+export default function UpcomingPools({ initialPools }: { initialPools?: PoolItem[] | null }) {
+    const {
+        isLoading,
+        isPending,
+        isFetching,
+        data: pools,
+    } = useServerActionQuery(getUpcomingPoolsAction, {
+        queryKey: ['upcoming-pools'],
+        input: undefined,
+        initialData: initialPools || undefined,
+    })
 
-    if (upcomingPools.length === 0) {
-        return (
-            <>
-                <h1 className='mb-4 text-lg font-semibold'>Upcoming Pools</h1>
-                <div className='flex-center h-80 flex-col'>
-                    <h1 className='mb-4 text-lg font-semibold'>No upcoming pools</h1>
-                    <p className='text-sm'>Come back later</p>
-                </div>
-            </>
-        )
+    if (isLoading || isPending || isFetching) {
+        return <PoolsSkeleton title='Upcoming Pools' length={7} />
     }
+
+    const upcomingPools = pools?.filter(pool => pool.startDate > new Date())
 
     return (
         <>
