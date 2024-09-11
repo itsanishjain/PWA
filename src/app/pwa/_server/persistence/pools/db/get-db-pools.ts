@@ -23,7 +23,6 @@ export async function getDbPools(): Promise<PoolItem[]> {
     return poolsData
         .map(pool => {
             if (!pool.contract_id) {
-                console.error('Pool missing contract_id:', pool.name)
                 return null
             }
 
