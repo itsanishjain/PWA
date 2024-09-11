@@ -1,20 +1,30 @@
 import dynamic from 'next/dynamic'
-import { getUserAvatarAction } from './actions'
+import PoolTopLogo from '../_components/icons/pool-top-logo'
+import { getUserInfoAction } from '../(pages)/profile/actions'
 
 const PageTitle = dynamic(() => import('./_components/page-title'), {
-    ssr: false,
+    ssr: true,
+    loading: () => (
+        <div className='animate-pulse'>
+            <PoolTopLogo />
+        </div>
+    ),
 })
 
 const BackButton = dynamic(() => import('./_components/back-button'), {
-    // ssr: false,
+    ssr: true,
 })
 
 const UserMenu = dynamic(() => import('./_components/user-menu'), {
-    // ssr: false,
+    ssr: true,
 })
 
 export default async function TopBarLayout(): Promise<JSX.Element> {
-    const userAvatar = await getUserAvatarAction()
+    const [userInfo, error] = await getUserInfoAction()
+
+    if (error) {
+        console.error(error)
+    }
 
     return (
         <header className='fixed left-0 top-0 z-30 w-dvw'>
@@ -28,7 +38,7 @@ export default async function TopBarLayout(): Promise<JSX.Element> {
                     </div>
                 </div>
                 <div className='flex w-1/4 justify-end'>
-                    <UserMenu userAvatar={userAvatar} />
+                    <UserMenu userAvatar={userInfo?.avatar || null} />
                 </div>
             </nav>
         </header>
