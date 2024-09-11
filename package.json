@@ -70,7 +70,8 @@
         "vaul": "0.9.1",
         "viem": "2.18.5",
         "wagmi": "2.12.1",
-        "zsa": "0.5.1"
+        "zsa": "0.5.1",
+        "zsa-react-query": "0.2.1"
     },
     "devDependencies": {
         "@next/bundle-analyzer": "14.2.5",
