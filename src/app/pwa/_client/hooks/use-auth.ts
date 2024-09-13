@@ -1,4 +1,5 @@
 'use client'
+
 import { useLogin, useLogout, usePrivy } from '@privy-io/react-auth'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
@@ -15,6 +16,7 @@ export function useAuth() {
     const { login } = useLogin({
         onComplete(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount) {
             console.log('[use-auth] auth complete')
+
             if (isNewUser) {
                 console.log('[use-auth] new user', { loginMethod, loginAccount })
                 router.replace('/profile/new' as Route)
@@ -24,11 +26,18 @@ export function useAuth() {
                 console.log('[use-auth] already authenticated')
             }
 
+            router.refresh()
             console.log('[use-auth] user', user)
         },
         onError(error) {
+            if (error === 'exited_auth_flow') {
+                console.log('[use-auth] exited auth flow')
+                return
+            }
             console.error('[use-auth] error', error)
-            toast.error('An error occurred while logging in. Please try again.')
+            toast.error('An error occurred while logging in. Please try again.', {
+                richColors: true,
+            })
             router.refresh()
         },
     })
