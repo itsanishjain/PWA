@@ -26,11 +26,11 @@ interface PoolItem {
 
 const publicClient = getPublicClient(serverConfig)
 
-export async function getContractPools(): Promise<PoolItem[]> {
+export async function getContractPools() {
     const latestPoolId = await publicClient.readContract({
         address: currentPoolAddress,
         abi: [LatestPoolId],
-        functionName: 'latestPoolId',
+        functionName: LatestPoolId.name,
     })
 
     const poolIds = Array.from({ length: Number(latestPoolId) }, (_, i) => BigInt(i + 1))
@@ -39,7 +39,7 @@ export async function getContractPools(): Promise<PoolItem[]> {
         contracts: poolIds.map(id => ({
             address: currentPoolAddress,
             abi: [GetAllPoolInfo],
-            functionName: 'getAllPoolInfo',
+            functionName: GetAllPoolInfo.name,
             args: [id],
         })),
     })
@@ -51,14 +51,13 @@ export async function getContractPools(): Promise<PoolItem[]> {
                 return {
                     id: poolIds[index].toString(),
                     name: poolDetail.poolName,
-                    status: ['INACTIVE', 'DEPOSIT_ENABLED', 'STARTED', 'ENDED', 'DELETED'][poolStatus],
-                    startDate: new Date(Number(poolDetail.timeStart) * 1000),
-                    endDate: new Date(Number(poolDetail.timeEnd) * 1000),
+                    status: poolStatus,
+                    timeStart: Number(poolDetail.timeStart),
+                    timeEnd: Number(poolDetail.timeEnd),
                     numParticipants: participants.length,
                 }
             }
-            // Handle error case if needed
-            throw new Error(`Failed to fetch pool info for id ${poolIds[index]}`)
+            return null
         })
         .filter(pool => pool !== null)
 }

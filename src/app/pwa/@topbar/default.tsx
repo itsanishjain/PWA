@@ -27,8 +27,8 @@ export default async function TopBarLayout(): Promise<JSX.Element> {
     }
 
     return (
-        <header className='fixed left-0 top-0 z-30 w-dvw'>
-            <nav className='mx-auto flex h-24 max-w-screen-md items-center justify-between bg-white pt-5 px-safe-or-6'>
+        <header className='fixed left-0 top-0 z-30 w-full'>
+            <nav className='mx-auto flex h-24 max-w-screen-md items-center justify-between bg-white pt-safe px-safe-or-6'>
                 <div className='flex w-1/4 justify-start'>
                     <BackButton />
                 </div>

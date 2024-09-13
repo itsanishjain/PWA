@@ -11,7 +11,6 @@ import type { ParticipantsInfo } from '../../persistence/pools/db/get-db-partici
 import getDbParticipantsInfo from '../../persistence/pools/db/get-db-participants-info'
 import type { PoolItem } from '../../persistence/pools/db/get-db-pool'
 import { getDbPool } from '../../persistence/pools/db/get-db-pool'
-import { User } from '@privy-io/server-auth'
 
 function processPoolDetails(
     contractPool: ContractPoolData,
@@ -24,7 +23,7 @@ function processPoolDetails(
     if (!poolInfo) {
         //  TODO: Handle creation of pool in DB if not found
         // throw new Error(`Pool with ID ${contractPool.id} not found in database`)
-        console.log('Pool not found in database with id:', contractPool.id)
+        console.log('[processPoolDetails] Pool not found in database with id:', contractPool.id)
         return {
             hostName: 'Unknown',
             contractId: BigInt(contractPool.id),
@@ -95,7 +94,7 @@ export async function getPoolDetailsUseCase(poolId: string, userAddress?: string
 
     if (!poolInfo) {
         // TODO: Handle creation of pool in DB
-        console.log('Pool not found in database with id:', poolId)
+        console.log('[getPoolDetails] Pool not found in database with id:', poolId)
         // throw new Error(`Pool with ID ${poolId} not found in database`)
     }
 

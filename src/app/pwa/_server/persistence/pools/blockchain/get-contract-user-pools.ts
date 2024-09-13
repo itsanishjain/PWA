@@ -1,23 +1,10 @@
-// src/persistence/pools/blockchain/get-user-pools.ts
 import 'server-only'
 
-import { poolAbi, poolAddress } from '@/types/contracts'
-import { createConfig, getPublicClient, multicall } from '@wagmi/core'
-import { baseSepolia } from '@wagmi/core/chains'
+import { poolAbi } from '@/types/contracts'
+import { multicall } from '@wagmi/core'
+import { getAbiItem } from 'viem'
 import type { Address } from 'viem'
-import { getAbiItem, http } from 'viem'
-
-const config = createConfig({
-    chains: [baseSepolia],
-    multiInjectedProviderDiscovery: false,
-    syncConnectedChain: true,
-    transports: {
-        [baseSepolia.id]: http(process.env.RPC_ENDPOINT),
-    },
-    ssr: true,
-})
-
-const publicClient = getPublicClient(config)
+import { currentPoolAddress, serverConfig } from '../../../blockchain/server-config'
 
 const GetPoolsCreatedBy = getAbiItem({
     abi: poolAbi,
@@ -35,36 +22,37 @@ const GetAllPoolInfo = getAbiItem({
 })
 
 export async function getUserPools(userAddress: Address) {
-    const [createdPoolsResult, joinedPoolsResult] = await multicall(config, {
+    const [createdPoolsResult, joinedPoolsResult] = await multicall(serverConfig, {
         contracts: [
             {
-                address: poolAddress[publicClient.chain.id],
+                address: currentPoolAddress,
                 abi: [GetPoolsCreatedBy],
-                functionName: 'getPoolsCreatedBy',
+                functionName: GetPoolsCreatedBy.name,
                 args: [userAddress],
             },
             {
-                address: poolAddress[publicClient.chain.id],
+                address: currentPoolAddress,
                 abi: [GetPoolsJoinedBy],
-                functionName: 'getPoolsJoinedBy',
+                functionName: GetPoolsJoinedBy.name,
                 args: [userAddress],
             },
         ],
     })
 
     if (createdPoolsResult.status !== 'success' || joinedPoolsResult.status !== 'success') {
-        throw new Error('Failed to fetch user pools')
+        console.error('Failed to fetch user pools')
+        return []
     }
 
     const createdPools = createdPoolsResult.result
     const joinedPools = joinedPoolsResult.result
     const allUserPools = [...new Set([...createdPools, ...joinedPools])]
 
-    const poolDetailsResults = await multicall(config, {
+    const poolDetailsResults = await multicall(serverConfig, {
         contracts: allUserPools.map(poolId => ({
-            address: poolAddress[publicClient.chain.id] as Address,
+            address: currentPoolAddress,
             abi: [GetAllPoolInfo],
-            functionName: 'getAllPoolInfo',
+            functionName: GetAllPoolInfo.name,
             args: [poolId],
         })),
     })
@@ -75,10 +63,10 @@ export async function getUserPools(userAddress: Address) {
                 const [, poolDetail, , poolStatus, , participants] = result.result
                 return {
                     id: allUserPools[index].toString(),
+                    name: poolDetail.poolName,
+                    status: poolStatus,
                     timeStart: Number(poolDetail.timeStart),
                     timeEnd: Number(poolDetail.timeEnd),
-                    status: poolStatus,
-                    name: poolDetail.poolName,
                     numParticipants: participants.length,
                 }
             }

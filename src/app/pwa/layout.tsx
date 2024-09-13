@@ -13,7 +13,7 @@ export default function RootLayout({
     return (
         <html lang='en'>
             <head />
-            <body className={`${(inter.variable, comfortaa.variable)}`}>
+            <body className={`${inter.variable} ${comfortaa.variable} flex min-h-screen flex-col`}>
                 <Providers>
                     {topbar}
                     <MainWrapper>{children}</MainWrapper>

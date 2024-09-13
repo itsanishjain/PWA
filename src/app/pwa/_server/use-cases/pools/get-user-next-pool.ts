@@ -1,7 +1,5 @@
-// src/use-cases/pools/get-user-next-pool.ts
-
-import { cache } from 'react'
 import 'server-only'
+
 import type { Address } from 'viem'
 import { getUserPools } from '../../persistence/pools/blockchain/get-contract-user-pools'
 import { getDbPools } from '../../persistence/pools/db/get-db-pools'
@@ -25,19 +23,13 @@ const statusMap: Record<number, string> = {
     4: 'DELETED',
 }
 
-export const getUserNextPoolUseCase = cache(async (userAddress: Address): Promise<PoolItem | undefined> => {
+export const getUserNextPoolUseCase = async (userAddress: Address): Promise<PoolItem | undefined> => {
     const [userPools, dbPools] = await Promise.all([getUserPools(userAddress), getDbPools()])
-
-    const now = Date.now() / 1000 // current timestamp in seconds
 
     const validPools = userPools
         .filter(
             (pool): pool is NonNullable<typeof pool> =>
-                pool !== null &&
-                pool !== undefined &&
-                typeof pool.timeStart === 'number' &&
-                typeof pool.timeEnd === 'number' &&
-                (pool.timeStart > now || pool.timeEnd > now),
+                pool !== null && pool !== undefined && (pool.status === 1 || pool.status === 2), // DEPOSIT_ENABLED or STARTED
         )
         .map(pool => {
             const dbPool = dbPools.find(dp => dp.id === pool.id)
@@ -53,22 +45,14 @@ export const getUserNextPoolUseCase = cache(async (userAddress: Address): Promis
             }
         })
 
-    const sortedPools = validPools.sort((a, b) => {
-        const aStart = a.startDate.getTime() / 1000
-        const bStart = b.startDate.getTime() / 1000
-        const aEnd = a.endDate.getTime() / 1000
-        const bEnd = b.endDate.getTime() / 1000
-
-        if (aStart > now && bStart > now) {
-            return aStart - bStart // Sort by closest start time for upcoming pools
-        } else if (aEnd > now && bEnd > now) {
-            return aEnd - bEnd // Sort by closest end time for active pools
-        } else {
-            return aStart > now ? -1 : 1 // Prioritize upcoming pools over active ones
+    // Sort first by startDate, then by endDate
+    const [nextUpcomingPool] = validPools.sort((a, b) => {
+        if (a.startDate.getTime() !== b.startDate.getTime()) {
+            return a.startDate.getTime() - b.startDate.getTime()
         }
+        return a.endDate.getTime() - b.endDate.getTime()
     })
 
-    if (sortedPools.length > 0) {
-        return sortedPools[0]
-    }
-})
+    // Return the next pool joined by the user
+    return nextUpcomingPool
+}

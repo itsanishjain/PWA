@@ -25,8 +25,9 @@ export default function MainContentWrapper({ children, title = null }: MainConte
     return (
         <main
             className={cn(
-                'relative mx-auto flex h-full w-dvw max-w-screen-md flex-1 flex-col pt-safe-offset-24 mb-safe-or-24 px-safe-or-6',
-                isBottomBarVisible ? 'pb-6' : '',
+                'flex flex-1 flex-col overflow-auto px-safe-or-6',
+                'pt-24 pb-safe', // Adjust top padding to account for topbar height
+                isBottomBarVisible ? 'pb-24' : '', // Add bottom padding when bottombar is visible
             )}>
             {children}
         </main>

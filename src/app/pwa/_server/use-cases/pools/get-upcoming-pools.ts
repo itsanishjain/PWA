@@ -1,15 +1,14 @@
 import 'server-only'
 import { getContractPools } from '../../persistence/pools/blockchain/get-contract-pools'
 import { getDbPools } from '../../persistence/pools/db/get-db-pools'
+import { PoolItem } from '@/app/pwa/_lib/entities/models/pool-item'
 
-interface PoolItem {
-    id: string
-    name: string
-    startDate: Date
-    endDate: Date
-    numParticipants: number
-    status: string
-    image: string
+const statusMap: Record<number, string> = {
+    0: 'INACTIVE',
+    1: 'DEPOSIT_ENABLED',
+    2: 'STARTED',
+    3: 'ENDED',
+    4: 'DELETED',
 }
 
 export async function getAllPoolsUseCase(): Promise<PoolItem[]> {
@@ -25,14 +24,15 @@ export async function getAllPoolsUseCase(): Promise<PoolItem[]> {
         return {
             id: contractPool.id.toString(),
             name: contractPool.name,
-            startDate: contractPool.startDate,
-            endDate: contractPool.endDate,
+            startDate: new Date(contractPool.timeStart * 1000),
+            endDate: new Date(contractPool.timeEnd * 1000),
             numParticipants: contractPool.numParticipants,
-            status: contractPool.status,
+            status: statusMap[contractPool.status] || 'UNKNOWN',
             image: dbPool.image,
+            softCap: dbPool.softCap,
         }
     })
 
     const now = new Date()
-    return allPools.filter(pool => new Date(pool.startDate) > now)
+    return allPools.filter(pool => pool.startDate > now)
 }
