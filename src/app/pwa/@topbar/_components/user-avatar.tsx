@@ -25,15 +25,23 @@ export default function UserAvatar({ userAvatar }: UserAvatarProps) {
 
     const { address } = useAccount()
 
-    return (
-        <Avatar className='size-10 cursor-pointer' aria-label='Go to Profile' asChild>
-            <Link href={'/profile' as Route}>
-                {userInfo.avatar ? (
-                    <AvatarImage alt='User Avatar' src={userInfo.avatar} />
-                ) : (
-                    <ReactBlockies seed={address || '0x'} size={10} />
-                )}
-            </Link>
-        </Avatar>
-    )
+    if (isLoading) {
+        return <div className='size-10 animate-pulse rounded-full bg-gray-200' />
+    }
+
+    if (isSuccess && userInfo) {
+        return (
+            <Avatar className='size-10 cursor-pointer' aria-label='Go to Profile' asChild>
+                <Link href={'/profile' as Route}>
+                    {userInfo?.avatar ? (
+                        <AvatarImage alt='User Avatar' src={userInfo.avatar} />
+                    ) : (
+                        <ReactBlockies seed={address || '0x'} size={10} />
+                    )}
+                </Link>
+            </Avatar>
+        )
+    }
+
+    return null
 }
