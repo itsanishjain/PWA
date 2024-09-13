@@ -16,6 +16,7 @@ const config: Config = {
             animation: {
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
+                'skeleton-pulse': 'skeleton-fade-in 0.8s ease-out forwards, skeleton-shimmer 2s infinite linear',
             },
             backgroundImage: {
                 cta: 'linear-gradient(180deg, #36a0f7, #1364da)',
@@ -95,6 +96,24 @@ const config: Config = {
                     },
                     'to': {
                         'background-position': '0% 0%',
+                    },
+                },
+                'skeleton-fade-in': {
+                    '0%': {
+                        opacity: '0',
+                        transform: 'scale(0.98)',
+                    },
+                    '100%': {
+                        opacity: '1',
+                        transform: 'scale(1)',
+                    },
+                },
+                'skeleton-shimmer': {
+                    '0%': {
+                        backgroundPosition: '-200% 0',
+                    },
+                    '100%': {
+                        backgroundPosition: '200% 0',
                     },
                 },
             },
