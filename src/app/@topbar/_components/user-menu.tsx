@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Skeleton } from '@/app/pwa/_components/ui/skeleton'
+import { Button } from '@/app/_components/ui/button'
+import { Skeleton } from '@/app/_components/ui/skeleton'
 import { usePrivy } from '@privy-io/react-auth'
 import { usePathname } from 'next/navigation'
 import SkipButton from './skip-button'
@@ -9,11 +9,7 @@ import UserAvatar from './user-avatar'
 import UserDropdown from './user-dropdown'
 import { useAuth } from '../../_client/hooks/use-auth'
 
-interface UserMenuProps {
-    userAvatar: string | null
-}
-
-export default function UserMenu({ userAvatar }: UserMenuProps) {
+export default function UserMenu() {
     const { login } = useAuth()
     const { ready, authenticated } = usePrivy()
     const pathname = usePathname()
@@ -27,7 +23,7 @@ export default function UserMenu({ userAvatar }: UserMenuProps) {
             case '/profile/new':
                 return <SkipButton />
             default:
-                return <UserAvatar userAvatar={userAvatar} />
+                return <UserAvatar />
         }
     }
 

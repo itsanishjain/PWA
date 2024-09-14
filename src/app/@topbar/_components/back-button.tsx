@@ -1,13 +1,13 @@
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
+import { Button } from '@/app/_components/ui/button'
 import { usePathname, useRouter } from 'next/navigation'
 
 export default function BackButton() {
     const router = useRouter()
     const pathname = usePathname()
 
-    const visible = pathname !== '/pools'
+    const visible = !['/pools', '/'].includes(pathname)
 
     return (
         <div className='w-6'>

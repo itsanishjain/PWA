@@ -1,6 +1,6 @@
 'use client'
 
-import PoolTopLogo from '@/app/pwa/_components/icons/pool-top-logo'
+import PoolTopLogo from '@/app/_components/icons/pool-top-logo'
 import { Route } from 'next'
 import Link from 'next/link'
 import { useAppStore } from '../../_client/providers/app-store.provider'

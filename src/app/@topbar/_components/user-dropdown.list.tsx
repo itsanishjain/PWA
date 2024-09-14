@@ -13,11 +13,11 @@ import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useAccount, useBalance } from 'wagmi'
 import OnRampDialog from '../../(pages)/profile/_components/onramps/onramp.dialog'
-import { wagmi } from '../../_client/providers/configs'
 import UserDropdownItem from './user-dropdown.item'
 import type { DropdownItemConfig } from './user-dropdown.list.config'
 import { dropdownItemsConfig } from './user-dropdown.list.config'
 import { useAuth } from '../../_client/hooks/use-auth'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.
@@ -53,7 +53,7 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
     const account = useAccount()
     const { data: tokenBalanceData } = useBalance({
         address: account.address,
-        token: dropletAddress[wagmi.config.state.chainId as ChainId],
+        token: dropletAddress[getConfig().state.chainId as ChainId],
     })
 
     const decimals = BigInt(tokenBalanceData?.decimals ?? BigInt(18))
@@ -135,10 +135,7 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
                     <UserDropdownItem {...item} />
                 </motion.div>
             ))}
-            <OnRampDialog
-                open={openOnRampDialog}
-                setOpen={setOpenOnRampDialog}
-            />
+            <OnRampDialog open={openOnRampDialog} setOpen={setOpenOnRampDialog} />
         </motion.div>
     )
 }
