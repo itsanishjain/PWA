@@ -18,12 +18,12 @@ export default {
             landingHeader: 'Log in or sign up to continue',
             loginMessage: 'Pooling funds made simple.',
             showWalletLoginFirst: true,
-            walletList: ['coinbase_wallet', 'detected_wallets'],
+            walletList: ['coinbase_wallet', 'detected_wallets', 'metamask', 'rainbow', 'wallet_connect'],
         },
         externalWallets: {
             coinbaseWallet: {
                 // Valid connection options include 'eoaOnly' (default), 'smartWalletOnly', or 'all'
-                connectionOptions: 'smartWalletOnly',
+                connectionOptions: 'all',
             },
         },
         supportedChains: [baseSepolia],
@@ -46,10 +46,10 @@ export default {
         //         secondary: '',
         //     },
         // },
-        // loginMethodsAndOrder: {
-        //     overflow: [],
-        //     primary: ['coinbase_wallet', 'detected_wallets', 'metamask'],
-        // },
+        loginMethodsAndOrder: {
+            primary: ['coinbase_wallet', 'detected_wallets', 'metamask'],
+            overflow: ['rainbow', 'wallet_connect'],
+        },
         // fiatOnRamp: { useSandbox: true },
         // loginMethods: []
     },
