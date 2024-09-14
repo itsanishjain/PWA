@@ -1,93 +1,12 @@
-// middleware.ts
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export const config = {
-    matcher: ['/((?!api|_next|manifest.json|app|landing|favicon.ico).*)'],
+export default function middleware(req: NextRequest) {
+    console.info('\x1b[35m[middleware]\x1b[0m', '🦩\t', '\x1b[36m' + req.nextUrl.pathname + '\x1b[0m')
+
+    return NextResponse.next()
 }
 
-export function middleware(req: NextRequest) {
-    const url = req.nextUrl
-    const pathname = url.pathname
-    const hostname = req.headers.get('host')!
-
-    console.log('[middleware]', hostname.split('.')[0], '🌐', pathname)
-
-    // Handle localhost:3000 and app.poolparty.cc
-    const isDevelopment = process.env.NODE_ENV === 'development'
-    const rootDomain = isDevelopment ? 'localhost:3000' : process.env.NEXT_PUBLIC_ROOT_DOMAIN
-
-    // handle subdomains
-    if (hostname.startsWith('app.')) {
-        // for app.poolparty.cc or app.localhost:3000
-        if (pathname === '/' || pathname === '/pwa' || pathname === '/pwa/') {
-            // permanent redirect to /pools
-            return NextResponse.redirect(new URL('/pools', req.url), 301)
-        }
-        return NextResponse.rewrite(new URL(`/pwa${pathname}`, req.url))
-    } else if (hostname === rootDomain || hostname.startsWith('www.')) {
-        // for localhost:3000, poolparty.cc or www.poolparty.cc
-        return NextResponse.rewrite(new URL(`/landing${pathname}`, req.url))
-    }
-
-    // if there is no condition match, continue with the regular request
-    return NextResponse.next()
-
-    // const subdomain = hostname.split('.')[0]
-
-    // console.log('Subdomain:', subdomain)
-
-    // // Skip middleware for static assets, API routes, and other excluded paths
-    // if (
-    //     pathname.startsWith('/_next/') ||
-    //     pathname.startsWith('/api/') ||
-    //     pathname.startsWith('/images/') ||
-    //     pathname === '/favicon.ico' ||
-    //     pathname === '/manifest.json' ||
-    //     pathname === '/sw.js'
-    // ) {
-    //     return NextResponse.next()
-    // }
-
-    // // Open routes
-    // if (pathname === '/pools' || (pathname.startsWith('/pool/') && pathname !== '/pool/new')) {
-    //     console.log('Open route detected')
-    //     return NextResponse.next()
-    // }
-
-    // // Verify auth token
-    // const privyAuthToken = request.cookies.get('privy-token')?.value
-
-    // if (!privyAuthToken) {
-    //     console.log('No auth token, redirecting to /pools')
-    //     return NextResponse.redirect(new URL('/pools', request.url))
-    // }
-
-    // const address = await getWalletAddress(privyAuthToken)
-    // console.log('Address:', address)
-
-    // // Verify user profile
-    // if (pathname.startsWith('/profile/')) {
-    //     const profileAddress = pathname.split('/')[2]
-    //     if (address?.toLowerCase() !== profileAddress.toLowerCase()) {
-    //         console.log('Profile mismatch, redirecting to /pools')
-    //         return NextResponse.redirect(new URL('/pools', request.url))
-    //     }
-    // }
-
-    // // Verify admin for creating pool
-    // if (pathname === '/pool/new') {
-    //     console.log('Checking admin for /pool/new')
-    //     const isAdminResult = await isAdmin(address)
-    //     console.log('Is admin:', isAdminResult)
-
-    //     if (!isAdminResult) {
-    //         console.log('Not admin, redirecting to /pools')
-    //         return NextResponse.redirect(new URL('/pools', request.url))
-    //     }
-    // }
-
-    // // For all other routes, allow access if authenticated
-    // console.log('Allowing access to authenticated route')
-    // return NextResponse.next()
+export const config = {
+    // matcher: '/disabled',
+    matcher: ['/((?!api|_next|static|public|favicon.ico).*)'],
 }
