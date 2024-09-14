@@ -32,9 +32,21 @@
 
     // github copilot
     "github.copilot.enable": {
-        "*": true,
         "env": false
     },
+
+    // supermaven
+    "supermaven.enable": {
+        ".env*": false
+    },
+
+    // cody
+    "cody.autocomplete.languages": {
+        ".env*": false
+    },
+
+    // cursor
+    "cursor.cpp.disabledLanguages": ["env"],
 
     // tailwindcss
     "tailwindCSS.emmetCompletions": true,
