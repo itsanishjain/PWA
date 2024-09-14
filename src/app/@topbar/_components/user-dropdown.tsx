@@ -13,7 +13,7 @@ import {
     DropdownMenuTrigger,
 } from '@/app/_components/ui/dropdown-menu'
 import { EllipsisIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import UserDropdownList from './user-dropdown.list'
 
 /**
@@ -24,12 +24,7 @@ import UserDropdownList from './user-dropdown.list'
  */
 const UserDropdown: React.FC = (): JSX.Element => {
     const [open, setOpen] = useState(false)
-    const [container, setContainer] = useState<HTMLElement | null>(null)
-
-    useEffect(() => {
-        // Assumes that the main container has the global reference mainRef
-        setContainer(document.querySelector('main'))
-    }, [])
+    const container = document.querySelector('main')
 
     return (
         <DropdownMenu open={open} onOpenChange={setOpen}>
