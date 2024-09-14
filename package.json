@@ -16,7 +16,8 @@
         "preinstall": "npx only-allow pnpm",
         "prettify": "prettier -w",
         "start": "next start",
-        "test": "vitest"
+        "test": "vitest",
+        "test:e2e": "playwright test"
     },
     "dependencies": {
         "@coinbase/cbpay-js": "2.2.0",
@@ -75,7 +76,7 @@
     },
     "devDependencies": {
         "@next/bundle-analyzer": "14.2.5",
-        "@playwright/test": "1.46.1",
+        "@playwright/test": "1.47.1",
         "@tanstack/eslint-plugin-query": "5.51.15",
         "@tanstack/react-query-devtools": "5.51.15",
         "@testing-library/jest-dom": "6.4.8",
