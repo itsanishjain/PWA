@@ -1,4 +1,4 @@
-import { Button } from '@/app/pwa/_components/ui/button'
+import { Button } from '@/app/_components/ui/button'
 import { cn } from '@/lib/utils/tailwind'
 import { AnimatePresence, motion } from 'framer-motion'
 import { debounce } from 'lodash'
@@ -8,13 +8,11 @@ import { generateChars } from './generate-encoded-text'
 
 interface EncryptTextProps {
     children: React.ReactNode
-    isEncoded: boolean
-    setIsEncoded: (value: boolean) => void
     balance: {
         integerPart: number
         fractionalPart: number
     }
-    symbol: string
+    symbol?: string
     color?: string
 }
 
@@ -36,15 +34,9 @@ const charVariants = {
     }),
 }
 
-const EncryptText: React.FC<EncryptTextProps> = ({
-    children,
-    isEncoded,
-    setIsEncoded,
-    balance,
-    symbol,
-    color = 'black',
-}) => {
+const EncryptText: React.FC<EncryptTextProps> = ({ children, balance, symbol = '', color = 'black' }) => {
     const [childrenVisible, setChildrenVisible] = useState(true)
+    const [isEncoded, setIsEncoded] = useState(false)
 
     const handleToggle = useMemo(
         () =>
