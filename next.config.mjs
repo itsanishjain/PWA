@@ -1,17 +1,16 @@
 // @ts-check
 import bundleAnalyzer from '@next/bundle-analyzer'
-// import withSerwistInit from '@serwist/next'
-import { inProduction } from './src/app/pwa/_lib/utils/environment.mjs'
+import withSerwistInit from '@serwist/next'
+import { inProduction } from './src/app/_lib/utils/environment.mjs'
 
 const turboEnabled = process.env.TURBO === 'true'
 
-// const withSerwist = withSerwistInit({
-//     swSrc: 'src/lib/utils/sw.ts',
-//     swDest: 'public/sw.js',
-//     // disable: !inProduction,
-//     disable: true,
-//     scope: '/pwa',
-// })
+const withSerwist = withSerwistInit({
+    swSrc: 'src/lib/utils/sw.ts',
+    swDest: 'public/sw.js',
+    disable: !inProduction,
+    scope: '/',
+})
 
 const withBundleAnalyzer = bundleAnalyzer({
     enabled: process.env.ANALYZE === 'true',
@@ -19,15 +18,14 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 /** @type {import('next').NextConfig} */
 export default withBundleAnalyzer(
-    // withSerwist(
-    {
+    withSerwist({
         eslint: { ignoreDuringBuilds: true },
         ...(turboEnabled ? {} : { compiler: { removeConsole: inProduction } }),
         experimental: {
             typedRoutes: !inProduction && !turboEnabled,
             ...(turboEnabled ? { turbo: { useSwcCss: true } } : {}),
             serverActions: {
-                allowedOrigins: ['app.localhost:3000'],
+                allowedOrigins: ['app.poolparty.cc'],
             },
         },
         reactStrictMode: !inProduction,
@@ -101,6 +99,5 @@ export default withBundleAnalyzer(
             // eslint-disable-next-line
             return config
         },
-    },
-    // ),
+    }),
 )
