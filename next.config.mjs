@@ -2,6 +2,7 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 import withSerwistInit from '@serwist/next'
 import { inProduction } from './src/app/_lib/utils/environment.mjs'
+import { execSync } from 'node:child_process'
 
 const turboEnabled = process.env.TURBO === 'true'
 
@@ -32,71 +33,21 @@ export default withBundleAnalyzer(
         images: {
             remotePatterns: [{ protocol: 'https', hostname: '*.supabase.co' }],
         },
-        // async rewrites() {
-        //     return [
-        //         {
-        //             source: '/:path*',
-        //             destination: '/pwa/:path*',
-        //             has: [
-        //                 {
-        //                     type: 'host',
-        //                     value: 'app.localhost:3000',
-        //                 },
-        //             ],
-        //         },
-        //         {
-        //             source: '/:path*',
-        //             destination: '/pwa/:path*',
-        //             has: [
-        //                 {
-        //                     type: 'host',
-        //                     value: 'app.poolparty.cc',
-        //                 },
-        //             ],
-        //         },
-        //         {
-        //             source: '/:path*',
-        //             destination: '/landing/:path*',
-        //             has: [
-        //                 {
-        //                     type: 'host',
-        //                     value: 'localhost:3000',
-        //                 },
-        //             ],
-        //         },
-        //         {
-        //             source: '/:path*',
-        //             destination: '/landing/:path*',
-        //             has: [
-        //                 {
-        //                     type: 'host',
-        //                     value: 'poolparty.cc',
-        //                 },
-        //             ],
-        //         },
-        //         {
-        //             source: '/:path*',
-        //             destination: '/landing/:path*',
-        //             has: [
-        //                 {
-        //                     type: 'host',
-        //                     value: 'www.poolparty.cc',
-        //                 },
-        //             ],
-        //         },
-        //     ]
-        // },
-        webpack: config => {
-            // if (dev) {
-            //     config.devtool = 'source-map'
-            // }
+        generateBuildId: () => {
+            const hash = execSync('git rev-parse HEAD').toString().trim()
+            return hash
+        },
+        webpack: (config, options) => {
             // Exclude *.test.ts(x) files from being compiled by Next.js
-            // eslint-disable-next-line
             config.module.rules.push({
                 test: /\.test\.tsx?$/,
                 use: 'ignore-loader',
             })
-            // eslint-disable-next-line
+            config.plugins.push(
+                new options.webpack.DefinePlugin({
+                    'process.env.CONFIG_BUILD_ID': JSON.stringify(options.buildId),
+                }),
+            )
             return config
         },
     }),
