@@ -8,10 +8,16 @@ const fetchUserAvatar = async (privyId?: string) => {
     if (!privyId) return
 
     const supabase = getSupabaseBrowserClient()
-    const { data, error } = await supabase.from('users').select('avatar').eq('privyId', privyId).single()
+    try {
+        const { data, error } = await supabase.from('users').select('avatar').eq('privyId', privyId).single()
 
-    if (error) throw error
-    return data?.avatar
+        // PGRST116 is negligible here, as it only means the user has no avatar set
+        if (error && error?.code !== 'PGRST116') throw error
+
+        return data?.avatar
+    } catch (error) {
+        console.error('[use-user-avatar] error', error)
+    }
 }
 
 export const useUserAvatar = () => {

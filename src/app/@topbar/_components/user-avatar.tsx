@@ -1,7 +1,7 @@
 'use client'
 
 import { Avatar, AvatarImage } from '@/app/_components/ui/avatar'
-import { useUserAvatar } from '@/hooks/useUserAvatar'
+import { useUserAvatar } from '@/hooks/use-user-avatar'
 import Link from 'next/link'
 
 export default function UserAvatar() {
