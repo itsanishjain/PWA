@@ -1,63 +1,39 @@
-/**
- * @file src/components/user-dropdown/user-dropdown.list.tsx
- * @description This file contains the `UserDropdownList` component that renders the list of items
- * for the user dropdown menu including options like 'Edit Profile', 'Request a refund', and 'Disconnect'.
- */
-
 'use client'
 
-import { dropletAddress } from '@/types/contracts'
 import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useAccount, useBalance } from 'wagmi'
 import OnRampDialog from '../../(pages)/profile/_components/onramps/onramp.dialog'
 import UserDropdownItem from './user-dropdown.item'
 import type { DropdownItemConfig } from './user-dropdown.list.config'
 import { dropdownItemsConfig } from './user-dropdown.list.config'
 import { useAuth } from '../../_client/hooks/use-auth'
-import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.
  */
 const menuVariants: Variants = {
     closed: {
-        opacity: 0,
-        transition: { when: 'afterChildren', staggerChildren: 0.1 },
+        opacity: 0.3,
+        transition: { when: 'afterChildren', staggerChildren: 0.06, duration: 0.1 },
     },
     open: {
         opacity: 1,
-        transition: { when: 'beforeChildren', staggerChildren: 0.1 },
+        transition: { when: 'beforeChildren', staggerChildren: 0.06, duration: 0.1 },
     },
 }
 
 const itemVariants: Variants = {
-    closed: { opacity: 0, y: -20 },
+    closed: { opacity: 0, y: -40 },
     open: { opacity: 1, y: 0 },
 }
 
-/**
- * UserDropdownList component renders a list of dropdown items in the user menu.
- *
- * @component
- * @returns {JSX.Element} The rendered user dropdown list.
- */
 const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setOpen }): JSX.Element => {
     const { logout } = useAuth()
     const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
     const dropdownListRef = useRef<HTMLDivElement | null>(null)
     const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
-
-    const account = useAccount()
-    const { data: tokenBalanceData } = useBalance({
-        address: account.address,
-        token: dropletAddress[getConfig().state.chainId as ChainId],
-    })
-
-    const decimals = BigInt(tokenBalanceData?.decimals ?? BigInt(18))
-    const _tokenBalance = ((tokenBalanceData?.value ?? BigInt(0)) / BigInt(10) ** decimals).toString()
 
     /**
      * Handles the click event on the 'Disconnect' dropdown item.
@@ -126,7 +102,7 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
                                 stiffness: 500,
                                 damping: 60,
                                 mass: 0.3,
-                                duration: 0.2,
+                                duration: 0.1,
                                 bounce: 0.2,
                             }}
                             style={{ pointerEvents: 'none' }}
