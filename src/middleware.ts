@@ -8,5 +8,5 @@ export default function middleware(req: NextRequest) {
 
 export const config = {
     // matcher: '/disabled',
-    matcher: ['/((?!api|_next|static|public|favicon.ico).*)'],
+    matcher: ['/((?!api|_next|static|public|favicon.ico|app/assets).*)'],
 }

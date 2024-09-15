@@ -7,10 +7,11 @@ import { execSync } from 'node:child_process'
 const turboEnabled = process.env.TURBO === 'true'
 
 const withSerwist = withSerwistInit({
-    swSrc: 'src/lib/utils/sw.ts',
+    swSrc: 'src/app/_lib/utils/sw.ts',
     swDest: 'public/sw.js',
     disable: !inProduction,
     scope: '/',
+    cacheOnNavigation: true,
 })
 
 const withBundleAnalyzer = bundleAnalyzer({
