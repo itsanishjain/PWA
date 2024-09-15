@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils/tailwind'
 import { useEffect } from 'react'
-import { useAppStore } from '../_client/providers/app-store.provider'
+import { useAppStore } from '@/app/_client/providers/app-store.provider'
 
 interface MainContentWrapperProps {
     children: React.ReactNode
@@ -26,7 +26,7 @@ export default function MainContentWrapper({ children, title = null }: MainConte
         <main
             className={cn(
                 'flex flex-1 flex-col overflow-auto px-safe-or-6',
-                'mt-24 pb-safe', // Adjust top padding to account for topbar height
+                'mt-24 pb-safe-offset-24', // Adjust top padding to account for topbar height
                 isBottomBarVisible ? 'mb-24' : '', // Add bottom margin when bottombar is visible
             )}>
             {children}
