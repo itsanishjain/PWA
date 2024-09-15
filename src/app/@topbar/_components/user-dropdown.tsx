@@ -1,9 +1,3 @@
-/**
- * @file src/components/user-dropdown/user-dropdown.tsx
- * @description This file contains the `UserDropdown` component that renders the entire user dropdown menu,
- * including the avatar trigger and the list of dropdown items.
- */
-
 'use client'
 
 import {
@@ -16,12 +10,6 @@ import { EllipsisIcon } from 'lucide-react'
 import { useState } from 'react'
 import UserDropdownList from './user-dropdown.list'
 
-/**
- * UserDropdown component that renders the full dropdown menu for the user.
- *
- * @component
- * @returns {JSX.Element} The rendered user dropdown menu.
- */
 const UserDropdown: React.FC = (): JSX.Element => {
     const [open, setOpen] = useState(false)
     const container = document.querySelector('main')

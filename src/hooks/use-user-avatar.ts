@@ -5,28 +5,21 @@ import { blo } from 'blo'
 import { Address } from 'viem'
 
 const fetchUserAvatar = async (privyId?: string) => {
-    if (!privyId) return
+    if (!privyId) return null
 
     const supabase = getSupabaseBrowserClient()
-    try {
-        const { data, error } = await supabase.from('users').select('avatar').eq('privyId', privyId).single()
+    const { data } = await supabase.from('users').select('avatar').eq('privyId', privyId).maybeSingle()
 
-        // PGRST116 is negligible here, as it only means the user has no avatar set
-        if (error && error?.code !== 'PGRST116') throw error
-
-        return data?.avatar
-    } catch (error) {
-        console.error('[use-user-avatar] error', error)
-    }
+    return data?.avatar ?? null
 }
 
 export const useUserAvatar = () => {
     const { user } = usePrivy()
 
     return useQuery({
-        queryKey: ['userAvatar', user?.id],
+        queryKey: ['user-avatar', user?.id],
         queryFn: () => fetchUserAvatar(user?.id),
-        enabled: !!user?.id,
+        enabled: Boolean(user?.id),
         select: data => {
             if (data) return data
             const address = user?.wallet?.address as Address | undefined
