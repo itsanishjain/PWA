@@ -7,22 +7,18 @@
 'use client'
 
 import { poolAbi, poolAddress } from '@/types/contracts'
-import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useQueryClient } from '@tanstack/react-query'
-import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
-
+import { useAccount } from 'wagmi'
 import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { getAbiItem } from 'viem'
-import { useDisconnect } from 'wagmi'
-import { useSponsoredTxn } from '../../_client/hooks/use-sponsored-txn'
-import { wagmi } from '../../_client/providers/configs'
 import RegisteredDropdownItem from './registered-dropdown.item'
 import type { RegisteredDropdownItemConfig } from './registered-dropdown.list.config'
 import { dropdownItemsConfig } from './registered-dropdown.list.config'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
+import useTransactions from '@/app/_client/hooks/use-smart-transaction'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.
@@ -55,62 +51,26 @@ const RegisteredDropdownList: React.FC<{ setOpen: (open: boolean) => void; poolI
 }): JSX.Element => {
     const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
     const dropdownListRef = useRef<HTMLDivElement | null>(null)
-    const { writeContract, data: hash } = useWriteContract()
-    const {
-        isLoading: isConfirming,
-        isSuccess: isConfirmed,
-        isError,
-        data: txData,
-    } = useWaitForTransactionReceipt({
-        hash,
-    })
     const queryClient = useQueryClient()
+    const { executeTransactions, isPending, isConfirmed } = useTransactions()
+    const { address } = useAccount()
 
-    const { wallets } = useWallets()
-    const { sponsoredTxn } = useSponsoredTxn()
-    const account = useAccount()
-    const accountAddress = account?.address ?? '0x'
-    /**
-     * Handles the click event on the 'Disconnect' dropdown item.
-     */
     const handleUnregisterClick = () => {
-        // close the dropdown menu:
         setOpen(false)
 
-        // TODO: Call the unregister function
+        const UnregisterPoolFunction = getAbiItem({
+            abi: poolAbi,
+            name: 'selfRefund',
+        })
 
-        try {
-            // const [deposit] = [BigInt(poolDetails?.poolDetailFromSC?.[1]?.depositAmountPerPerson.toString() ?? 0)]
-            console.log('unregister')
-            console.log('unregister poolId', BigInt(poolId))
-
-            const UnregisterPoolFunction = getAbiItem({
-                abi: poolAbi,
-                name: 'selfRefund',
-            })
-            if (
-                wallets[0].walletClientType === 'coinbase_smart_wallet' ||
-                wallets[0].walletClientType === 'coinbase_wallet'
-            ) {
-                sponsoredTxn([
-                    {
-                        address: poolAddress[wagmi.config.state.chainId as ChainId],
-                        abi: [UnregisterPoolFunction],
-                        functionName: 'selfRefund',
-                        args: [BigInt(poolId)],
-                    },
-                ])
-            } else {
-                writeContract({
-                    address: poolAddress[wagmi.config.state.chainId as ChainId],
-                    abi: [UnregisterPoolFunction],
-                    functionName: 'selfRefund',
-                    args: [BigInt(poolId)],
-                })
-            }
-        } catch (error) {
-            console.log('Unregister Error', error)
-        }
+        executeTransactions([
+            {
+                address: poolAddress[getConfig().state.chainId as ChainId],
+                abi: [UnregisterPoolFunction],
+                functionName: UnregisterPoolFunction.name,
+                args: [BigInt(poolId)],
+            },
+        ])
     }
 
     /**
@@ -131,29 +91,25 @@ const RegisteredDropdownList: React.FC<{ setOpen: (open: boolean) => void; poolI
     )
 
     useEffect(() => {
-        console.log('isError', isError)
-        console.log('isConfirmed', isConfirmed)
-        console.log('isConfirming', isConfirming)
-        console.log('hash', hash)
-        console.log('txData', txData)
         let toastId
-        if (isConfirming) {
+        if (isPending) {
             toastId = toast.loading('Unregistering from Pool', {
                 description: 'Unjoining pool...',
+                richColors: true,
             })
         }
-        if (hash && isConfirmed) {
+        if (isConfirmed) {
             toast.dismiss(toastId)
 
-            void queryClient.invalidateQueries({
-                queryKey: ['poolDetails', BigInt(poolId), wagmi.config.state.chainId],
-            })
-            void queryClient.invalidateQueries({
-                queryKey: ['allowance', accountAddress],
-            })
+            // TODO: invalidate the correct queries
+            // void queryClient.invalidateQueries({
+            //     queryKey: ['poolDetails', BigInt(poolId), getConfig().state.chainId],
+            // })
+            // void queryClient.invalidateQueries({
+            //     queryKey: ['allowance', accountAddress],
+            // })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isError, isConfirmed, isConfirming, hash, txData])
+    }, [isConfirmed, isPending])
 
     return (
         <motion.div

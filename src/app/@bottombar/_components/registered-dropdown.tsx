@@ -10,7 +10,7 @@ import {
     DropdownMenuContent,
     DropdownMenuPortal,
     DropdownMenuTrigger,
-} from '@/app/pwa/_components/ui/dropdown-menu'
+} from '@/app/_components/ui/dropdown-menu'
 import { useEffect, useState } from 'react'
 import RegisteredDropdownList from './registered-dropdown.list'
 
