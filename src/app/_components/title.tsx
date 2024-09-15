@@ -1,6 +1,5 @@
 'use client'
 
-import { cn } from '@/lib/utils/tailwind'
 import { useEffect } from 'react'
 import { useAppStore } from '../_client/providers/app-store.provider'
 
