@@ -20,7 +20,8 @@ const formatNumber = (num: number, padLength: number) =>
     num
         .toString()
         .padStart(padLength, '0')
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+        // replace with commas to add thousand separators
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '')
 
 const MotionSpan = motion.span
 
@@ -118,17 +119,17 @@ const EncryptText: React.FC<EncryptTextProps> = ({ children, balance, symbol = '
                     <AnimatePresence mode='popLayout' initial={false}>
                         {!isEncoded && (
                             <motion.div key='visible' className='absolute'>
-                                {renderText('$')}
+                                {renderText('$', 'text-neutral-300')}
                                 {renderText(formattedInteger, 'inline-block text-4xl tabular-nums')}
                                 {renderText('.')}
-                                {renderText(formattedFractional, 'inline-block text-2xl tabular-nums')}
-                                <span className='ml-2'>{renderText(symbol || '', 'text-sm')}</span>
+                                {renderText(formattedFractional, 'inline-block text-2xl tabular-nums text-neutral-500')}
+                                <span className='ml-2'>{renderText(symbol || '', 'text-sm text-neutral-800')}</span>
                             </motion.div>
                         )}
 
                         {isEncoded && (
                             <motion.div key='encoded' className='absolute blur-sm'>
-                                {renderText('$')}
+                                {renderText('$', 'text-neutral-300')}
                                 {renderText(encodedText?.integer || '', 'inline-block text-4xl tabular-nums')}
                                 {renderText('.')}
                                 {renderText(encodedText?.fractional || '', 'inline-block text-2xl tabular-nums')}
