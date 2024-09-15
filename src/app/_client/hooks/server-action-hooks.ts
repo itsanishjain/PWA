@@ -2,11 +2,12 @@ import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
 import { createServerActionsKeyFactory, setupServerActionHooks } from 'zsa-react-query'
 
 export const QueryKeyFactory = createServerActionsKeyFactory({
-    getUpcomingPoolsAction: () => ['getUpcomingPoolsAction'],
+    createUserAction: () => ['createUserAction'],
     getAdminStatusAction: () => ['getAdminStatusAction'],
+    getUpcomingPoolsAction: () => ['getUpcomingPoolsAction'],
     getUserInfoAction: () => ['getUserInfoAction'],
-    getUserUpcomingPoolsAction: () => ['getUserUpcomingPoolsAction'],
     getUserPastPoolsAction: () => ['getUserPastPoolsAction'],
+    getUserUpcomingPoolsAction: () => ['getUserUpcomingPoolsAction'],
 })
 
 const { useServerActionQuery, useServerActionMutation, useServerActionInfiniteQuery } = setupServerActionHooks({
