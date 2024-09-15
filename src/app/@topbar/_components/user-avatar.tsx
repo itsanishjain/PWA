@@ -1,6 +1,6 @@
 'use client'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/app/_components/ui/avatar'
+import { Avatar, AvatarImage } from '@/app/_components/ui/avatar'
 import { useUserAvatar } from '@/hooks/use-user-avatar'
 import { User, Loader2 } from 'lucide-react'
 import Link from 'next/link'
