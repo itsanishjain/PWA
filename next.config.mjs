@@ -51,5 +51,11 @@ export default withBundleAnalyzer(
             )
             return config
         },
+        async rewrites() {
+            return [
+                { source: '/profile/new', destination: '/profile/edit?new' },
+                { source: '/', destination: '/pools' },
+            ]
+        },
     }),
 )
