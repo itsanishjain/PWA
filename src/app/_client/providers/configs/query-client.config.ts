@@ -3,7 +3,7 @@
 
 import { defaultShouldDehydrateQuery, isServer, QueryClient } from '@tanstack/react-query'
 import type { PersistedClient, Persister, PersistQueryClientProviderProps } from '@tanstack/react-query-persist-client'
-import { hashFn } from '@wagmi/core/query'
+import { hashFn } from 'wagmi/query'
 import { serialize } from 'wagmi'
 import { del, get, set } from 'idb-keyval'
 import { throttle } from 'lodash'
