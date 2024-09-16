@@ -1,13 +1,35 @@
 'use client'
 
-import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Route } from 'next'
+import { useAppStore } from '@/app/_client/providers/app-store.provider'
+import { Button } from '@/app/_components/ui/button'
+import type { Route } from 'next'
 import Link from 'next/link'
 import { useEffect } from 'react'
+import { usePrivy } from '@privy-io/react-auth'
+import { useQuery } from '@tanstack/react-query'
 
-export default function RenderBottomBar({ isAdmin = false }: { isAdmin?: boolean | null }) {
+async function validateAdminStatus() {
+    const response = await fetch('/api/validate-admin', {
+        method: 'GET',
+    })
+    if (!response.ok) {
+        throw new Error('Failed to validate admin status')
+    }
+    return response.json()
+}
+
+export default function RenderBottomBar() {
     const setBottomBar = useAppStore(state => state.setBottomBarContent)
+    const { user } = usePrivy()
+
+    const { data: isAdmin, isLoading } = useQuery({
+        queryKey: ['admin-status', user?.id],
+        queryFn: async () => {
+            const { isAdmin } = await validateAdminStatus()
+            return isAdmin
+        },
+        enabled: !!user,
+    })
 
     useEffect(() => {
         if (isAdmin) {
@@ -24,6 +46,8 @@ export default function RenderBottomBar({ isAdmin = false }: { isAdmin?: boolean
             setBottomBar(null)
         }
     }, [isAdmin, setBottomBar])
+
+    if (isLoading) return null
 
     return null
 }

@@ -1,18 +1,19 @@
-import Balance from '../../_components/balance/balance'
+import Balance from '@/app/_components/balance/balance'
 import NextUserPool from './_components/next-user-pool'
-import RenderBottomBar from './_components/render-bottom-bar'
+import { AuthenticatedGuard } from '@/components/authenticated-guard'
 import UpcomingPools from './_components/upcoming-pools'
-import { getPoolsPageAction } from './actions'
+import RenderBottomBar from './_components/render-bottom-bar'
 
 export default async function PoolsPage() {
-    const { balance, isAdmin, pools, nextPool, userAddress } = await getPoolsPageAction()
-
     return (
-        <div className='space-y-6'>
-            {userAddress && <Balance initialBalance={balance} />}
-            {userAddress && <NextUserPool initialNextPool={nextPool} />}
-            <UpcomingPools initialPools={pools} />
-            <RenderBottomBar isAdmin={isAdmin} />
+        <div className='flex flex-1 flex-col space-y-6'>
+            <AuthenticatedGuard loading={null}>
+                <Balance />
+                <NextUserPool />
+                <RenderBottomBar />
+            </AuthenticatedGuard>
+
+            <UpcomingPools />
         </div>
     )
 }

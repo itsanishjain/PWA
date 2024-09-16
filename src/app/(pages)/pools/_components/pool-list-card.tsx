@@ -1,14 +1,15 @@
 'use client'
 
-import { getPoolStatus } from '@/app/pwa/_lib/utils/get-pool.status'
-import { getStatusString } from '@/app/pwa/_lib/utils/get-relative-date'
+import { getPoolStatus } from '@/app/_lib/utils/get-pool.status'
+import { getStatusString } from '@/app/_lib/utils/get-relative-date'
 import { cn } from '@/lib/utils/tailwind'
 import { motion } from 'framer-motion'
 import type { Route } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import frog from '@/public/app/images/frog.png'
-import { Skeleton } from '@/app/pwa/_components/ui/skeleton'
+import { Skeleton } from '@/app/_components/ui/skeleton'
+import { useEffect, useState } from 'react'
 
 interface PoolItem {
     id: string
@@ -44,9 +45,14 @@ export default function PoolListCard({
     numParticipants,
     softCap,
 }: PoolItem) {
+    const [dateString, setDateString] = useState<string>('Date information unavailable')
     const statusIndicator = getPoolStatus({ startDate, endDate })
 
     const resolvedImage = image || frog.src
+
+    useEffect(() => {
+        setDateString(getStatusString({ status: statusIndicator, startDate, endDate }))
+    }, [statusIndicator, startDate, endDate])
 
     if (!id) return <PoolCardSkeleton />
 
@@ -71,9 +77,7 @@ export default function PoolListCard({
                 <div className='flex flex-col gap-[5px] truncate'>
                     <h1 className='truncate text-sm font-semibold'>{name}</h1>
                     <span className='truncate text-xs font-medium tracking-tight'>{`${numParticipants}/${softCap} Registered`}</span>
-                    <span className='truncate text-xs font-medium tracking-tight'>
-                        {getStatusString({ status: statusIndicator, startDate, endDate })}
-                    </span>
+                    <span className='truncate text-xs font-medium tracking-tight'>{dateString}</span>
                 </div>
             </motion.div>
         </Link>

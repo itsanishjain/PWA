@@ -1,33 +1,39 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useInView } from 'react-intersection-observer'
 import PoolList from './pool-list'
 import PoolsSkeleton from './pools-skeleton'
-import { useServerActionQuery } from '@/app/pwa/_client/hooks/server-action-hooks'
-import { getUpcomingPoolsAction } from '../actions'
-import { PoolItem } from '@/app/pwa/_lib/entities/models/pool-item'
+import { useUpcomingPools } from '@/hooks/use-upcoming-pools'
 
-export default function UpcomingPools({ initialPools }: { initialPools?: PoolItem[] | null }) {
-    const {
-        isLoading,
-        isPending,
-        isFetching,
-        data: pools,
-    } = useServerActionQuery(getUpcomingPoolsAction, {
-        queryKey: ['upcoming-pools'],
-        input: undefined,
-        initialData: initialPools || undefined,
-    })
+export default function UpcomingPools() {
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } = useUpcomingPools()
+    const { ref, inView } = useInView()
 
-    if (isLoading || isPending || isFetching) {
-        return <PoolsSkeleton title='Upcoming Pools' length={7} />
+    useEffect(() => {
+        if (inView && hasNextPage) {
+            fetchNextPage()
+        }
+    }, [inView, fetchNextPage, hasNextPage])
+
+    if (isError) {
+        return <div>Error loading upcoming pools</div>
     }
 
-    const upcomingPools = pools?.filter(pool => pool.startDate > new Date())
+    const pools = data?.pages.flatMap(page => page) ?? []
 
     return (
         <>
             <h1 className='mb-4 text-lg font-semibold'>Upcoming Pools</h1>
-            <PoolList pools={upcomingPools} />
+            {isLoading ? (
+                <PoolsSkeleton length={8} />
+            ) : (
+                <>
+                    <PoolList pools={pools} name='feed' />
+                    {isFetchingNextPage && <PoolsSkeleton length={4} />}
+                    <div ref={ref} />
+                </>
+            )}
         </>
     )
 }

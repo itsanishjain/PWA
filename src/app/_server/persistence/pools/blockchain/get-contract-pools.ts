@@ -1,4 +1,4 @@
-import 'server-only'
+// import 'server-only'
 
 import { poolAbi } from '@/types/contracts'
 import { getPublicClient, multicall } from '@wagmi/core'
