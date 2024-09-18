@@ -1,6 +1,6 @@
 // @ts-check
 
-import { inProduction } from './src/app/pwa/_lib/utils/environment.mjs'
+import { inProduction } from './src/app/_lib/utils/environment.mjs'
 
 /** @type {import('postcss-load-config').Config} */
 const config = {

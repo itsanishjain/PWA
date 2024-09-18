@@ -8,15 +8,20 @@ node_modules
 **/public/workbox**
 **/public/sw**
 
+# System
 .DS_Store
 
-
+# Environment
 .env.*
 env.*
 !.env.example
-
 info.md
+
+# Vercel
 .vercel
+certificates
+
+# Playwright
 /test-results/
 /playwright-report/
 /blob-report/

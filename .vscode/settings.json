@@ -32,9 +32,21 @@
 
     // github copilot
     "github.copilot.enable": {
-        "*": true,
         "env": false
     },
+
+    // supermaven
+    "supermaven.enable": {
+        ".env*": false
+    },
+
+    // cody
+    "cody.autocomplete.languages": {
+        ".env*": false
+    },
+
+    // cursor
+    "cursor.cpp.disabledLanguages": ["env"],
 
     // tailwindcss
     "tailwindCSS.emmetCompletions": true,
@@ -46,6 +58,8 @@
     "css.lint.validProperties": ["field-sizing"],
 
     // typescript
-    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.tsdk": "./node_modules/typescript/lib",
+
+    // solidity
     "solidity.compileUsingRemoteVersion": "v0.8.25+commit.b61c2a91"
 }
