@@ -1,19 +1,19 @@
 'use client'
 
-import { dropletAddress } from '@/types/contracts'
 import { useWallets } from '@privy-io/react-auth'
 import type { Address } from 'viem'
 import { useBalance } from 'wagmi'
 import Container from '../../claim-winning/_components/container'
 import SectionContent from '../../claim-winning/_components/section-content'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
+import { currentTokenAddress } from '@/app/_server/blockchain/server-config'
 
 export default function ProfileBalanceSection() {
     const { wallets } = useWallets()
 
     const { data: tokenBalanceData } = useBalance({
         address: wallets[0]?.address as Address,
-        token: dropletAddress[getConfig().state.chainId as ChainId],
+        token: currentTokenAddress,
     })
 
     const decimals = BigInt(tokenBalanceData?.decimals ?? BigInt(18))

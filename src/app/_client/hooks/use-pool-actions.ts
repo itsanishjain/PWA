@@ -1,13 +1,14 @@
-import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
+import { currentPoolAddress, currentTokenAddress } from '@/app/_server/blockchain/server-config'
 import { useAuth } from './use-auth'
 import useTransactions from './use-smart-transaction'
-import { poolAbi, useReadDropletBalanceOf } from '@/types/contracts'
+import { poolAbi, tokenAbi } from '@/types/contracts'
 import { useWallets } from '@privy-io/react-auth'
 import type { Address } from 'viem'
 import { parseUnits } from 'viem'
 import { toast } from 'sonner'
 import { approve } from '@/app/_lib/blockchain/functions/token/approve'
 import { deposit } from '@/app/_lib/blockchain/functions/pool/deposit'
+import { useReadContract } from 'wagmi'
 
 export function usePoolActions(
     poolId: bigint,
@@ -19,11 +20,14 @@ export function usePoolActions(
     const { login, authenticated } = useAuth()
     const { executeTransactions, isConfirmed, isPending, isReady, resetConfirmation } = useTransactions()
     const { wallets } = useWallets()
-    const { data: userBalance, error: balanceError } = useReadDropletBalanceOf({
+    const { data: userBalance, error: balanceError } = useReadContract({
+        address: currentTokenAddress,
+        abi: tokenAbi,
+        functionName: 'balanceOf',
         args: [(wallets[0]?.address as Address) || '0x'],
         query: {
             enabled: Boolean(wallets[0]?.address),
-            refetchInterval: 10_000, // 10 seconds
+            refetchInterval: 20_000, // 10 seconds
         },
     })
 

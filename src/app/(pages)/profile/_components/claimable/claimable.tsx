@@ -5,11 +5,12 @@ import { useClaimablePools } from '../../claim-winning/_components/use-claimable
 import PoolCardRow from '../../claim-winning/_components/pool-card-row'
 import { Button } from '@/app/_components/ui/button'
 import useSmartTransaction from '@/app/_client/hooks/use-smart-transaction'
-import { poolAbi, poolAddress } from '@/types/contracts'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 import { toast } from 'sonner'
 import { getAbiItem } from 'viem'
 import { useConfetti } from '@/hooks/use-confetti'
+import { poolAbi } from '@/types/contracts'
+import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 
 export default function ClaimablePrizes() {
     const { address } = useAccount()
@@ -31,7 +32,7 @@ export default function ClaimablePrizes() {
         try {
             await executeTransactions([
                 {
-                    address: poolAddress[getConfig().state.chainId as ChainId],
+                    address: currentPoolAddress,
                     abi: [ClaimWinningsFunction],
                     functionName: ClaimWinningsFunction.name,
                     args: [poolIds, walletAddresses],

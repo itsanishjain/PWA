@@ -2,13 +2,10 @@
 
 import { db } from '@/app/_server/database/db'
 import { createPoolUseCase } from '@/app/_server/use-cases/pools/create-pool'
-import { dropletAddress } from '@/types/contracts'
-import { cookies } from 'next/headers'
-import { baseSepolia } from 'viem/chains'
 import { CreatePoolFormSchema } from './_lib/definitions'
 import { verifyToken } from '@/app/_server/auth/privy'
-import { isAdminUseCase } from '@/app/_server/use-cases/users/is-admin'
 import { getAdminStatusAction, getUserAddressAction } from '../../pools/actions'
+import { currentTokenAddress } from '@/app/_server/blockchain/server-config'
 
 type FormState = {
     message?: string
@@ -121,7 +118,7 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
             startDate: dateRange.start,
             endDate: dateRange.end,
             price: Number(price),
-            tokenAddress: dropletAddress[baseSepolia.id],
+            tokenAddress: currentTokenAddress,
         })
 
         console.log('Pool created successfully, internalPoolId:', internalPoolId)

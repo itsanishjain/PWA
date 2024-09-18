@@ -5,7 +5,6 @@ import { Button } from '@/app/_components/ui/button'
 import { CircleCheckIcon } from 'lucide-react'
 
 // import { useWinnerDetail } from '@/app/_client/hooks/use-winner-detail'
-// import { poolAbi, poolAddress } from '@/types/contracts'
 // import { useWallets } from '@privy-io/react-auth'
 // import { useEffect } from 'react'
 // import { toast } from 'sonner'
@@ -60,7 +59,7 @@ const PoolClaimRow = (props: PoolDetailsProps) => {
         //     ) {
         //         sponsoredTxn([
         //             {
-        //                 address: poolAddress[wagmi.config.state.chainId as ChainId],
+        //                 address: currentPoolAddress,
         //                 abi: [ClaimWinningFunction],
         //                 functionName: 'claimWinning',
         //                 args: [BigInt(props.poolId), wallets[0]?.address as Address],
@@ -68,7 +67,7 @@ const PoolClaimRow = (props: PoolDetailsProps) => {
         //         ])
         //     } else {
         //         writeContract({
-        //             address: poolAddress[wagmi.config.state.chainId as ChainId],
+        //             address: currentPoolAddress,
         //             abi: [ClaimWinningFunction],
         //             functionName: 'claimWinning',
         //             args: [BigInt(props.poolId), wallets[0]?.address as Address],

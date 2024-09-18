@@ -2,7 +2,6 @@
 
 import { Button } from '@/app/_components/ui/button'
 import { Input } from '@/app/_components/ui/input'
-import { dropletAbi, dropletAddress } from '@/types/contracts'
 import { useWallets } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 import type { Address } from 'viem'
@@ -13,13 +12,15 @@ import SectionContent from '../../claim-winning/_components/section-content'
 import { useTokenDecimals } from './use-token-decimals'
 import { useAppStore } from '@/app/_client/providers/app-store.provider'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
+import { currentTokenAddress } from '@/app/_server/blockchain/server-config'
+import { tokenAbi } from '@/types/contracts'
 
 export default function AmountSection() {
     const { wallets } = useWallets()
 
     const { data: tokenBalanceData } = useBalance({
         address: wallets[0]?.address as Address,
-        token: dropletAddress[getConfig().state.chainId as ChainId],
+        token: currentTokenAddress,
     })
 
     const decimals = BigInt(tokenBalanceData?.decimals ?? BigInt(18))
@@ -40,9 +41,9 @@ export default function AmountSection() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data: hash, isPending, isSuccess, writeContract } = useWriteContract()
 
-    const { tokenDecimalsData } = useTokenDecimals(dropletAddress[getConfig().state.chainId as ChainId] as Address)
+    const { tokenDecimalsData } = useTokenDecimals(currentTokenAddress)
     const TransferFunction = getAbiItem({
-        abi: dropletAbi,
+        abi: tokenAbi,
         name: 'transfer',
     })
     const onWithdrawButtonClicked = (amount: string, withdrawAddress: string) => {
@@ -54,8 +55,9 @@ export default function AmountSection() {
         //     : BigInt(amount) * BigInt(Math.pow(10, Number(tokenDecimalsData?.tokenDecimals ?? 0))),
         // })
 
+        // TODO: use the transaction hook for that
         writeContract({
-            address: dropletAddress[getConfig().state.chainId as ChainId],
+            address: currentTokenAddress,
             abi: [TransferFunction],
             functionName: 'transfer',
             args: [

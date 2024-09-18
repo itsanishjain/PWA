@@ -6,7 +6,6 @@ import { Input } from '@/app/_components/ui/input'
 import { formatAddress } from '@/app/_lib/utils/addresses'
 import { cn } from '@/lib/utils/tailwind'
 import frog from '@/public/app/images/frog.png'
-import { poolAbi, poolAddress } from '@/types/contracts'
 import { toast } from 'sonner'
 import type { Address } from 'viem'
 import { getAbiItem } from 'viem'
@@ -17,12 +16,14 @@ import useSmartTransaction from '@/app/_client/hooks/use-smart-transaction'
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/_components/ui/avatar'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 import { useUserDetails } from '../_components/use-user-details'
+import { currentPoolAddress, currentTokenAddress } from '@/app/_server/blockchain/server-config'
+import { poolAbi } from '@/types/contracts'
 
 const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participant-id': Address } }) => {
     const { data: userDetails } = useUserDetails(params['participant-id'])
     const { poolDetails } = usePoolDetails(BigInt(params?.['pool-id']))
 
-    const tokenAddress = poolDetails?.poolDetailFromSC?.[4] ?? '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+    const tokenAddress = poolDetails?.poolDetailFromSC?.[4] ?? currentTokenAddress
 
     const { tokenDecimalsData } = useTokenDecimals(tokenAddress)
     const { data: hash, isPending, isSuccess } = useWriteContract()
@@ -45,9 +46,9 @@ const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participa
 
         const args = [
             {
-                address: poolAddress[getConfig().state.chainId as ChainId],
+                address: currentPoolAddress,
                 abi: [SetWinnerFunction],
-                functionName: 'setWinner',
+                functionName: SetWinnerFunction.name,
                 args: [BigInt(params['pool-id']), params['participant-id'], winnerAmount],
             },
         ]

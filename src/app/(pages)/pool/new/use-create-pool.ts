@@ -3,12 +3,13 @@ import { useFormState } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { parseEther, Hash, parseEventLogs } from 'viem'
 import { createPoolAction, updatePoolStatus } from './actions'
-import { dropletAddress, poolAbi, poolAddress } from '@/types/contracts'
 import useSmartTransaction from '@/app/_client/hooks/use-smart-transaction'
 import { Steps, usePoolCreationStore } from '@/app/_client/stores/pool-creation-store'
 import { useWaitForTransactionReceipt } from 'wagmi'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 import { useQueryClient } from '@tanstack/react-query'
+import { currentPoolAddress, currentTokenAddress } from '@/app/_server/blockchain/server-config'
+import { poolAbi } from '@/types/contracts'
 
 const initialState = {
     message: '',
@@ -64,7 +65,7 @@ export function useCreatePool() {
             console.log('Pool data:', poolData)
 
             const contractCall = {
-                address: poolAddress[getConfig().state.chainId as ChainId],
+                address: currentPoolAddress,
                 abi: poolAbi,
                 functionName: 'createPool',
                 args: [
@@ -73,7 +74,7 @@ export function useCreatePool() {
                     poolData.name,
                     parseEther(poolData.price.toString()),
                     1000,
-                    dropletAddress[getConfig().state.chainId as ChainId],
+                    currentTokenAddress,
                 ],
             }
 

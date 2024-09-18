@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@/app/_components/ui/button'
-import { poolAbi, poolAddress } from '@/types/contracts'
 import { useEffect } from 'react'
 import type { Address } from 'viem'
 import { getAbiItem } from 'viem'
@@ -14,6 +13,8 @@ import { useClaimablePools } from './use-claimable-pools'
 import { useAppStore } from '@/app/_client/providers/app-store.provider'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 import useTransactions from '@/app/_client/hooks/use-smart-transaction'
+import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
+import { poolAbi } from '@/types/contracts'
 
 export default function ClaimablePrizesList() {
     const setBottomBarContent = useAppStore(state => state.setBottomBarContent)
@@ -35,7 +36,7 @@ export default function ClaimablePrizesList() {
 
         executeTransactions([
             {
-                address: poolAddress[getConfig().state.chainId as ChainId],
+                address: currentPoolAddress,
                 abi: [ClaimWinningsFunction],
                 functionName: ClaimWinningsFunction.name,
                 args: [poolIdsToClaimFrom, walletAddresses],
@@ -44,7 +45,7 @@ export default function ClaimablePrizesList() {
     }
 
     useEffect(() => {
-        if (!claimablePools || poolIdsToClaimFrom.length === 0) {
+        if (!claimablePools || poolIdsToClaimFrom?.length === 0) {
             setBottomBarContent(undefined)
         } else {
             setBottomBarContent(

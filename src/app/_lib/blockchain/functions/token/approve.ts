@@ -1,11 +1,11 @@
 import { ContractCall } from '@/app/_lib/entities/models/contract-call'
 import { currentTokenAddress } from '@/app/_server/blockchain/server-config'
-import { dropletAbi } from '@/types/contracts'
+import { tokenAbi } from '@/types/contracts'
 import type { Address } from 'viem'
 import { getAbiItem } from 'viem'
 
 const ApproveFunction = getAbiItem({
-    abi: dropletAbi,
+    abi: tokenAbi,
     name: 'approve',
 })
 

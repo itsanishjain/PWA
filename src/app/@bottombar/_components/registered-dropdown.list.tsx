@@ -6,7 +6,6 @@
 
 'use client'
 
-import { poolAbi, poolAddress } from '@/types/contracts'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAccount } from 'wagmi'
 import type { Variants } from 'framer-motion'
@@ -19,6 +18,8 @@ import type { RegisteredDropdownItemConfig } from './registered-dropdown.list.co
 import { dropdownItemsConfig } from './registered-dropdown.list.config'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 import useTransactions from '@/app/_client/hooks/use-smart-transaction'
+import { poolAbi } from '@/types/contracts'
+import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.
@@ -65,7 +66,7 @@ const RegisteredDropdownList: React.FC<{ setOpen: (open: boolean) => void; poolI
 
         executeTransactions([
             {
-                address: poolAddress[getConfig().state.chainId as ChainId],
+                address: currentPoolAddress,
                 abi: [UnregisterPoolFunction],
                 functionName: UnregisterPoolFunction.name,
                 args: [BigInt(poolId)],

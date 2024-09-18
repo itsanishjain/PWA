@@ -3,12 +3,13 @@
 import useSmartTransaction from '@/app/_client/hooks/use-smart-transaction'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 import { Button } from '@/app/_components/ui/button'
-import { poolAbi, poolAddress } from '@/types/contracts'
 import { CheckCircleIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Address, getAbiItem } from 'viem'
 import { useAccount } from 'wagmi'
 import { useConfetti } from '@/hooks/use-confetti'
+import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
+import { poolAbi } from '@/types/contracts'
 
 interface PoolDetailsClaimableWinningsProps {
     claimableAmount: number
@@ -37,9 +38,9 @@ export default function PoolDetailsClaimableWinnings({
 
         const args = [
             {
-                address: poolAddress[getConfig().state.chainId as ChainId],
+                address: currentPoolAddress,
                 abi: [ClaimWinningFunction],
-                functionName: 'claimWinning',
+                functionName: ClaimWinningFunction.name,
                 args: [poolId, address],
             },
         ]

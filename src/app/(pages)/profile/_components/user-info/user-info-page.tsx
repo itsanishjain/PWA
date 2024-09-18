@@ -42,8 +42,8 @@ export default function ProfileHeader() {
 
                 {/* <SponsoredTxn
                     text='Mint 1000 USDC'
-                    targetAddress={dropletAddress[wagmi.config.state.chainId as ChainId]}
-                    abi={dropletAbi}
+                    targetAddress={currentTokenAddress}
+                    abi={tokenAbi}
                     functionName='mint'
                     args={[account.address, '1000000000000000000000']}
                 />

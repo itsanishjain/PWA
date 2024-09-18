@@ -1,7 +1,7 @@
 import 'server-only'
 
 import type { POOLSTATUS } from '@/app/(pages)/pool/[pool-id]/_lib/definitions'
-import { poolAbi } from '@/types/contracts'
+import { poolAbi, tokenAbi } from '@/types/contracts'
 import { getPublicClient } from '@wagmi/core'
 import type { Address } from 'viem'
 import { erc20Abi, getAbiItem } from 'viem'
@@ -31,7 +31,7 @@ export interface ContractPoolData {
 
 export async function getContractPool(poolId: string): Promise<ContractPoolData | null> {
     try {
-        const poolInfo = await publicClient.readContract({
+        const poolInfo = await publicClient?.readContract({
             address: currentPoolAddress,
             abi: [GetAllPoolInfo],
             functionName: 'getAllPoolInfo',
@@ -70,17 +70,17 @@ export async function getContractPool(poolId: string): Promise<ContractPoolData 
 
 async function getTokenSymbol(tokenAddress: Address): Promise<string> {
     const SymbolFunction = getAbiItem({
-        abi: erc20Abi,
+        abi: tokenAbi,
         name: 'symbol',
     })
 
-    const tokenSymbol = await publicClient.readContract({
+    const tokenSymbol = await publicClient?.readContract({
         address: tokenAddress,
         abi: [SymbolFunction],
         functionName: 'symbol',
     })
 
-    return tokenSymbol
+    return tokenSymbol ?? ''
 }
 
 async function getTokenDecimals(tokenAddress: Address): Promise<number> {
@@ -89,7 +89,7 @@ async function getTokenDecimals(tokenAddress: Address): Promise<number> {
         name: 'decimals',
     })
 
-    const tokenDecimals = await publicClient.readContract({
+    const tokenDecimals = await publicClient?.readContract({
         address: tokenAddress,
         abi: [DecimalsFunction],
         functionName: 'decimals',
