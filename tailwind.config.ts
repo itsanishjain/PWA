@@ -71,7 +71,6 @@ const config: Config = {
                 },
             },
             fontFamily: {
-                logo: 'var(--font-logo), "Comfortaa-fallback", sans-serif',
                 body: 'var(--font-body), "Inter-fallback", sans-serif',
             },
             height: {

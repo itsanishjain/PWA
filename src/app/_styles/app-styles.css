@@ -3,13 +3,6 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: 'Comfortaa-fallback';
-    size-adjust: 116.87%;
-    ascent-override: 70%;
-    src: local('Arial');
-}
-
-@font-face {
     font-family: 'Inter-fallback';
     size-adjust: 107%;
     ascent-override: 90%;
