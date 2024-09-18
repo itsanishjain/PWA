@@ -4,6 +4,9 @@
     "version": "0.0.0",
     "license": "MIT",
     "type": "module",
+    "engines": {
+        "node": ">=20.0.0"
+    },
     "scripts": {
         "build": "next build",
         "check-types": "tsc --noemit",
@@ -14,7 +17,7 @@
         "gen:contracts": "pnpm gen contracts",
         "gen:db": "pnpm gen db",
         "lint": "next lint",
-        "preinstall": "npx only-allow pnpm",
+        "preinstall": "node scripts/check-node-version.js && npx only-allow pnpm",
         "prettify": "prettier -w",
         "start": "next start",
         "test": "vitest",
@@ -182,5 +185,6 @@
             ],
             "@typescript-eslint/consistent-type-imports": 1
         }
-    }
+    },
+    "packageManager": "pnpm@8.0.0"
 }
