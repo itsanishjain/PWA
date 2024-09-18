@@ -124,6 +124,7 @@ export const dropletAbi = [
  */
 export const dropletAddress = {
     84532: '0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b',
+    8453: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
 } as const
 
 /**
@@ -1539,6 +1540,7 @@ export const poolAbi = [
  */
 export const poolAddress = {
     84532: '0x5C22662210E48D0f5614cACA6f7a6a938716Ea26',
+    8453: '0x5CA11740144513897Be27e3E82D75Aa75067F712',
 } as const
 
 /**

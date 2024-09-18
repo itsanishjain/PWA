@@ -5,8 +5,9 @@ import { db } from '@/app/pwa/_server/database/db'
 import { createPoolUseCase } from '@/app/pwa/_server/use-cases/pools/create-pool'
 import { dropletAddress } from '@/types/contracts'
 import { cookies } from 'next/headers'
-import { baseSepolia } from 'viem/chains'
+import { baseSepolia, base } from 'viem/chains'
 import { CreatePoolFormSchema } from './_lib/definitions'
+import { inProduction } from '@/app/pwa/_lib/utils/environment.mjs'
 
 type FormState = {
     message?: string
@@ -69,7 +70,7 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
             dateRange = {
                 start: new Date(parsedDateRange.start).toISOString().substring(0, 16), // YYYY-MM-DDTHH:MM
                 end: new Date(parsedDateRange.end).toISOString().substring(0, 16), // YYYY-MM-DDTHH:MM
-            };
+            }
         } catch (error) {
             console.error('Error parsing dateRange:', error)
         }
@@ -116,6 +117,7 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
     }
 
     try {
+        const tokenAddress = inProduction ? dropletAddress[base.id] : dropletAddress[baseSepolia.id]
         const internalPoolId = await createPoolUseCase(walletAddress, {
             bannerImage,
             name,
@@ -125,7 +127,7 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
             startDate: dateRange.start,
             endDate: dateRange.end,
             price: Number(price),
-            tokenAddress: dropletAddress[baseSepolia.id],
+            tokenAddress: tokenAddress,
         })
 
         return {
