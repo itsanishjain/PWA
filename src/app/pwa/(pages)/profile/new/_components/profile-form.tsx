@@ -104,7 +104,7 @@ const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
                 }
 
                 return (
-                    <section key={field.key} className='flex flex-1 flex-col'>
+                    <section key={field.key} className='mb-6 flex flex-1 flex-col'>
                         <Label className='text-base font-medium text-[#090909]'>{field.label}</Label>
                         <p className='mb-4 mt-1.5 text-xs font-medium text-[#b2b2b2]'>{field.description}</p>
                         <field.component name={field.name} defaultValue={defaultValue} />

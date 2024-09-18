@@ -36,7 +36,7 @@ export default function AvatarUploader({ name, onChange, defaultValue }: AvatarU
     }
 
     return (
-        <div className='flex flex-col items-center'>
+        <div className='flex flex-col'>
             <input
                 placeholder='Choose an image'
                 title='Choose an image'
