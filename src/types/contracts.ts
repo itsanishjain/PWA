@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x5C22662210E48D0f5614cACA6f7a6a938716Ea26)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x5CA11740144513897Be27e3E82D75Aa75067F712)
  * - [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x5C22662210E48D0f5614cACA6f7a6a938716Ea26)
  */
 export const poolAbi = [
@@ -1400,16 +1400,16 @@ export const poolAbi = [
 ] as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x5C22662210E48D0f5614cACA6f7a6a938716Ea26)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x5CA11740144513897Be27e3E82D75Aa75067F712)
  * - [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x5C22662210E48D0f5614cACA6f7a6a938716Ea26)
  */
 export const poolAddress = {
-    8453: '0x5C22662210E48D0f5614cACA6f7a6a938716Ea26',
+    8453: '0x5CA11740144513897Be27e3E82D75Aa75067F712',
     84532: '0x5C22662210E48D0f5614cACA6f7a6a938716Ea26',
 } as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x5C22662210E48D0f5614cACA6f7a6a938716Ea26)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x5CA11740144513897Be27e3E82D75Aa75067F712)
  * - [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x5C22662210E48D0f5614cACA6f7a6a938716Ea26)
  */
 export const poolConfig = { address: poolAddress, abi: poolAbi } as const
@@ -1419,7 +1419,7 @@ export const poolConfig = { address: poolAddress, abi: poolAbi } as const
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913)
  * - [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b)
  */
 export const tokenAbi = [
@@ -1530,16 +1530,16 @@ export const tokenAbi = [
 ] as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913)
  * - [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b)
  */
 export const tokenAddress = {
-    8453: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // base mainnet USDC
-    84532: '0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b', // base sepolia droplet
+    8453: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    84532: '0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b',
 } as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913)
  * - [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0xfD2Ec58cE4c87b253567Ff98ce2778de6AF0101b)
  */
 export const tokenConfig = { address: tokenAddress, abi: tokenAbi } as const

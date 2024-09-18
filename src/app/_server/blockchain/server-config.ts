@@ -25,4 +25,8 @@ export const serverConfig = createConfig({
 export const currentPoolAddress: Address = poolAddress[chain.id as keyof typeof poolAddress] as Address
 export const currentTokenAddress: Address = tokenAddress[chain.id as keyof typeof tokenAddress] as Address
 
+// it should be: https://sepolia.basescan.org/ for base sepolia
+// it should be: https://base.blockscout.com/ for base mainnet
+export const explorerUrl = chain.id === baseSepolia.id ? 'https://sepolia.basescan.org' : 'https://base.blockscout.com'
+
 export const serverClient = getPublicClient(serverConfig)

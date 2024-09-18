@@ -10,6 +10,7 @@ import { Tables } from '@/types/db'
 import { useServerActionQuery } from '@/app/_client/hooks/server-action-hooks'
 import { blo } from 'blo'
 import { useUserInfo } from '@/hooks/use-user-info'
+import { explorerUrl } from '@/app/_server/blockchain/server-config'
 
 type UserItem = Pick<Tables<'users'>, 'avatar' | 'displayName'> | null
 
@@ -35,7 +36,11 @@ export default function UserInfo() {
                     {address ? truncatedAddress : <Skeleton className='h-4 w-16 bg-[#5472E9]/20' />}
                 </h2>
             </div>
-            <Link href={`https://sepolia.basescan.org/address/${address}`} passHref legacyBehavior>
+            <Link
+                href={`${explorerUrl}/address/${address}`}
+                passHref
+                legacyBehavior
+                title='View on Base block explorer'>
                 <a target='_blank' rel='external noopener noreferrer nofollow' className='self-center'>
                     <ExternalLinkIcon className='size-6' />
                 </a>

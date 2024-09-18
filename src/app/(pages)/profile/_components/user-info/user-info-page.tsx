@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/app/_components/ui/avatar
 import { Container, ExternalLinkIcon } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import SectionContent from '../../claim-winning/_components/section-content'
+import { explorerUrl } from '@/app/_server/blockchain/server-config'
 
 export default function ProfileHeader() {
     const account = useAccount()
@@ -31,8 +32,8 @@ export default function ProfileHeader() {
 
                     <div className='flex flex-row items-center justify-center'>
                         <a
-                            title='View on BaseScan'
-                            href={`https://sepolia.basescan.org/address/${account.address}`}
+                            title='View on Base block explorer'
+                            href={`${explorerUrl}/address/${account.address}`}
                             target='_blank'
                             rel='noopener noreferrer nofollow'>
                             <ExternalLinkIcon width={24} height={24} />
