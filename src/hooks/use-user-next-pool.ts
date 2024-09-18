@@ -13,7 +13,7 @@ const statusMap: Record<number, string> = {
     4: 'DELETED',
 }
 
-const fetchUserNextPool = async (userAddress: Address): Promise<PoolItem | undefined> => {
+const fetchUserNextPool = async (userAddress: Address): Promise<PoolItem | null> => {
     const supabase = getSupabaseBrowserClient()
     const userPools = await getUserPools(userAddress)
 
@@ -38,9 +38,9 @@ const fetchUserNextPool = async (userAddress: Address): Promise<PoolItem | undef
         })
 
     // Sort pools by start date (ascending) and get the first one
-    const [nextUpcomingPool] = validPools.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+    const [nextUpcomingPool] = validPools.sort((a, b) => b.startDate.getTime() - a.startDate.getTime())
 
-    return nextUpcomingPool
+    return nextUpcomingPool || null // Return null if no pool is found
 }
 
 export const useUserNextPool = () => {
@@ -51,5 +51,6 @@ export const useUserNextPool = () => {
         queryKey: ['user-next-pool', userAddress],
         queryFn: () => fetchUserNextPool(userAddress!),
         enabled: Boolean(userAddress),
+        select: data => data || undefined, // Convert null to undefined if no pool is found
     })
 }
