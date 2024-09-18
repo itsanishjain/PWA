@@ -1,11 +1,9 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getSupabaseBrowserClient } from '@/app/(pages)/pool/[pool-id]/participants/_components/db-client'
 import { PoolItem } from '@/app/_lib/entities/models/pool-item'
 import { getContractPools } from '@/app/_server/persistence/pools/blockchain/get-contract-pools'
 
-const ITEMS_PER_PAGE = 8
-
-const fetchUpcomingPools = async ({ pageParam = 0 }): Promise<PoolItem[]> => {
+const fetchUpcomingPools = async (): Promise<PoolItem[]> => {
     const supabase = getSupabaseBrowserClient()
 
     // Fetch pools from the smart contract
@@ -14,14 +12,9 @@ const fetchUpcomingPools = async ({ pageParam = 0 }): Promise<PoolItem[]> => {
     console.log('contract pools', contractPools)
 
     // Fetch pool data from Supabase
-    const { data: dbPools } = await supabase
-        .from('pools')
-        .select('*')
-        .range(pageParam * ITEMS_PER_PAGE, (pageParam + 1) * ITEMS_PER_PAGE - 1)
+    const { data: dbPools } = await supabase.from('pools').select('*')
 
     console.log('db pools', dbPools)
-
-    const now = new Date()
 
     const upcomingPools = contractPools
         .map(contractPool => {
@@ -46,21 +39,17 @@ const fetchUpcomingPools = async ({ pageParam = 0 }): Promise<PoolItem[]> => {
             }
         })
         .filter((pool): pool is PoolItem => pool !== null)
-        .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+        .sort((a, b) => b.startDate.getTime() - a.startDate.getTime())
 
     console.log('upcoming pools', upcomingPools)
 
-    return upcomingPools.slice(0, ITEMS_PER_PAGE)
+    return upcomingPools
 }
 
 export const useUpcomingPools = () => {
-    return useInfiniteQuery({
+    return useQuery({
         queryKey: ['upcoming-pools'],
         queryFn: fetchUpcomingPools,
-        initialPageParam: 0,
-        getNextPageParam: (lastPage, pages) => {
-            return lastPage.length === ITEMS_PER_PAGE ? pages.length : undefined
-        },
         refetchInterval: 30000, // Refetch every 30 seconds
         staleTime: 10000, // Consider data stale after 10 seconds
     })
