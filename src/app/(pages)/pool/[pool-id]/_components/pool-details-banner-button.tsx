@@ -2,7 +2,7 @@
 
 import { QrCode, EditIcon } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import ShareDialog from './share.dialog'
+import ShareDialog from './share-dialog'
 
 interface PoolDetailsBannerButtonProps {
     isAdmin?: boolean | null
