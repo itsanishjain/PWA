@@ -1,4 +1,4 @@
-import { currentPoolAddress, currentTokenAddress } from '@/app/_server/blockchain/server-config'
+import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 import { useAuth } from './use-auth'
 import useTransactions from './use-smart-transaction'
 import { poolAbi, useReadDropletBalanceOf } from '@/types/contracts'
@@ -9,12 +9,7 @@ import { toast } from 'sonner'
 import { approve } from '@/app/_lib/blockchain/functions/token/approve'
 import { deposit } from '@/app/_lib/blockchain/functions/pool/deposit'
 
-export function usePoolActions(
-    poolId: bigint,
-    poolPrice: number,
-    tokenDecimals: number,
-    openOnRampDialog: () => void
-) {
+export function usePoolActions(poolId: bigint, poolPrice: number, tokenDecimals: number, openOnRampDialog: () => void) {
     const { login, authenticated } = useAuth()
     const { executeTransactions, isConfirmed, isPending, isReady, resetConfirmation } = useTransactions()
     const { wallets } = useWallets()
@@ -79,7 +74,7 @@ export function usePoolActions(
         }
 
         if (isReady && authenticated) {
-            console.log('Check funds')
+            console.log('Checking funds...')
 
             const bigIntPrice = parseUnits(poolPrice.toString(), tokenDecimals)
             console.log('Big int price:', bigIntPrice.toString())
@@ -88,6 +83,10 @@ export function usePoolActions(
                 console.error('Error reading balance', balanceError)
                 return
             }
+
+            console.log('User balance number:', Number(userBalance || 0))
+            console.log('Big int price:', bigIntPrice.toString())
+            console.log('Is onramp needed?', Number(userBalance || 0) < bigIntPrice)
 
             if (Number(userBalance || 0) < bigIntPrice) {
                 console.log('Onramp funds if needed')
@@ -106,6 +105,10 @@ export function usePoolActions(
         }
     }
 
+    const resetJoinPoolProcess = () => {
+        resetConfirmation()
+    }
+
     const ready = isReady
 
     return {
@@ -113,6 +116,7 @@ export function usePoolActions(
         handleStartPool,
         handleEndPool,
         handleJoinPool,
+        resetJoinPoolProcess,
         ready,
         isPending,
         isConfirmed,

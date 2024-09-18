@@ -60,6 +60,7 @@ export default function BottomBarHandler({
         handleEndPool,
         handleJoinPool,
         handleStartPool,
+        resetJoinPoolProcess,
         ready,
         isPending,
         isConfirmed,
@@ -95,7 +96,16 @@ export default function BottomBarHandler({
                 user: null,
             },
         }),
-        [poolPrice, poolTokenSymbol, handleEnableDeposits, handleStartPool, handleJoinPool, handleEndPool],
+        [
+            poolPrice,
+            poolTokenSymbol,
+            handleEnableDeposits,
+            handleStartPool,
+            handleJoinPool,
+            handleEndPool,
+            isParticipant,
+            handleViewTicket,
+        ],
     )
 
     const renderButton = useCallback(
@@ -154,7 +164,7 @@ export default function BottomBarHandler({
             router.refresh()
             updateBottomBarContent()
             resetConfirmation()
-            setIsLoading(false) // Reset loading state
+            setIsLoading(false)
         }
     }, [isConfirmed, updateBottomBarContent, router, resetConfirmation])
 
@@ -164,5 +174,13 @@ export default function BottomBarHandler({
         }
     }, [isPending, isConfirmed])
 
-    return <OnRampDialog open={openOnRampDialog} setOpen={setOpenOnRampDialog} amount={poolPrice.toString()} />
+    const handleOnRampDialogClose = () => {
+        setOpenOnRampDialog(false)
+        resetJoinPoolProcess()
+        setIsLoading(false)
+        updateBottomBarContent()
+        router.refresh()
+    }
+
+    return <OnRampDialog open={openOnRampDialog} setOpen={handleOnRampDialogClose} amount={poolPrice.toString()} />
 }
