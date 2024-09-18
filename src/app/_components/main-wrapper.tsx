@@ -25,8 +25,8 @@ export default function MainContentWrapper({ children, title = null }: MainConte
     return (
         <main
             className={cn(
-                'relative mx-auto flex w-dvw max-w-screen-md flex-1 flex-col overflow-auto pt-safe-offset-24 px-safe-or-2',
-                'mt-24 pb-safe-offset-24', // Adjust margin and padding to account for topbar height
+                'pt-safe-offset relative mx-auto flex w-dvw max-w-screen-md flex-1 flex-col overflow-auto px-safe-or-2',
+                'pb-safe-offset mt-24', // Adjust margin and padding to account for topbar height
                 isBottomBarVisible ? 'mb-safe-or-24' : 'mb-safe', // Add bottom margin when bottombar is visible
             )}>
             {children}
