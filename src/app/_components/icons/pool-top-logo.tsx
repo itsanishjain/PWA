@@ -4,11 +4,11 @@ import { forwardRef, memo } from 'react'
 const SvgComponent = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     <svg
         xmlns='http://www.w3.org/2000/svg'
-        width={428}
-        height={193}
+        viewBox='0 0 428 193'
         fill='none'
         ref={ref}
         shapeRendering='geometricPrecision'
+        style={{ width: '100%', height: '100%', maxWidth: '100px' }}
         {...props}>
         <path
             fill='#5270E6'

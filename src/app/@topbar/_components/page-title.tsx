@@ -9,7 +9,13 @@ export default function PageTitle() {
 
     return (
         <Link href='/'>
-            <h1 className='text-[0.875rem] font-semibold'>{title ?? <PoolTopLogo />}</h1>
+            <h1 className='text-[0.875rem] font-semibold'>
+                {title ?? (
+                    <div className='h-8 w-24'>
+                        <PoolTopLogo />
+                    </div>
+                )}
+            </h1>
         </Link>
     )
 }
