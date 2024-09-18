@@ -128,7 +128,7 @@ export default function BottomBarHandler({
             if (!config) return null
             return (
                 <Button
-                    className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
+                    className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-4 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
                     onClick={() => {
                         setIsLoading(true)
                         config.action()

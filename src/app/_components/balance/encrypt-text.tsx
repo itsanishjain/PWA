@@ -142,7 +142,7 @@ const EncryptText: React.FC<EncryptTextProps> = ({ children, balance, symbol = '
             <Button
                 size='icon'
                 variant='ghost'
-                className={cn(`z-10 size-4 sm:size-6`, `text-[${color}]`)}
+                className={cn(`z-10 size-6 sm:size-6`, `text-[${color}]`)}
                 onClick={handleToggle}>
                 {isEncoded ? <EyeIcon /> : <EyeOffIcon />}
             </Button>
