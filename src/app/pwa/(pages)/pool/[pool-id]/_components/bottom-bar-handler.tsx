@@ -50,8 +50,16 @@ export default function BottomBarHandler({
         args: [walletAddress || '0x', poolId],
     })
 
-    const { handleEnableDeposits, handleEndPool, handleJoinPool, handleStartPool, ready, isPending, isConfirmed, resetConfirmation } =
-        usePoolActions(poolId, poolPrice, tokenDecimals, () => setOpenOnRampDialog(true))
+    const {
+        handleEnableDeposits,
+        handleEndPool,
+        handleJoinPool,
+        handleStartPool,
+        ready,
+        isPending,
+        isConfirmed,
+        resetConfirmation,
+    } = usePoolActions(poolId, poolPrice, tokenDecimals, () => setOpenOnRampDialog(true))
 
     const handleViewTicket = useCallback(() => {
         router.push(`/pool/${poolId}/ticket` as Route)
@@ -65,7 +73,9 @@ export default function BottomBarHandler({
             },
             [POOLSTATUS.DEPOSIT_ENABLED]: {
                 admin: { label: 'Start Pool', action: handleStartPool },
-                user: isParticipant ? { label: 'View My Ticket', action: handleViewTicket } : { label: `Register for ${poolPrice} ${poolTokenSymbol}`, action: handleJoinPool },
+                user: isParticipant
+                    ? { label: 'View My Ticket', action: handleViewTicket }
+                    : { label: `Register for ${poolPrice} ${poolTokenSymbol}`, action: handleJoinPool },
             },
             [POOLSTATUS.STARTED]: {
                 admin: { label: 'End pool', action: handleEndPool },
@@ -88,7 +98,7 @@ export default function BottomBarHandler({
             if (!config) return null
             return (
                 <Button
-                    className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
+                    className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-4 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
                     onClick={config.action}
                     disabled={isPending}>
                     {isPending ? 'Confirming...' : config.label}
@@ -132,5 +142,5 @@ export default function BottomBarHandler({
         }
     }, [isConfirmed, updateBottomBarContent, router, resetConfirmation])
 
-    return <OnRampDialog open={openOnRampDialog} setOpen={setOpenOnRampDialog} amount={poolPrice.toString()}/>
+    return <OnRampDialog open={openOnRampDialog} setOpen={setOpenOnRampDialog} amount={poolPrice.toString()} />
 }
