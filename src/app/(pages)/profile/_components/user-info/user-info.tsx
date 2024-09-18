@@ -9,18 +9,13 @@ import { Skeleton } from '@/app/_components/ui/skeleton'
 import { Tables } from '@/types/db'
 import { useServerActionQuery } from '@/app/_client/hooks/server-action-hooks'
 import { blo } from 'blo'
+import { useUserInfo } from '@/hooks/use-user-info'
 
 type UserItem = Pick<Tables<'users'>, 'avatar' | 'displayName'> | null
 
-export default function UserInfo({ initialUserInfo }: { initialUserInfo?: UserItem }) {
-    const { data: userInfo, isLoading } = useServerActionQuery(getUserInfoAction, {
-        queryKey: ['getUserInfoAction'],
-        initialData: initialUserInfo || undefined,
-        input: undefined,
-    })
-
+export default function UserInfo() {
+    const { data: userInfo, isLoading } = useUserInfo()
     const { address } = useAccount()
-
     const truncatedAddress = address?.slice(0, 6) + '...' + address?.slice(-4)
 
     return (
@@ -29,7 +24,7 @@ export default function UserInfo({ initialUserInfo }: { initialUserInfo?: UserIt
                 {isLoading ? (
                     <Skeleton className='size-14 rounded-full' />
                 ) : (
-                    <AvatarImage alt='user avatar' src={userInfo.avatar || blo(address || '0x')} />
+                    <AvatarImage alt='user avatar' src={userInfo?.avatar || blo(address || '0x')} />
                 )}
             </Avatar>
             <div className='flex-1 space-y-1'>

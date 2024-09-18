@@ -1,10 +1,10 @@
-import { wagmi } from '@/app/pwa/_client/providers/configs'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 import { dropletAbi } from '@/types/contracts'
 import { getPublicClient } from '@wagmi/core'
 import { Address } from 'viem'
 
 export const fetchTokenDecimals = async ({ queryKey }: { queryKey: [string, string, number] }) => {
-    const publicClient = getPublicClient(wagmi.config)
+    const publicClient = getPublicClient(getConfig())
     const [_, tokenAddress] = queryKey
     const tokenDecimals = await publicClient?.readContract({
         abi: dropletAbi,

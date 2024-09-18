@@ -1,6 +1,6 @@
 'use client'
 
-import { Skeleton } from '@/app/pwa/_components/ui/skeleton'
+import { Skeleton } from '@/app/_components/ui/skeleton'
 import Image from 'next/image'
 import { useState } from 'react'
 

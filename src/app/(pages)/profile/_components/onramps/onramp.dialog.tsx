@@ -1,15 +1,15 @@
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/app/pwa/_components/ui/drawer'
-import Divider from '@/app/pwa/_components/divider'
-import OnRampCoinbaseButton from '@/app/pwa/(pages)/profile/_components/onramps/onramp-coinbase'
+import { Button } from '@/app/_components/ui/button'
+import { Drawer } from '@/app/_components/ui/drawer'
+import Divider from '@/app/_components/divider'
+import OnRampCoinbaseButton from '@/app/(pages)/profile/_components/onramps/onramp-coinbase'
 import OnRampForm from './onramp.form'
-import ReceiveDialog from '@/app/pwa/(pages)/profile/_components/receive/receive.dialog'
-import Unlimit from '@/app/pwa/(pages)/profile/_components/onramps/unlimit'
-import { OnrampWithStripe } from '@/app/pwa/(pages)/profile/_components/onramps/onramp-stripe'
+import ReceiveDialog from '@/app/(pages)/profile/_components/receive/receive.dialog'
+import Unlimit from '@/app/(pages)/profile/_components/onramps/unlimit'
+import { OnrampWithStripe } from '@/app/(pages)/profile/_components/onramps/onramp-stripe'
 import { MoonpayCurrencyCode, MoonpayPaymentMethod, useFundWallet, useWallets } from '@privy-io/react-auth'
-import { currentTokenAddress } from '@/app/pwa/_server/blockchain/server-config'
+import { currentTokenAddress } from '@/app/_server/blockchain/server-config'
 import { useAccount, useBalance } from 'wagmi'
 
 interface OnRampDialogProps {
@@ -20,13 +20,13 @@ interface OnRampDialogProps {
 
 const OnRampDialog = ({ open, setOpen, amount }: OnRampDialogProps) => {
     const { address } = useAccount()
-    const {data: balance } = useBalance({
+    const { data: balance } = useBalance({
         token: currentTokenAddress,
         address,
         query: {
             enabled: Boolean(address),
             refetchInterval: 10_000, // 10 seconds
-        }
+        },
     })
 
     const formattedBalance = Number(balance?.value) / Math.pow(10, Number(balance?.decimals))
@@ -62,12 +62,12 @@ const OnRampDialog = ({ open, setOpen, amount }: OnRampDialogProps) => {
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild></DrawerTrigger>
-            <DrawerContent className='bg-white'>
-                <DrawerHeader className='text-left'>
-                    <DrawerTitle className='mb-6 text-xl'>
+            <Drawer.Trigger asChild></Drawer.Trigger>
+            <Drawer.Content className='bg-white'>
+                <Drawer.Header className='text-left'>
+                    <Drawer.Title className='mb-6 text-xl'>
                         You need to add USDC in order to register for this event.
-                    </DrawerTitle>
+                    </Drawer.Title>
                     <div>
                         <div className='flex flex-row justify-between text-sm'>
                             <span className='font-medium'>Your current balance:</span>
@@ -142,8 +142,8 @@ const OnRampDialog = ({ open, setOpen, amount }: OnRampDialogProps) => {
                             <ReceiveDialog />
                         </div>
                     </div>
-                </DrawerHeader>
-            </DrawerContent>
+                </Drawer.Header>
+            </Drawer.Content>
         </Drawer>
     )
 }

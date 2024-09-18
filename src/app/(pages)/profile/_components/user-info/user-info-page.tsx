@@ -1,7 +1,7 @@
 'use client'
 
 import frog from '@/../public/images/frog.png'
-import { Avatar, AvatarFallback, AvatarImage } from '@/app/pwa/_components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/_components/ui/avatar'
 import { Container, ExternalLinkIcon } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import SectionContent from '../../claim-winning/_components/section-content'

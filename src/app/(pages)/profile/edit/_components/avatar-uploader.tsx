@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
+import { Button } from '@/app/_components/ui/button'
 import Image from 'next/image'
 import AvatarUploadIcon from './avatar-upload-icon'
 import { CameraIcon, Trash2Icon } from 'lucide-react'
@@ -46,7 +46,14 @@ export default function AvatarUploader({ name, defaultValue, onChange }: AvatarU
             />
             {avatarPreview ? (
                 <div className='relative size-[109px]'>
-                    <Image src={avatarPreview} alt='Avatar preview' className='rounded-full object-cover' fill />
+                    <Image
+                        src={avatarPreview}
+                        alt='Avatar preview'
+                        className='rounded-full object-cover'
+                        sizes='(max-width: 768px) 100vw, 109px'
+                        fill
+                        priority
+                    />
                     <div className='absolute inset-0 flex items-center justify-center opacity-0 transition-opacity hover:opacity-100'>
                         <div className='absolute inset-0 rounded-full bg-black opacity-50'></div>
                         <Button

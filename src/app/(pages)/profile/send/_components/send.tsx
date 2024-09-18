@@ -1,7 +1,7 @@
 'use client'
 
-import Divider from '@/app/pwa/_components/divider'
-import { formatAddress } from '@/app/pwa/_lib/utils/addresses'
+import Divider from '@/app/_components/divider'
+import { formatAddress } from '@/app/_lib/utils/addresses'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import { inter } from '@/lib/utils/fonts'

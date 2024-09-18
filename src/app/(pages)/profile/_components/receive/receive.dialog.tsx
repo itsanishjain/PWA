@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Dialog } from '@/app/pwa/_components/ui/dialog'
+import { Button } from '@/app/_components/ui/button'
+import { Dialog } from '@/app/_components/ui/dialog'
 import { useState } from 'react'
 import ReceiveForm from './receive.form'
 

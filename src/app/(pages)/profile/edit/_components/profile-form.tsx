@@ -1,18 +1,17 @@
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Label } from '@/app/pwa/_components/ui/label'
-import { usePrivy } from '@privy-io/react-auth'
+import { Button } from '@/app/_components/ui/button'
+import { Label } from '@/app/_components/ui/label'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { useFormState } from 'react-dom'
 import { toast } from 'sonner'
-import { validateProfileAction } from '../actions'
 import { Tables } from '@/types/db'
-import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
+import { useAppStore } from '@/app/_client/providers/app-store.provider'
+import Text from '@/app/_components/forms-controls/text.control'
+import getQueryClientConfig from '@/app/_client/providers/configs/query-client.config'
 import AvatarUploader from './avatar-uploader'
-import Text from '@/app/pwa/_components/forms-controls/text.control'
-import getQueryClientConfig from '@/app/pwa/_client/providers/configs/query-client.config'
+import { validateProfileAction } from '../actions'
 
 const formFields = [
     {
@@ -42,23 +41,23 @@ const initialState = {
         avatar: [],
     },
 }
-interface ProfileFormProps {
-    name?: string | null
-    avatar?: string | null
+
+interface ProfilePageProps {
+    userInfo?: Pick<Tables<'users'>, 'avatar' | 'displayName'> | null
 }
 
-const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
+export default function ProfileForm({ userInfo }: ProfilePageProps) {
     const router = useRouter()
-    const { setBottomBarContent, setTopBarTitle } = useAppStore(s => ({
+    const { setBottomBarContent, setTopBarTitle, topBarTitle } = useAppStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
         setTopBarTitle: s.setTopBarTitle,
+        topBarTitle: s.topBarTitle,
     }))
     const [avatarChanged, setAvatarChanged] = useState(false)
 
     const [state, formAction] = useFormState(validateProfileAction, initialState)
 
-    useEffect(() => {
-        setTopBarTitle('Create a Profile')
+    useLayoutEffect(() => {
         setBottomBarContent(
             <Button
                 type='submit'
@@ -69,10 +68,9 @@ const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
         )
 
         return () => {
-            setTopBarTitle(null)
             setBottomBarContent(null)
         }
-    }, [setBottomBarContent, setTopBarTitle])
+    }, [setBottomBarContent])
 
     useEffect(() => {
         if (state?.message) {
@@ -107,9 +105,9 @@ const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
                 let defaultValue: string | undefined
 
                 if (field.key === 'displayName') {
-                    defaultValue = name || undefined
+                    defaultValue = userInfo?.displayName || undefined
                 } else if (field.key === 'avatar') {
-                    defaultValue = avatar || undefined
+                    defaultValue = userInfo?.avatar || undefined
                 }
 
                 return (
@@ -125,25 +123,4 @@ const ProfileForm = ({ name, avatar }: ProfileFormProps) => {
             })}
         </form>
     )
-}
-
-interface ProfilePageProps {
-    userInfo?: Pick<Tables<'users'>, 'avatar' | 'displayName'> | null
-}
-
-export default function NewProfilePage({ userInfo }: ProfilePageProps) {
-    const router = useRouter()
-    const { ready, user } = usePrivy()
-
-    useEffect(() => {
-        if (ready && !user) {
-            router.back()
-        }
-    }, [ready, user, router])
-
-    if (!ready || !user) {
-        return <div className='flex-center mx-6'>Loading...</div>
-    }
-
-    return <ProfileForm name={userInfo?.displayName} avatar={userInfo?.avatar} />
 }

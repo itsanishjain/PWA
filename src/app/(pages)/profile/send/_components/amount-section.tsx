@@ -1,8 +1,7 @@
 'use client'
 
-import { wagmi } from '@/app/pwa/_client/providers/configs'
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Input } from '@/app/pwa/_components/ui/input'
+import { Button } from '@/app/_components/ui/button'
+import { Input } from '@/app/_components/ui/input'
 import { dropletAbi, dropletAddress } from '@/types/contracts'
 import { useWallets } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
@@ -12,14 +11,15 @@ import { useBalance, useWriteContract } from 'wagmi'
 import Container from '../../claim-winning/_components/container'
 import SectionContent from '../../claim-winning/_components/section-content'
 import { useTokenDecimals } from './use-token-decimals'
-import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
+import { useAppStore } from '@/app/_client/providers/app-store.provider'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 
 export default function AmountSection() {
     const { wallets } = useWallets()
 
     const { data: tokenBalanceData } = useBalance({
         address: wallets[0]?.address as Address,
-        token: dropletAddress[wagmi.config.state.chainId as ChainId],
+        token: dropletAddress[getConfig().state.chainId as ChainId],
     })
 
     const decimals = BigInt(tokenBalanceData?.decimals ?? BigInt(18))
@@ -40,7 +40,7 @@ export default function AmountSection() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data: hash, isPending, isSuccess, writeContract } = useWriteContract()
 
-    const { tokenDecimalsData } = useTokenDecimals(dropletAddress[wagmi.config.state.chainId as ChainId] as Address)
+    const { tokenDecimalsData } = useTokenDecimals(dropletAddress[getConfig().state.chainId as ChainId] as Address)
     const TransferFunction = getAbiItem({
         abi: dropletAbi,
         name: 'transfer',
@@ -55,7 +55,7 @@ export default function AmountSection() {
         // })
 
         writeContract({
-            address: dropletAddress[wagmi.config.state.chainId as ChainId],
+            address: dropletAddress[getConfig().state.chainId as ChainId],
             abi: [TransferFunction],
             functionName: 'transfer',
             args: [

@@ -1,12 +1,9 @@
 'use server'
 
-import { authenticatedProcedure } from '@/app/pwa/_server/procedures/authenticated'
-import { createProfileUseCase } from '@/app/pwa/_server/use-cases/users/create-user'
-import { updateProfileUseCase } from '@/app/pwa/_server/use-cases/users/update-profile'
+import { authenticatedProcedure } from '@/app/_server/procedures/authenticated'
+import { updateProfileUseCase } from '@/app/_server/use-cases/users/update-profile'
 import { CreateProfileFormSchema } from './_lib/definitions'
 import { z } from 'zod'
-import { Address } from 'viem'
-import { isAdminUseCase } from '@/app/pwa/_server/use-cases/users/is-admin'
 
 type FormState = {
     message?: string
@@ -20,7 +17,7 @@ export async function validateProfileAction(_prevState: FormState, formData: For
     const avatarFile = formData.get('avatar') as File | null
     const displayName = formData.get('displayName') as string
 
-    console.log('Validating profile form', { displayName, avatarFile })
+    console.log('validating profile form', { displayName, avatarFile })
 
     let avatarToUpdate: File | null | undefined
 
@@ -99,32 +96,5 @@ export const updateProfileAction = authenticatedProcedure
                     displayName: ['An unexpected error occurred'],
                 },
             }
-        }
-    })
-
-export const createProfileAction = authenticatedProcedure
-    .createServerAction()
-    .output(
-        z.object({
-            needsRefresh: z.boolean().optional(),
-        }),
-    )
-    .handler(async ({ ctx: { user } }) => {
-        const walletAddress = user.wallet?.address as Address
-        if (!walletAddress) {
-            throw new Error('User does not have a wallet address')
-        }
-        try {
-            await createProfileUseCase({
-                privyId: user.id,
-                info: {
-                    walletAddress,
-                    role: (await isAdminUseCase(walletAddress)) ? 'admin' : 'user',
-                },
-            })
-            return {}
-        } catch (error) {
-            console.error('Error creating user:', error)
-            throw new Error('Failed to create user')
         }
     })

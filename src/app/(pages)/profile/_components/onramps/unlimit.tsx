@@ -1,4 +1,4 @@
-import { Button } from '@/app/pwa/_components/ui/button'
+import { Button } from '@/app/_components/ui/button'
 import { GateFiDisplayModeEnum, GateFiSDK } from '@gatefi/js-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'

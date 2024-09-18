@@ -9,12 +9,12 @@ export const getUserInfoAction = authenticatedProcedure.createServerAction().han
 })
 
 export async function getProfilePageAction() {
-    const [[userInfo], [balance]] = await Promise.all([
+    const [balance] = await Promise.all([
         // getUpcomingPoolsAction(),
         // getAdminStatusAction(),
         getUserInfoAction(),
         getTokenBalanceAction(),
     ])
 
-    return { userInfo, balance }
+    return { balance }
 }

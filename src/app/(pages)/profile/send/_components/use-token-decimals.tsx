@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchTokenDecimals } from './fetch-token-decimal'
-import { wagmi } from '@/app/pwa/_client/providers/configs'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 
 export const useTokenDecimals = (tokenAddress: string) => {
     const {
@@ -8,7 +8,7 @@ export const useTokenDecimals = (tokenAddress: string) => {
         isLoading,
         error,
     } = useQuery({
-        queryKey: ['tokenDecimals', tokenAddress, wagmi.config.state.chainId],
+        queryKey: ['tokenDecimals', tokenAddress, getConfig().state.chainId],
         queryFn: fetchTokenDecimals,
     })
 
