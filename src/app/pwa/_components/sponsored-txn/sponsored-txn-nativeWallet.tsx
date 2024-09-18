@@ -8,11 +8,12 @@ import { signerToSimpleSmartAccount } from 'permissionless/accounts'
 import { createPimlicoPaymasterClient } from 'permissionless/clients/pimlico'
 
 import { http } from 'viem'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 import { usePublicClient, useWalletClient } from 'wagmi'
 
 import { toast } from 'sonner'
 import { Button } from '../ui/button'
+import { inProduction } from '../../_lib/utils/environment.mjs'
 
 export default function SponsoredTxn() {
     const { wallets } = useWallets()
@@ -46,9 +47,10 @@ export default function SponsoredTxn() {
             signer: signer,
         })
 
+        const chain = inProduction ? base : baseSepolia
         const smartAccountClient = createSmartAccountClient({
             account: simpleSmartAccountClient,
-            chain: baseSepolia,
+            chain: chain,
             bundlerTransport: http(process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL),
             middleware: {
                 sponsorUserOperation: paymasterClient.sponsorUserOperation, // optional
@@ -74,12 +76,21 @@ export default function SponsoredTxn() {
                     <p>✅ Transaction successfully sponsored!</p>
                     <p>
                         🔍 View on Etherscan:{' '}
-                        <a
-                            href={`https://sepolia.basescan.org/tx/${txHash}`}
-                            target='_blank'
-                            rel='external noopener noreferrer nofollow'>
-                            Transaction Link
-                        </a>
+                        {inProduction ? (
+                            <a
+                                href={`https://basescan.org/tx/${txHash}`}
+                                target='_blank'
+                                rel='external noopener noreferrer nofollow'>
+                                Transaction Link
+                            </a>
+                        ) : (
+                            <a
+                                href={`https://sepolia.basescan.org/tx/${txHash}`}
+                                target='_blank'
+                                rel='external noopener noreferrer nofollow'>
+                                Transaction Link
+                            </a>
+                        )}
                     </p>
                 </div>
             )}

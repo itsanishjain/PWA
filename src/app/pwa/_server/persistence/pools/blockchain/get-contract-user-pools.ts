@@ -3,16 +3,20 @@ import 'server-only'
 
 import { poolAbi, poolAddress } from '@/types/contracts'
 import { createConfig, getPublicClient, multicall } from '@wagmi/core'
-import { baseSepolia } from '@wagmi/core/chains'
+import { base, baseSepolia } from '@wagmi/core/chains'
 import type { Address } from 'viem'
 import { getAbiItem, http } from 'viem'
+import { inProduction } from '@/app/pwa/_lib/utils/environment.mjs'
+
+const chain = inProduction ? base : baseSepolia
 
 const config = createConfig({
-    chains: [baseSepolia],
+    chains: [chain],
     multiInjectedProviderDiscovery: false,
     syncConnectedChain: true,
     transports: {
         [baseSepolia.id]: http(process.env.RPC_ENDPOINT),
+        [base.id]: http(process.env.RPC_ENDPOINT),
     },
     ssr: true,
 })

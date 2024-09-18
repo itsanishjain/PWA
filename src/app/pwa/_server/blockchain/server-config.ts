@@ -1,14 +1,18 @@
 import { dropletAddress, poolAddress } from '@/types/contracts'
 import { createConfig, getPublicClient, http } from '@wagmi/core'
 import type { Address } from 'viem'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
+import { inProduction } from '../../_lib/utils/environment.mjs'
+
+const chain = inProduction ? base : baseSepolia
 
 export const serverConfig = createConfig({
-    chains: [baseSepolia],
+    chains: [chain],
     multiInjectedProviderDiscovery: false,
     syncConnectedChain: true,
     transports: {
         [baseSepolia.id]: http(process.env.RPC_ENDPOINT),
+        [base.id]: http(process.env.RPC_ENDPOINT),
     },
     ssr: true,
 })
