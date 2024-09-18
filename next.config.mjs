@@ -34,7 +34,7 @@ const cspHeader = `
 `
 
 /** @type {import('next').NextConfig} */
-module.exports = withBundleAnalyzer(
+export default withBundleAnalyzer(
     withSerwist({
         eslint: { ignoreDuringBuilds: true },
         ...(turboEnabled ? {} : { compiler: { removeConsole: inProduction } }),
