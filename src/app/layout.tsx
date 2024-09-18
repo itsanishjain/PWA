@@ -4,6 +4,7 @@ import { Providers } from './_client/providers'
 import MainWrapper from './_components/main-wrapper'
 import { inter } from '@/lib/utils/fonts'
 import { headers } from 'next/headers'
+import InstallPromptDrawer from '@/components/install-prompt-drawer'
 
 export { metadata, viewport } from './_lib/utils/metadata'
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children, bottombar, topbar, modal }: Props
                     <MainWrapper>{children}</MainWrapper>
                     {modal}
                     {bottombar}
+                    <InstallPromptDrawer />
                 </Providers>
             </body>
         </html>
