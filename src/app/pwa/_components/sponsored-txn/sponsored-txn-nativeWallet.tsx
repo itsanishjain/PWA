@@ -44,7 +44,6 @@ export default function SponsoredTxn() {
         const simpleSmartAccountClient = await signerToSimpleSmartAccount(publicClient, {
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             signer: signer,
-            factoryAddress: '0x9406Cc6185a346906296840746125a0E44976454',
         })
 
         const smartAccountClient = createSmartAccountClient({
