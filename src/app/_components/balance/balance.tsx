@@ -10,6 +10,15 @@ import EncryptText from './encrypt-text'
 import { usePrivy } from '@privy-io/react-auth'
 import { Address } from 'viem'
 
+// Add this after the imports
+const zeroBalance = {
+    value: BigInt(0),
+    decimals: 18,
+    symbol: 'USDC',
+    integerPart: 0,
+    fractionalPart: 0,
+}
+
 type Props = {
     color?: string
 }
@@ -27,6 +36,7 @@ export default function Balance({ color }: Props) {
                 ...data,
                 ...formatBalance(data.value, data.decimals),
             }),
+            enabled: Boolean(address), // Only run the query when we have an address
         },
     })
 
@@ -34,17 +44,20 @@ export default function Balance({ color }: Props) {
         <section
             className={cn(
                 'detail_card mt-2 flex w-full flex-col gap-[0.69rem] rounded-3xl p-6 transition-all duration-300',
-                balance ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0',
+                'translate-y-0 opacity-100', // Always visible
             )}>
             <h1 className='text-[0.6875rem] font-semibold'>Total balance</h1>
             <div className='inline-flex items-baseline gap-2 text-4xl font-bold'>
                 {isLoading && <BalanceSkeleton />}
-                {balance && (
-                    <EncryptText balance={balance} color={color} symbol={balance?.symbol}>
+                {!isLoading && (
+                    <EncryptText
+                        balance={balance || zeroBalance}
+                        color={color}
+                        symbol={(balance || zeroBalance).symbol}>
                         <FormattedBalance
-                            integerPart={balance.integerPart}
-                            fractionalPart={balance.fractionalPart}
-                            symbol={balance?.symbol}
+                            integerPart={(balance || zeroBalance).integerPart}
+                            fractionalPart={(balance || zeroBalance).fractionalPart}
+                            symbol={(balance || zeroBalance).symbol}
                         />
                     </EncryptText>
                 )}

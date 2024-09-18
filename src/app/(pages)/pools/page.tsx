@@ -7,8 +7,8 @@ import RenderBottomBar from './_components/render-bottom-bar'
 export default async function PoolsPage() {
     return (
         <div className='flex flex-1 flex-col space-y-6'>
+            <Balance />
             <AuthenticatedGuard loading={null}>
-                <Balance />
                 <NextUserPool />
                 <RenderBottomBar />
             </AuthenticatedGuard>
