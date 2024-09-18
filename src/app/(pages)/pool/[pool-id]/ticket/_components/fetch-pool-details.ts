@@ -1,9 +1,9 @@
-import { wagmi } from '@/app/pwa/_client/providers/configs'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 import { poolAbi, poolAddress } from '@/types/contracts'
 import { getPublicClient } from '@wagmi/core'
 
 export const fetchPoolDetails = async ({ queryKey }: { queryKey: [string, bigint, number] }) => {
-    const publicClient = getPublicClient(wagmi.config)
+    const publicClient = getPublicClient(getConfig())
     const [_, poolId] = queryKey
     const poolDetailFromSC = await publicClient?.readContract({
         abi: poolAbi,

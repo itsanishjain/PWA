@@ -21,8 +21,7 @@ const fetchUserNextPool = async (userAddress: Address): Promise<PoolItem | undef
 
     const validPools = userPools
         .filter(
-            (pool): pool is NonNullable<typeof pool> =>
-                pool !== null && pool !== undefined && (pool.status === 1 || pool.status === 2),
+            (pool): pool is NonNullable<typeof pool> => pool !== null && pool !== undefined && pool.status <= 1, // Only INACTIVE or DEPOSIT_ENABLED pools
         )
         .map(pool => {
             const dbPool = dbPools?.find(dp => dp.contract_id === parseInt(pool.id))
@@ -38,12 +37,8 @@ const fetchUserNextPool = async (userAddress: Address): Promise<PoolItem | undef
             }
         })
 
-    const [nextUpcomingPool] = validPools.sort((a, b) => {
-        if (a.startDate.getTime() !== b.startDate.getTime()) {
-            return a.startDate.getTime() - b.startDate.getTime()
-        }
-        return a.endDate.getTime() - b.endDate.getTime()
-    })
+    // Sort pools by start date (ascending) and get the first one
+    const [nextUpcomingPool] = validPools.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
 
     return nextUpcomingPool
 }

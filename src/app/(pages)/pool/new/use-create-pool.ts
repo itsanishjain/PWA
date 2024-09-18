@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useFormState } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { decodeEventLog, parseEther, keccak256, toHex, Hash, TransactionReceipt, parseEventLogs } from 'viem'
+import { parseEther, Hash, parseEventLogs } from 'viem'
 import { createPoolAction, updatePoolStatus } from './actions'
-import { wagmi } from '@/app/pwa/_client/providers/configs'
 import { dropletAddress, poolAbi, poolAddress } from '@/types/contracts'
-import useSmartTransaction from '@/app/pwa/_client/hooks/use-smart-transaction'
-import { Steps, usePoolCreationStore } from '@/app/pwa/_client/stores/pool-creation-store'
+import useSmartTransaction from '@/app/_client/hooks/use-smart-transaction'
+import { Steps, usePoolCreationStore } from '@/app/_client/stores/pool-creation-store'
 import { Route } from 'next'
 import { useWaitForTransactionReceipt } from 'wagmi'
-import { fromZonedTime } from 'date-fns-tz'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
+import { useQueryClient } from '@tanstack/react-query'
 
 const initialState = {
     message: '',
@@ -45,9 +45,10 @@ export function useCreatePool() {
     })
     const isCreatingPool = useRef(false)
     const isPoolUpdated = useRef(false)
+    const queryClient = useQueryClient()
 
     const createPoolOnChain = useCallback(() => {
-        console.log('createPoolOnChain called')
+        console.log('createPoolOnChain called, current state:', state)
 
         if (isCreatingPool.current) {
             console.log('Pool creation already in progress')
@@ -62,23 +63,20 @@ export function useCreatePool() {
             const { poolData } = state
 
             console.log('Pool data:', poolData)
-            console.log("startDate", Math.floor(fromZonedTime(poolData.startDate, 'UTC').getTime() / 1000))
-            console.log("endDate", Math.floor(fromZonedTime(poolData.endDate, 'UTC').getTime() / 1000))
 
             const contractCall = {
-                address: poolAddress[wagmi.config.state.chainId as ChainId],
+                address: poolAddress[getConfig().state.chainId as ChainId],
                 abi: poolAbi,
                 functionName: 'createPool',
                 args: [
-                    Math.floor(fromZonedTime(poolData.startDate, 'UTC').getTime() / 1000),
-                    Math.floor(fromZonedTime(poolData.endDate, 'UTC').getTime() / 1000),
+                    Math.floor(new Date(poolData.startDate).getTime() / 1000),
+                    Math.floor(new Date(poolData.endDate).getTime() / 1000),
                     poolData.name,
                     parseEther(poolData.price.toString()),
-                    0,
-                    dropletAddress[wagmi.config.state.chainId as ChainId],
+                    1000,
+                    dropletAddress[getConfig().state.chainId as ChainId],
                 ],
             }
-            console.log('Contract call:', contractCall)
 
             executeTransactions([contractCall])
                 .then(() => {
@@ -100,9 +98,10 @@ export function useCreatePool() {
                 poolData: state.poolData,
             })
         }
-    }, [state.internalPoolId, state.poolData, executeTransactions, setStep, setError, showToast])
+    }, [state, executeTransactions, setStep, setError, showToast])
 
     useEffect(() => {
+        console.log('Effect triggered. Current state:', state)
         console.log('isConfirmed:', isConfirmed)
         console.log('receipt:', receipt)
 
@@ -132,6 +131,7 @@ export function useCreatePool() {
                     .then(() => {
                         setStep(Steps.Completed)
                         showToast()
+                        queryClient.invalidateQueries({ queryKey: ['upcoming-pools'] })
                         router.push(`/pool/${latestPoolId}` as Route)
                     })
                     .catch(error => {
@@ -145,7 +145,7 @@ export function useCreatePool() {
                 showToast()
             }
         }
-    }, [isConfirmed, receipt, router, setStep, setError, showToast, state.internalPoolId, isPoolUpdated.current])
+    }, [isConfirmed, receipt, router, setStep, setError, showToast, state.internalPoolId, queryClient])
 
     return {
         formAction,

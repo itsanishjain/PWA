@@ -1,6 +1,6 @@
 'use client'
 
-import { formatTimeDiff } from '@/app/pwa/_lib/utils/date-time'
+import { formatTimeDiff } from '@/app/_lib/utils/date-time'
 import type { Database } from '@/types/db'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useQueryClient } from '@tanstack/react-query'

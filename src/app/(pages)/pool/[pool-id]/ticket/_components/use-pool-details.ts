@@ -1,6 +1,6 @@
-import { wagmi } from '@/app/pwa/_client/providers/configs'
 import { useQuery } from '@tanstack/react-query'
 import { fetchPoolDetails } from './fetch-pool-details'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 
 export const usePoolDetails = (poolId: bigint) => {
     const {
@@ -8,7 +8,7 @@ export const usePoolDetails = (poolId: bigint) => {
         isLoading,
         error,
     } = useQuery({
-        queryKey: ['poolDetails', poolId, wagmi.config.state.chainId],
+        queryKey: ['poolDetails', poolId, getConfig().state.chainId],
         queryFn: fetchPoolDetails,
     })
 

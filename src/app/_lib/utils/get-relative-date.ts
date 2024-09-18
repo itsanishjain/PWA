@@ -4,21 +4,26 @@
  * using Intl.RelativeTimeFormat
  * source: https://www.builder.io/blog/relative-time
  */
-import { toZonedTime } from "date-fns-tz"
+import { toZonedTime } from 'date-fns-tz'
 
-export function getRelativeTimeString(date: Date | number, lang = navigator.language): string {
+export function getRelativeTimeString(date: Date | number | string, lang = navigator.language): string {
+    // Check if the input is valid
+    if (date === null || date === undefined || date === '') {
+        return 'Date not available'
+    }
+
     // Allow dates or times to be passed
     const timeMs = date instanceof Date ? date.getTime() : typeof date === 'string' ? new Date(date).getTime() : date
 
-    if (!Number.isFinite(timeMs)) {
-        console.error('Invalid date provided:', date)
+    if (!Number.isFinite(timeMs) || isNaN(timeMs)) {
+        console.warn('Invalid date provided:', date)
         return 'Invalid date'
     }
 
     // Get the amount of seconds between the given date and now
     const deltaSeconds = Math.round((timeMs - Date.now()) / 1000)
 
-    // Array reprsenting one minute, hour, day, week, month, etc in seconds
+    // Array representing one minute, hour, day, week, month, etc in seconds
     const cutoffs = [60, 3600, 86400, 86400 * 7, 86400 * 30, 86400 * 365, Infinity]
 
     // Array equivalent to the above but in the string representation of the units
@@ -34,11 +39,6 @@ export function getRelativeTimeString(date: Date | number, lang = navigator.lang
     // Intl.RelativeTimeFormat do its magic
     const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' })
 
-    if (!Number.isFinite(deltaSeconds) || !Number.isFinite(divisor)) {
-        return 'Invalid date'
-        // throw new Error('deltaSeconds and divisor must be finite numbers');
-    }
-
     return rtf.format(Math.floor(deltaSeconds / divisor), units[unitIndex])
 }
 
@@ -51,7 +51,7 @@ export const getStatusString = ({
     status,
     startDate,
     endDate,
-}: Pick<PoolBase, 'startDate' | 'endDate'> & { status: 'live' | 'upcoming' | 'past' }) => {
+}: Pick<PoolBase, 'startDate' | 'endDate'> & { status: 'live' | 'upcoming' | 'past' }): string => {
     const definitions = {
         upcoming: { verb: 'Starts', reference: startDate },
         past: { verb: 'Ended', reference: endDate },
@@ -60,15 +60,14 @@ export const getStatusString = ({
 
     const { verb, reference } = definitions[status]
 
-    try {
-        const relativeTime = getRelativeTimeString(new Date(reference))
-        // Ajusta el verbo para eventos pasados
-        const adjustedVerb = status === 'past' ? 'Ended' : verb
-        return `${adjustedVerb} ${relativeTime}`
-    } catch (error) {
-        console.error('Error parsing date:', error)
+    if (!reference) {
         return 'Date information unavailable'
     }
+
+    const relativeTime = getRelativeTimeString(reference)
+    const adjustedVerb = status === 'past' ? 'Ended' : verb
+
+    return `${adjustedVerb} ${relativeTime}`
 }
 
 export const getFormattedEventTime = (startDate: Date | string, endDate: Date | string): string => {

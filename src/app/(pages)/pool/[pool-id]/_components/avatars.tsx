@@ -1,6 +1,6 @@
 'use client'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/app/pwa/_components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/_components/ui/avatar'
 import { cn } from '@/lib/utils/tailwind'
 
 interface AvatarsProps {

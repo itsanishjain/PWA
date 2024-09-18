@@ -1,10 +1,10 @@
 // src/components/pool-detail/pool-detail.tsx
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
+import { Button } from '@/app/_components/ui/button'
 import { CircleCheckIcon } from 'lucide-react'
 
-// import { useWinnerDetail } from '@/app/pwa/_client/hooks/use-winner-detail'
+// import { useWinnerDetail } from '@/app/_client/hooks/use-winner-detail'
 // import { poolAbi, poolAddress } from '@/types/contracts'
 // import { useWallets } from '@privy-io/react-auth'
 // import { useEffect } from 'react'
@@ -12,9 +12,8 @@ import { CircleCheckIcon } from 'lucide-react'
 // import type { Address } from 'viem'
 // import { getAbiItem } from 'viem'
 // import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
-// // import { useAdmin } from '@/app/pwa/_client/hooks/use-admin'
-// import { useSponsoredTxn } from '@/app/pwa/_client/hooks/use-sponsored-txn'
-// import { wagmi } from '@/app/pwa/_client/providers/configs'
+// // import { useAdmin } from '@/app/_client/hooks/use-admin'
+// import { wagmi } from '@/app/_client/providers/configs'
 
 // const avatarUrls = new Array(4).fill(frog.src)
 

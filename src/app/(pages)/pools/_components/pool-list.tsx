@@ -28,8 +28,16 @@ const poolMessages = {
 }
 
 export default function PoolList({ pools, name = 'feed' }: { pools?: PoolItem[] | null; name?: string }) {
-    if (name !== 'user' && pools?.length === 0) {
-        const { title, message, cta, link, linkText } = poolMessages[name as keyof typeof poolMessages]
+    if (pools?.length === 0) {
+        const defaultMessage = {
+            title: 'No Pools Available',
+            message: 'There are currently no pools to display.',
+            cta: 'Check back later for new pools.',
+            link: null,
+            linkText: null,
+        }
+        const { title, message, cta, link, linkText } =
+            poolMessages[name as keyof typeof poolMessages] || defaultMessage
         return (
             <section className='flex-center flex-1 flex-col px-4 text-center'>
                 <h1 className='mb-4 text-lg font-semibold'>{title}</h1>

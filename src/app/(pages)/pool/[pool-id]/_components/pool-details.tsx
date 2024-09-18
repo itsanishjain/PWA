@@ -9,12 +9,12 @@ import PoolDetailsBannerButtons from './pool-details-banner-button'
 import PoolDetailsBannerStatus from './pool-details-banner-status'
 import PoolDetailsInfo from './pool-details-info'
 import BottomBarHandler from './bottom-bar-handler'
-import { getAdminStatusAction, getUserAddressAction } from '../../../pools/actions'
+import { getAdminStatusAction } from '../../../pools/actions'
+import { Address } from 'viem'
 
 export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
     const avatarUrls = pool.participants.map(participant => participant.avatarUrl)
     const [isAdmin] = (await getAdminStatusAction()) ? [true] : [false]
-    const [walletAddress] = await getUserAddressAction()
 
     return (
         <div className='space-y-3 bg-white p-2'>
@@ -68,7 +68,6 @@ export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
                 poolPrice={pool.price}
                 poolTokenSymbol={pool.tokenSymbol}
                 tokenDecimals={pool.tokenDecimals}
-                walletAddress={walletAddress}
             />
         </div>
     )

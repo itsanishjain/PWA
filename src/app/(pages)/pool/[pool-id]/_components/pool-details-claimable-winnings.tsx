@@ -1,10 +1,9 @@
 'use client'
 
-import useSmartTransaction from '@/app/pwa/_client/hooks/use-smart-transaction'
-import { wagmi } from '@/app/pwa/_client/providers/configs'
-import { Button } from '@/app/pwa/_components/ui/button'
-import { serverConfig } from '@/app/pwa/_server/blockchain/server-config'
-import { poolAbi, poolAddress, useWritePoolClaimWinning } from '@/types/contracts'
+import useSmartTransaction from '@/app/_client/hooks/use-smart-transaction'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
+import { Button } from '@/app/_components/ui/button'
+import { poolAbi, poolAddress } from '@/types/contracts'
 import { CheckCircleIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Address, getAbiItem } from 'viem'
@@ -37,7 +36,7 @@ export default function PoolDetailsClaimableWinnings({
 
         const args = [
             {
-                address: poolAddress[wagmi.config.state.chainId as ChainId],
+                address: poolAddress[getConfig().state.chainId as ChainId],
                 abi: [ClaimWinningFunction],
                 functionName: 'claimWinning',
                 args: [poolId, address],

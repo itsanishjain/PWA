@@ -4,5 +4,10 @@
  */
 
 import MyPools from './_components/my-pools'
+import { getMyPoolsPageAction } from './actions'
 
-export default MyPools
+export default async function MyPoolsPage() {
+    const { upcomingPools, pastPools } = await getMyPoolsPageAction()
+
+    return <MyPools initialUpcomingPools={upcomingPools} initialPastPools={pastPools} />
+}

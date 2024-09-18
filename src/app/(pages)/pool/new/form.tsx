@@ -1,27 +1,27 @@
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Label } from '@/app/pwa/_components/ui/label'
+import { Button } from '@/app/_components/ui/button'
+import { Label } from '@/app/_components/ui/label'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import { useFormState, useFormStatus } from 'react-dom'
 import { toast } from 'sonner'
 import { createPoolAction } from './actions'
-import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
+import { useAppStore } from '@/app/_client/providers/app-store.provider'
 
 // Dynamic imports for form components
-const CurrencyAmount = dynamic(() => import('@/app/pwa/_components/forms-controls/currency-amount.control'), {
+const CurrencyAmount = dynamic(() => import('@/app/_components/forms-controls/currency-amount.control'), {
     ssr: false,
 })
-const DateTimeRange = dynamic(() => import('@/app/pwa/_components/forms-controls/date-time-range.control'), {
+const DateTimeRange = dynamic(() => import('@/app/_components/forms-controls/date-time-range.control'), {
     ssr: false,
 })
-const ImageUploader = dynamic(() => import('@/app/pwa/_components/forms-controls/image-uploader.control'), {
+const ImageUploader = dynamic(() => import('@/app/_components/forms-controls/image-uploader.control'), {
     ssr: false,
 })
-const NumberControl = dynamic(() => import('@/app/pwa/_components/forms-controls/number.control'), { ssr: false })
-const TextArea = dynamic(() => import('@/app/pwa/_components/forms-controls/text-area.control'), { ssr: false })
-const Text = dynamic(() => import('@/app/pwa/_components/forms-controls/text.control'), { ssr: false })
+const NumberControl = dynamic(() => import('@/app/_components/forms-controls/number.control'), { ssr: false })
+const TextArea = dynamic(() => import('@/app/_components/forms-controls/text-area.control'), { ssr: false })
+const Text = dynamic(() => import('@/app/_components/forms-controls/text.control'), { ssr: false })
 
 // Form fields configuration
 const formFields = [

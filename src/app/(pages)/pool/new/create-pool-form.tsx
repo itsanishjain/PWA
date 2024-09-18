@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useCreatePool } from './use-create-pool'
 import { FormFieldKey, formFields } from './form-fields'
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Label } from '@/app/pwa/_components/ui/label'
-import { Steps, usePoolCreationStore } from '@/app/pwa/_client/stores/pool-creation-store'
-import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
+import { Button } from '@/app/_components/ui/button'
+import { Label } from '@/app/_components/ui/label'
+import { Steps, usePoolCreationStore } from '@/app/_client/stores/pool-creation-store'
+import { useAppStore } from '@/app/_client/providers/app-store.provider'
+import { useFormStatus } from 'react-dom'
+import { Loader2 } from 'lucide-react'
 
 export default function CreatePoolForm() {
     const { formAction, state, createPoolOnChain, isPending, isConfirming } = useCreatePool()
@@ -21,6 +23,8 @@ export default function CreatePoolForm() {
         showToast: state.showToast,
     }))
 
+    const { pending } = useFormStatus()
+
     const handleSubmit = useCallback(() => {
         setStep(Steps.CreatingDB)
         showToast()
@@ -32,17 +36,24 @@ export default function CreatePoolForm() {
             <Button
                 type='submit'
                 form='pool-form'
-                disabled={isPending || isConfirming}
+                disabled={pending || isPending || isConfirming}
                 className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
                 onClick={handleSubmit}>
-                {isPending ? 'Creating in DB...' : isConfirming ? 'Confirming on-chain...' : 'Create Pool'}
+                {pending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                {pending
+                    ? 'Submitting...'
+                    : isPending
+                      ? 'Creating in DB...'
+                      : isConfirming
+                        ? 'Confirming on-chain...'
+                        : 'Create Pool'}
             </Button>,
         )
         return () => {
             setTopBarTitle(null)
             setBottomBarContent(null)
         }
-    }, [setBottomBarContent, setTopBarTitle, isPending, isConfirming, handleSubmit])
+    }, [setBottomBarContent, setTopBarTitle, isPending, isConfirming, handleSubmit, pending])
 
     useEffect(() => {
         console.log(

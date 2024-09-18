@@ -1,4 +1,4 @@
-import { Label } from '@/app/pwa/_components/ui/label'
+import { Label } from '@/app/_components/ui/label'
 import React from 'react'
 
 interface FormFieldProps {

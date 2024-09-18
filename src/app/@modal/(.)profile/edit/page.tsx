@@ -1,7 +1,7 @@
 'use client'
 
 import { getUserInfoAction } from '@/app/(pages)/profile/actions'
-import ProfileForm from '@/app/(pages)/profile/new/_components/profile-form'
+import ProfileForm from '@/app/(pages)/profile/edit/_components/profile-form'
 import { useServerActionQuery } from '@/app/_client/hooks/server-action-hooks'
 import { Modal } from '@/app/_components/ui/modal'
 

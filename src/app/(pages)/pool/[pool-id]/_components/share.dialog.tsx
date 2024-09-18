@@ -1,18 +1,9 @@
 'use client'
 
-import useMediaQuery from '@/app/pwa/_client/hooks/use-media-query'
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Dialog } from '@/app/pwa/_components/ui/dialog'
-import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerTrigger,
-} from '@/app/pwa/_components/ui/drawer'
+import useMediaQuery from '@/app/_client/hooks/use-media-query'
+import { Button } from '@/app/_components/ui/button'
+import { Dialog } from '@/app/_components/ui/dialog'
+import { Drawer } from '@/app/_components/ui/drawer'
 import { ShareIcon } from 'lucide-react'
 
 import type { StaticImport } from 'next/dist/shared/lib/get-img-props'
@@ -51,7 +42,7 @@ const ShareDialog = () => {
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
+            <Drawer.Trigger asChild>
                 {/* <button
                     title='Share with Friends'
                     type='button'
@@ -59,19 +50,21 @@ const ShareDialog = () => {
                     <Image className='flex size-full' src={shareIcon as StaticImport} alt='Share with Friends' />
                 </button> */}
                 <ShareIcon className='size-5 text-white' />
-            </DrawerTrigger>
-            <DrawerContent className='bg-white'>
-                <DrawerHeader className='text-left'>
-                    <DrawerTitle>Share with Friends</DrawerTitle>
-                    <DrawerDescription>Invites are best attended with friends. The more the merrier.</DrawerDescription>
-                </DrawerHeader>
+            </Drawer.Trigger>
+            <Drawer.Content className='bg-white'>
+                <Drawer.Header className='text-left'>
+                    <Drawer.Title>Share with Friends</Drawer.Title>
+                    <Drawer.Description>
+                        Invites are best attended with friends. The more the merrier.
+                    </Drawer.Description>
+                </Drawer.Header>
                 <ShareForm className='px-4' />
-                <DrawerFooter className='pt-2'>
-                    <DrawerClose asChild>
+                <Drawer.Footer className='pt-2'>
+                    <Drawer.Close asChild>
                         <Button variant='outline'>Cancel</Button>
-                    </DrawerClose>
-                </DrawerFooter>
-            </DrawerContent>
+                    </Drawer.Close>
+                </Drawer.Footer>
+            </Drawer.Content>
         </Drawer>
     )
 }

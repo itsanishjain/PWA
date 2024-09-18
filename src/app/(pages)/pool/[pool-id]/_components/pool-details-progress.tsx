@@ -1,5 +1,5 @@
-import ShineBorder from '@/app/pwa/_components/shine-border'
-import { Progress } from '@/app/pwa/_components/ui/progress'
+import ShineBorder from '@/app/_components/shine-border'
+import { Progress } from '@/app/_components/ui/progress'
 
 interface PoolDetailsProgressProps {
     current: number

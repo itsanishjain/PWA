@@ -1,4 +1,4 @@
-import { getFormattedEventTime } from '@/app/pwa/_lib/utils/get-relative-date'
+import { getFormattedEventTime } from '@/app/_lib/utils/get-relative-date'
 
 interface PoolDetailsHeadingProps {
     name: string

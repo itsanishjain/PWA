@@ -1,15 +1,17 @@
 'use client'
 
-import { Button } from '@/app/pwa/_components/ui/button'
+import { Button } from '@/app/_components/ui/button'
 import { useReadPoolIsParticipant } from '@/types/contracts'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Address } from 'viem'
-import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
+import { useAppStore } from '@/app/_client/providers/app-store.provider'
 import { POOLSTATUS } from '../_lib/definitions'
-import { usePoolActions } from '@/app/pwa/_client/hooks/use-pool-actions'
+import { usePoolActions } from '@/app/_client/hooks/use-pool-actions'
 import { useRouter } from 'next/navigation'
 import type { Route } from 'next'
 import OnRampDialog from '../../../profile/_components/onramps/onramp.dialog'
+import { Loader2 } from 'lucide-react'
+import { useAccount } from 'wagmi'
 
 type ButtonConfig = {
     label: string
@@ -28,12 +30,10 @@ interface BottomBarHandlerProps {
     poolPrice: number
     poolTokenSymbol: string
     tokenDecimals: number
-    walletAddress: Address | null
 }
 
 export default function BottomBarHandler({
     isAdmin,
-    walletAddress,
     poolStatus,
     poolId,
     poolPrice,
@@ -41,13 +41,18 @@ export default function BottomBarHandler({
     tokenDecimals,
 }: BottomBarHandlerProps) {
     const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     const router = useRouter()
     const setBottomBarContent = useAppStore(state => state.setBottomBarContent)
+    const { address: walletAddress } = useAccount()
 
     // @ts-expect-error ts(2589) FIXME: Type instantiation is excessively deep and possibly infinite.
     const { data: isParticipant } = useReadPoolIsParticipant({
-        args: [walletAddress || '0x', poolId],
+        args: walletAddress ? [walletAddress, poolId] : undefined,
+        query: {
+            enabled: Boolean(walletAddress),
+        },
     })
 
     const {
@@ -99,13 +104,23 @@ export default function BottomBarHandler({
             return (
                 <Button
                     className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'
-                    onClick={config.action}
-                    disabled={isPending}>
-                    {isPending ? 'Confirming...' : config.label}
+                    onClick={() => {
+                        setIsLoading(true)
+                        config.action()
+                    }}
+                    disabled={isPending || isLoading}>
+                    {isPending || isLoading ? (
+                        <>
+                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                            Processing...
+                        </>
+                    ) : (
+                        config.label
+                    )}
                 </Button>
             )
         },
-        [isPending],
+        [isPending, isLoading],
     )
 
     const updateBottomBarContent = useCallback(() => {
@@ -138,9 +153,16 @@ export default function BottomBarHandler({
             console.log('Transaction confirmed')
             router.refresh()
             updateBottomBarContent()
-            resetConfirmation() // Reset the isConfirmed state after executing the necessary logic
+            resetConfirmation()
+            setIsLoading(false) // Reset loading state
         }
     }, [isConfirmed, updateBottomBarContent, router, resetConfirmation])
+
+    useEffect(() => {
+        if (!isPending && !isConfirmed) {
+            setIsLoading(false)
+        }
+    }, [isPending, isConfirmed])
 
     return <OnRampDialog open={openOnRampDialog} setOpen={setOpenOnRampDialog} amount={poolPrice.toString()} />
 }

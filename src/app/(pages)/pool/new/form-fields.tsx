@@ -1,18 +1,18 @@
 import dynamic from 'next/dynamic'
 
 // Dynamic imports for form components
-const CurrencyAmount = dynamic(() => import('@/app/pwa/_components/forms-controls/currency-amount.control'), {
+const CurrencyAmount = dynamic(() => import('@/app/_components/forms-controls/currency-amount.control'), {
     ssr: false,
 })
-const DateTimeRange = dynamic(() => import('@/app/pwa/_components/forms-controls/date-time-range.control'), {
+const DateTimeRange = dynamic(() => import('@/app/_components/forms-controls/date-time-range.control'), {
     ssr: false,
 })
-const ImageUploader = dynamic(() => import('@/app/pwa/_components/forms-controls/image-uploader.control'), {
+const ImageUploader = dynamic(() => import('@/app/_components/forms-controls/image-uploader.control'), {
     ssr: false,
 })
-const NumberControl = dynamic(() => import('@/app/pwa/_components/forms-controls/number.control'), { ssr: false })
-const TextArea = dynamic(() => import('@/app/pwa/_components/forms-controls/text-area.control'), { ssr: false })
-const Text = dynamic(() => import('@/app/pwa/_components/forms-controls/text.control'), { ssr: false })
+const NumberControl = dynamic(() => import('@/app/_components/forms-controls/number.control'), { ssr: false })
+const TextArea = dynamic(() => import('@/app/_components/forms-controls/text-area.control'), { ssr: false })
+const Text = dynamic(() => import('@/app/_components/forms-controls/text.control'), { ssr: false })
 
 export const formFields = [
     {

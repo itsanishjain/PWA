@@ -1,13 +1,13 @@
 'use client'
 
 import { Avatar, AvatarImage } from '@/app/_components/ui/avatar'
-import { useUserAvatar } from '@/hooks/use-user-avatar'
+import { useUserInfo } from '@/hooks/use-user-info'
 import { User, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function UserAvatar() {
-    const { data: userAvatar, isLoading } = useUserAvatar()
+    const { data: userInfo, isLoading } = useUserInfo()
 
     return (
         <Avatar className='relative size-10 cursor-pointer overflow-hidden' aria-label='Go to Profile' asChild>
@@ -23,7 +23,7 @@ export default function UserAvatar() {
                             className='absolute inset-0 flex items-center justify-center bg-neutral-200'>
                             <Loader2 className='animate-spin text-blue-500' />
                         </motion.div>
-                    ) : userAvatar ? (
+                    ) : userInfo?.avatar ? (
                         <motion.div
                             key='image'
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -33,7 +33,7 @@ export default function UserAvatar() {
                             className='absolute inset-0'>
                             <AvatarImage
                                 alt='user avatar'
-                                src={userAvatar}
+                                src={userInfo.avatar}
                                 fetchPriority='high'
                                 className='object-cover'
                             />

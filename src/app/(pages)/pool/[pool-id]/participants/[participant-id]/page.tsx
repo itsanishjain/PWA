@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { wagmi } from '@/app/pwa/_client/providers/configs'
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Input } from '@/app/pwa/_components/ui/input'
-import { formatAddress } from '@/app/pwa/_lib/utils/addresses'
+import { Button } from '@/app/_components/ui/button'
+import { Input } from '@/app/_components/ui/input'
+import { formatAddress } from '@/app/_lib/utils/addresses'
 import { cn } from '@/lib/utils/tailwind'
 import frog from '@/public/app/images/frog.png'
 import { poolAbi, poolAddress } from '@/types/contracts'
@@ -12,11 +11,12 @@ import { toast } from 'sonner'
 import type { Address } from 'viem'
 import { getAbiItem } from 'viem'
 import { useWriteContract } from 'wagmi'
-import { useTokenDecimals } from '@/app/pwa/(pages)/profile/send/_components/use-token-decimals'
+import { useTokenDecimals } from '@/app/(pages)/profile/send/_components/use-token-decimals'
 import { usePoolDetails } from '../../ticket/_components/use-pool-details'
 import { useUserDetailsDB } from '../_components/use-user-details'
-import useSmartTransaction from '@/app/pwa/_client/hooks/use-smart-transaction'
-import { Avatar, AvatarFallback, AvatarImage } from '@/app/pwa/_components/ui/avatar'
+import useSmartTransaction from '@/app/_client/hooks/use-smart-transaction'
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/_components/ui/avatar'
+import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
 
 const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participant-id': Address } }) => {
     const { userDetailsDB } = useUserDetailsDB(params['participant-id'])
@@ -45,7 +45,7 @@ const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participa
 
         const args = [
             {
-                address: poolAddress[wagmi.config.state.chainId as ChainId],
+                address: poolAddress[getConfig().state.chainId as ChainId],
                 abi: [SetWinnerFunction],
                 functionName: 'setWinner',
                 args: [BigInt(params['pool-id']), params['participant-id'], winnerAmount],

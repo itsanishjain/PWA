@@ -1,4 +1,3 @@
-import { fromZonedTime } from 'date-fns-tz'
 import { z } from 'zod'
 
 const MAX_FILE_SIZE = 5_000_000 // 5MB
@@ -18,7 +17,7 @@ const dateTimeSchema = z
 
 const futureDateTimeSchema = dateTimeSchema.refine(
     dateTime => {
-        const date = fromZonedTime(dateTime, 'UTC')
+        const date = new Date(dateTime)
         const now = new Date()
         return date > now
     },

@@ -1,10 +1,10 @@
 'use server'
 
-import { getPoolDetailsUseCase } from '@/app/pwa/_server/use-cases/pools/get-pool-details'
+import { getPoolDetailsUseCase } from '@/app/_server/use-cases/pools/get-pool-details'
 import { z } from 'zod'
 import { PoolDetailsDTOSchema, validatePoolDetailsDTO } from './_lib/definitions'
-import { unauthenticatedProcedure } from '@/app/pwa/_server/procedures/unauthenticated'
-import { verifyToken } from '@/app/pwa/_server/auth/privy'
+import { unauthenticatedProcedure } from '@/app/_server/procedures/unauthenticated'
+import { verifyToken } from '@/app/_server/auth/privy'
 
 // TODO: handle special statuses: Paused, Deposit disabled, Deposit re-enabled, Ended, Cancelled, Deleted...
 export const getPoolDetailsAction = unauthenticatedProcedure

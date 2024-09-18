@@ -1,7 +1,7 @@
-import useMediaQuery from '@/app/pwa/_client/hooks/use-media-query'
-import Divider from '@/app/pwa/_components/divider'
-import { Button } from '@/app/pwa/_components/ui/button'
-import { Dialog } from '@/app/pwa/_components/ui/dialog'
+import useMediaQuery from '@/app/_client/hooks/use-media-query'
+import Divider from '@/app/_components/divider'
+import { Button } from '@/app/_components/ui/button'
+import { Dialog } from '@/app/_components/ui/dialog'
 import {
     Drawer,
     DrawerClose,
@@ -11,8 +11,8 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from '@/app/pwa/_components/ui/drawer'
-import { Input } from '@/app/pwa/_components/ui/input'
+} from '@/app/_components/ui/drawer'
+import { Input } from '@/app/_components/ui/input'
 import { cn } from '@/lib/utils/tailwind'
 import _ from 'lodash'
 import { ShareIcon } from 'lucide-react'

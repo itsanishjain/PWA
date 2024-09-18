@@ -20,6 +20,12 @@ export default async function getContractParticipantDetail(
     participantAddress: string,
 ): Promise<ParticipantDetail | null> {
     try {
+        // Validate the participantAddress
+        if (!participantAddress || participantAddress === '0' || !participantAddress.startsWith('0x')) {
+            console.error('Invalid participant address:', participantAddress)
+            return null
+        }
+
         const participantInfo = await serverClient.readContract({
             address: currentPoolAddress,
             abi: [GetParticipantDetail],

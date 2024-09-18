@@ -47,7 +47,11 @@ export default function useTransactions() {
         },
     })
 
-    const { data: receipt, isLoading: isConfirming } = useWaitForTransactionReceipt({
+    const {
+        data: receipt,
+        isLoading: isConfirming,
+        isSuccess: isEoaConfirmed,
+    } = useWaitForTransactionReceipt({
         hash: result.hash as Hash | undefined,
     })
 
@@ -63,6 +67,13 @@ export default function useTransactions() {
             setIsConfirmed(true)
         }
     }, [callsStatus])
+
+    useEffect(() => {
+        if (isEoaConfirmed) {
+            console.log('Transaction confirmed by EOA')
+            setIsConfirmed(true)
+        }
+    }, [isEoaConfirmed])
 
     const resetConfirmation = useCallback(() => {
         setIsConfirmed(false)

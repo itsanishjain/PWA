@@ -1,12 +1,14 @@
 'use server'
 
-import { getPrivyUser, getWalletAddress, isAdmin } from '@/app/pwa/_server/auth/privy'
-import { db } from '@/app/pwa/_server/database/db'
-import { createPoolUseCase } from '@/app/pwa/_server/use-cases/pools/create-pool'
+import { db } from '@/app/_server/database/db'
+import { createPoolUseCase } from '@/app/_server/use-cases/pools/create-pool'
 import { dropletAddress } from '@/types/contracts'
 import { cookies } from 'next/headers'
 import { baseSepolia } from 'viem/chains'
 import { CreatePoolFormSchema } from './_lib/definitions'
+import { verifyToken } from '@/app/_server/auth/privy'
+import { isAdminUseCase } from '@/app/_server/use-cases/users/is-admin'
+import { getAdminStatusAction, getUserAddressAction } from '../../pools/actions'
 
 type FormState = {
     message?: string
@@ -29,19 +31,12 @@ type FormState = {
 }
 
 export async function createPoolAction(_prevState: FormState, formData: FormData): Promise<FormState> {
-    const user = await getPrivyUser()
-    const cookieStore = cookies()
-    const privyAuthToken = cookieStore.get('privy-token')?.value
+    console.log('createPoolAction started')
+    const walletAddress = await getUserAddressAction()
+    const isAdmin = await getAdminStatusAction()
 
-    if (!user || !privyAuthToken) {
-        return {
-            message: 'Not connected with Privy',
-        }
-    }
-
-    const walletAddress = await getWalletAddress()
-
-    if (!walletAddress || !(await isAdmin(walletAddress))) {
+    if (!isAdmin) {
+        console.log('Unauthorized user')
         return {
             message: 'Unauthorized user',
         }
@@ -65,11 +60,11 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
         try {
             const parsedDateRange = JSON.parse(dateRangeString) as { start: string; end: string }
 
-            // Convert local dates to UTC by subtracting the timezone offset
+            // Truncate seconds from the date strings
             dateRange = {
-                start: new Date(parsedDateRange.start).toISOString().substring(0, 16), // YYYY-MM-DDTHH:MM
-                end: new Date(parsedDateRange.end).toISOString().substring(0, 16), // YYYY-MM-DDTHH:MM
-            };
+                start: parsedDateRange.start.substring(0, 16), // YYYY-MM-DDTHH:MM
+                end: parsedDateRange.end.substring(0, 16), // YYYY-MM-DDTHH:MM
+            }
         } catch (error) {
             console.error('Error parsing dateRange:', error)
         }
@@ -116,6 +111,7 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
     }
 
     try {
+        console.log('Attempting to create pool')
         const internalPoolId = await createPoolUseCase(walletAddress, {
             bannerImage,
             name,
@@ -128,6 +124,8 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
             tokenAddress: dropletAddress[baseSepolia.id],
         })
 
+        console.log('Pool created successfully, internalPoolId:', internalPoolId)
+
         return {
             message: 'Pool created successfully',
             internalPoolId,
@@ -139,6 +137,7 @@ export async function createPoolAction(_prevState: FormState, formData: FormData
             },
         }
     } catch (error) {
+        console.error('Error creating pool:', error)
         return { message: 'Error creating pool: ' + (error as Error).message }
     }
 }
@@ -148,7 +147,7 @@ export async function updatePoolStatus(
     status: 'draft' | 'unconfirmed' | 'inactive' | 'depositsEnabled' | 'started' | 'paused' | 'ended' | 'deleted',
     contract_id: number,
 ) {
-    const user = await getPrivyUser()
+    const user = await verifyToken()
     if (!user) {
         throw new Error('User not found trying to add as mainhost')
     }

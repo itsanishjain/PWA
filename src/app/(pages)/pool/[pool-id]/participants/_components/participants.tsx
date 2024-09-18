@@ -3,14 +3,15 @@
 import { useEffect, useState, useMemo } from 'react'
 import ParticipantCard from './participantRow'
 import { usePoolDetails } from '../../ticket/_components/use-pool-details'
-import { useAppStore } from '@/app/pwa/_client/providers/app-store.provider'
+import { useAppStore } from '@/app/_client/providers/app-store.provider'
 import { Route } from 'next'
 import Link from 'next/link'
 import { QrCodeIcon, SearchIcon } from 'lucide-react'
-import { Input } from '@/app/pwa/_components/ui/input'
+import { Input } from '@/app/_components/ui/input'
 import { useUserDetailsDB } from './use-user-details'
-import { formatAddress } from '@/app/pwa/_lib/utils/addresses'
+import { formatAddress } from '@/app/_lib/utils/addresses'
 import frog from '@/public/app/images/frog.png'
+import type { Address } from 'viem'
 
 interface PoolParticipantsProps {
     poolId: string
@@ -27,17 +28,19 @@ const Participants = ({ poolId }: PoolParticipantsProps) => {
     const participants = poolDetails?.poolDetailFromSC?.[5] || []
 
     // Fetch user details for all participants
-    const participantDetails = participants.map(address => {
-        const { userDetailsDB } = useUserDetailsDB(address)
-        return {
-            address,
-            avatar: userDetailsDB?.userDetail?.avatar || frog.src,
-            displayName: userDetailsDB?.userDetail?.displayName || formatAddress(address),
-        }
-    })
+    const participantDetails = participants
+        ? participants.map((address: Address) => {
+              const { userDetailsDB } = useUserDetailsDB(address)
+              return {
+                  address,
+                  avatar: userDetailsDB?.userDetail?.avatar || frog.src,
+                  displayName: userDetailsDB?.userDetail?.displayName || formatAddress(address),
+              }
+          })
+        : []
 
     const filteredParticipants = useMemo(() => {
-        return participantDetails.filter(participant =>
+        return participantDetails.filter((participant: any) =>
             participant.displayName.toLowerCase().includes(query.toLowerCase()),
         )
     }, [participantDetails, query])
@@ -72,16 +75,20 @@ const Participants = ({ poolId }: PoolParticipantsProps) => {
                         className='mb-2 h-10 rounded-full px-10'
                     />
                 </div>
-                {filteredParticipants.map(participant => (
-                    <ParticipantCard
-                        key={participant.address}
-                        address={participant.address}
-                        avatar={participant.avatar}
-                        displayName={participant.displayName}
-                        poolId={poolId}
-                        status='Registered'
-                    />
-                ))}
+                {filteredParticipants && filteredParticipants.length > 0 ? (
+                    filteredParticipants.map((participant: any) => (
+                        <ParticipantCard
+                            key={participant.address}
+                            address={participant.address}
+                            avatar={participant.avatar}
+                            displayName={participant.displayName}
+                            poolId={poolId}
+                            status='Registered'
+                        />
+                    ))
+                ) : (
+                    <p>No participants found.</p>
+                )}
             </div>
         </div>
     )
