@@ -20,7 +20,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.privy.io;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.privy.io https://js.stripe.com https://*.stripe.com;
     style-src 'self' 'unsafe-inline' https://cdn.privy.io;
     img-src 'self' blob: data: https://*.supabase.co https://explorer-api.walletconnect.com;
     font-src 'self';
@@ -28,8 +28,8 @@ const cspHeader = `
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    frame-src 'self' https://app.privy.io https://auth.privy.io;
-    connect-src 'self' https://api.privy.io https://auth.privy.io wss://auth.privy.io https://mainnet.base.org https://explorer-api.walletconnect.com https://*.supabase.co;
+    frame-src 'self' https://app.privy.io https://auth.privy.io https://js.stripe.com;
+    connect-src 'self' https://api.privy.io https://auth.privy.io wss://auth.privy.io https://mainnet.base.org https://explorer-api.walletconnect.com https://*.supabase.co https://*.stripe.com;
     upgrade-insecure-requests;
 `
 
@@ -98,7 +98,7 @@ export default withBundleAnalyzer(
                         },
                         {
                             key: 'Permissions-Policy',
-                            value: 'camera=(), microphone=(), geolocation=()',
+                            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
                         },
                     ],
                 },
