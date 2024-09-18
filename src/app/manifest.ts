@@ -44,10 +44,43 @@ export default function manifest(): MetadataRoute.Manifest {
                 type: 'image/png',
             },
             {
+                src: '/app/assets/icon-384.png',
+                sizes: '384x384',
+                type: 'image/png',
+            },
+            {
                 src: '/app/assets/icon-512.png',
                 sizes: '512x512',
                 type: 'image/png',
             },
+            {
+                src: '/app/assets/icon-maskable-192.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'maskable',
+            },
+            {
+                src: '/app/assets/icon-maskable-384.png',
+                sizes: '384x384',
+                type: 'image/png',
+                purpose: 'maskable',
+            },
+            {
+                src: '/app/assets/icon-maskable-512.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'maskable',
+            },
         ],
+        shortcuts: [
+            // {
+            //     name: 'Create New Pool',
+            //     short_name: 'New Pool',
+            //     description: 'Start a new pool party',
+            //     url: '/pool/new',
+            //     icons: [{ src: '/app/assets/icon-new-pool.png', sizes: '192x192' }],
+            // },
+        ],
+        prefer_related_applications: false,
     }
 }

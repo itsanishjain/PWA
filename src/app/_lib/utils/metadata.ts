@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from 'next'
+import type { Metadata as NextMetadata, Viewport } from 'next'
 
 export const viewport: Viewport = {
     userScalable: false,
@@ -16,7 +16,20 @@ const APP_DEFAULT_TITLE = 'Pool App'
 const APP_TITLE_TEMPLATE = '%s - Pool'
 const APP_DESCRIPTION = 'Pool Party! 🏖️'
 
-export const metadata: Metadata = {
+interface CustomMetadata extends NextMetadata {
+    twitter: {
+        card: string
+        title: {
+            default: string
+            template: string
+        }
+        description: string
+        site: string
+        creator: string
+    }
+}
+
+export const metadata: CustomMetadata = {
     ...(process.env.NODE_ENV === 'production' ? { metadataBase: new URL('https://app.poolparty.cc') } : {}),
     icons: {
         icon: '/app/assets/favicon.png',
@@ -131,9 +144,18 @@ export const metadata: Metadata = {
             template: APP_TITLE_TEMPLATE,
         },
         description: APP_DESCRIPTION,
+        images: [
+            {
+                url: '/app/assets/icon-maskable-512.png',
+                width: 512,
+                height: 512,
+            },
+        ],
     },
     twitter: {
-        card: 'app',
+        card: 'summary_large_image',
+        site: '@poolpartycc',
+        creator: '@poolpartycc',
         title: {
             default: APP_DEFAULT_TITLE,
             template: APP_TITLE_TEMPLATE,
