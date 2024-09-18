@@ -28,8 +28,8 @@ const cspHeader = `
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    frame-src 'self' https://app.privy.io;
-    connect-src 'self' https://api.privy.io https://auth.privy.io wss://auth.privy.io;
+    frame-src 'self' https://app.privy.io https://auth.privy.io;
+    connect-src 'self' https://api.privy.io https://auth.privy.io wss://auth.privy.io https://mainnet.base.org https://explorer-api.walletconnect.com;
     upgrade-insecure-requests;
 `
 
