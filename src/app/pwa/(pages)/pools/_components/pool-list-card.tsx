@@ -37,7 +37,7 @@ export default function PoolListCard({
     return (
         <Link href={`/pool/${id}` as Route}>
             <motion.div
-                className='flex h-24 items-center gap-[14px] rounded-[2rem] bg-[#f4f4f4] p-3 pr-4'
+                className='flex h-24 items-center gap-[14px] rounded-[1.5rem] bg-[#f4f4f4] p-3 pr-4'
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}>
                 <div className='relative size-[72px] shrink-0 overflow-hidden rounded-[16px] bg-neutral-200'>
