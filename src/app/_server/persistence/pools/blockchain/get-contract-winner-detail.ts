@@ -22,7 +22,7 @@ export default async function getContractWinnerDetail(
     winnerAddress: Address,
 ): Promise<WinnerDetail | null> {
     try {
-        const winnerInfo = await serverClient.readContract({
+        const winnerInfo = await serverClient?.readContract({
             address: currentPoolAddress,
             abi: [GetWinnerDetail],
             functionName: 'getWinnerDetail',

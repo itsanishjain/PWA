@@ -26,7 +26,7 @@ export default async function getContractParticipantDetail(
             return null
         }
 
-        const participantInfo = await serverClient.readContract({
+        const participantInfo = await serverClient?.readContract({
             address: currentPoolAddress,
             abi: [GetParticipantDetail],
             functionName: 'getParticipantDetail',

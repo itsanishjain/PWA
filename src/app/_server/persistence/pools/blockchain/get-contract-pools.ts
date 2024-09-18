@@ -27,7 +27,7 @@ interface PoolItem {
 const publicClient = getPublicClient(serverConfig)
 
 export async function getContractPools() {
-    const latestPoolId = await publicClient.readContract({
+    const latestPoolId = await publicClient?.readContract({
         address: currentPoolAddress,
         abi: [LatestPoolId],
         functionName: LatestPoolId.name,
