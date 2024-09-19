@@ -19,10 +19,9 @@ interface MyPoolsProps {
 
 const MyPools: React.FC<MyPoolsProps> = ({ initialUpcomingPools, initialPastPools }): JSX.Element => {
     const searchParams = useSearchParams()
-    const { myPoolsTab, setMyPoolsTab, setBottomBarContent } = useAppStore(state => ({
+    const { myPoolsTab, setMyPoolsTab } = useAppStore(state => ({
         myPoolsTab: state.myPoolsTab,
         setMyPoolsTab: state.setMyPoolsTab,
-        setBottomBarContent: state.setBottomBarContent,
     }))
     const initialLoadRef = useRef(true)
 
@@ -49,18 +48,7 @@ const MyPools: React.FC<MyPoolsProps> = ({ initialUpcomingPools, initialPastPool
             }
             initialLoadRef.current = false
         }
-
-        setBottomBarContent(
-            <Button
-                asChild
-                className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
-                <Link href={'/pool/new'}>Create Pool</Link>
-            </Button>,
-        )
-        return () => {
-            setBottomBarContent(null)
-        }
-    }, [searchParams, setBottomBarContent, setMyPoolsTab, myPoolsTab])
+    }, [searchParams, setMyPoolsTab, myPoolsTab])
 
     const updateSearchParam = (tab: string) => {
         const params = new URLSearchParams(window.location.search)
