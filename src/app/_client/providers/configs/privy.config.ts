@@ -2,7 +2,7 @@
 
 import logo from '@/public/app/images/pool-logo-horizontal.png'
 import type { PrivyProviderProps } from '@privy-io/react-auth'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 
 if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
     throw new Error('Missing NEXT_PUBLIC_PRIVY_APP_ID')
@@ -26,8 +26,8 @@ export default {
                 connectionOptions: 'all',
             },
         },
-        supportedChains: [baseSepolia],
-        defaultChain: baseSepolia,
+        supportedChains: [base],
+        defaultChain: base,
         legal: {
             privacyPolicyUrl: '/privacy-policy',
             termsAndConditionsUrl: '/terms',
