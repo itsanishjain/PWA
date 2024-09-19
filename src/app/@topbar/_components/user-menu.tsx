@@ -21,8 +21,6 @@ export default function UserMenu() {
             case pathname === '/profile':
                 return <UserDropdown />
             case pathname === '/profile/new':
-            case pathname.startsWith('/pool/'):
-            case pathname === '/pools':
                 return <SkipButton />
             default:
                 return <UserAvatar />
