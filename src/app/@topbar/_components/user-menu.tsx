@@ -17,10 +17,12 @@ export default function UserMenu() {
     if (!ready) return <Skeleton className='h-[30px] w-[46px] px-[10px] py-[5px]' />
 
     if (ready && authenticated) {
-        switch (pathname) {
-            case '/profile':
+        switch (true) {
+            case pathname === '/profile':
                 return <UserDropdown />
-            case '/profile/new':
+            case pathname === '/profile/new':
+            case pathname.startsWith('/pool/'):
+            case pathname === '/pools':
                 return <SkipButton />
             default:
                 return <UserAvatar />
