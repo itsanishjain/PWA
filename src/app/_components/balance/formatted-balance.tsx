@@ -12,12 +12,12 @@ export default function FormattedBalance({
     return (
         <>
             <span>
-                <span className='text-4xl text-neutral-300'>$</span>
+                <span className='text-4xl'>$</span>
                 <NumberTicker value={integerPart} className='text-4xl' />
                 <span>.</span>
-                <NumberTicker value={fractionalPart} className='text-2xl text-neutral-500' padding={2} />
+                <NumberTicker value={fractionalPart} className='text-2xl' padding={2} />
             </span>
-            <span className='ml-2 text-sm text-neutral-800'>{symbol}</span>
+            <span className='ml-2 text-sm'>{symbol}</span>
         </>
     )
 }
