@@ -22,7 +22,7 @@ export default function RootLayout({ children, bottombar, topbar, modal }: Props
                     <MainWrapper>{children}</MainWrapper>
                     {modal}
                     {bottombar}
-                    <InstallPromptDrawer />
+                    {/* <InstallPromptDrawer /> */}
                 </Providers>
             </body>
         </html>
