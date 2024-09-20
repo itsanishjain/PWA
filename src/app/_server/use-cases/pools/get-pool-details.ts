@@ -17,13 +17,8 @@ function processPoolDetails(
     poolInfo: PoolItem | null,
     participantsInfo: ParticipantsInfo,
     claimableAmount: bigint,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    userInfo: ParticipantDetail | null,
 ): PoolDetailsDTO {
     if (!poolInfo) {
-        //  TODO: Handle creation of pool in DB if not found
-        // throw new Error(`Pool with ID ${contractPool.id} not found in database`)
-        console.log('[processPoolDetails] Pool not found in database with id:', contractPool.id)
         return {
             hostName: 'Unknown',
             contractId: BigInt(contractPool.id),
@@ -32,9 +27,8 @@ function processPoolDetails(
                 name: user.name,
                 avatarUrl: user.avatarUrl,
             })),
-            // userDeposit: Number(userInfo?.deposit) ?? 0,
             goal: 0,
-            progress: Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
+            progress: Number(contractPool.poolBalance),
             name: contractPool.name,
             startDate: contractPool.startDate,
             endDate: contractPool.endDate,
@@ -60,9 +54,7 @@ function processPoolDetails(
             avatarUrl: user.avatarUrl,
         })),
         // userDeposit: Number(userInfo?.deposit) ?? 0,
-        goal:
-            poolInfo.softCap * contractPool.price ||
-            Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
+        goal: poolInfo.softCap * contractPool.price || Number(contractPool.poolBalance),
         progress: Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
         name: contractPool.name,
         startDate: contractPool.startDate,
@@ -77,7 +69,7 @@ function processPoolDetails(
         softCap: poolInfo.softCap,
         description: poolInfo.description,
         termsUrl: poolInfo.terms || undefined,
-        poolBalance: Number(contractPool.poolBalance) / 10 ** contractPool.tokenDecimals,
+        poolBalance: Number(contractPool.poolBalance),
     }
 }
 
@@ -95,15 +87,11 @@ export async function getPoolDetailsUseCase(poolId: string, userAddress?: string
     if (!poolInfo) {
         // TODO: Handle creation of pool in DB
         console.log('[getPoolDetails] Pool not found in database with id:', poolId)
-        // throw new Error(`Pool with ID ${poolId} not found in database`)
     }
 
     let claimableAmount: bigint = BigInt(0)
-    let userDeposit: ParticipantDetail | null = null
 
     if (userAddress && contractPool.participantAddresses.includes(userAddress)) {
-        userDeposit = await getContractParticipantDetail(poolId, userAddress)
-
         if (contractPool.status === POOLSTATUS.ENDED) {
             const winnerDetail = (await getContractWinnerDetail(poolId, userAddress as Address)) || {
                 amountWon: BigInt(0),
@@ -114,5 +102,5 @@ export async function getPoolDetailsUseCase(poolId: string, userAddress?: string
         }
     }
 
-    return processPoolDetails(contractPool, poolInfo, usersInfo, claimableAmount, userDeposit)
+    return processPoolDetails(contractPool, poolInfo, usersInfo, claimableAmount)
 }
