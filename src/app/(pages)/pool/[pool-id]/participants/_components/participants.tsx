@@ -10,9 +10,10 @@ import { useParticipants } from '@/hooks/use-participants'
 
 interface PoolParticipantsProps {
     poolId: string
+    isAdmin: boolean
 }
 
-const Participants = ({ poolId }: PoolParticipantsProps) => {
+const Participants = ({ poolId, isAdmin }: PoolParticipantsProps) => {
     const setTopBarTitle = useAppStore(state => state.setTopBarTitle)
     const [query, setQuery] = useState('')
     const { data: participants, isLoading, error } = useParticipants(poolId)
@@ -39,8 +40,8 @@ const Participants = ({ poolId }: PoolParticipantsProps) => {
     return (
         <div className='mx-auto max-w-md overflow-hidden rounded-lg bg-white'>
             <div className='p-4'>
-                <SearchBar query={query} onChange={handleChange} poolId={poolId} />
-                <ParticipantList participants={filteredParticipants} poolId={poolId} />
+                <SearchBar query={query} onChange={handleChange} poolId={poolId} isAdmin={isAdmin} />
+                <ParticipantList participants={filteredParticipants} poolId={poolId} isAdmin={isAdmin} />
             </div>
         </div>
     )
@@ -50,20 +51,24 @@ const SearchBar = ({
     query,
     onChange,
     poolId,
+    isAdmin,
 }: {
     query: string
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
     poolId: string
+    isAdmin: boolean
 }) => (
     <div className='relative mb-2 h-10'>
         <div className='absolute left-4 top-[1px] z-10 flex h-full w-4 items-center'>
             <SearchIcon size={16} />
         </div>
-        <Link
-            href={`/pool/${poolId}/participants/`}
-            className='absolute right-2 top-[1px] z-10 flex h-10 w-6 items-center'>
-            <QrCodeIcon size={16} />
-        </Link>
+        {isAdmin && (
+            <Link
+                href={`/pool/${poolId}/participants/`}
+                className='absolute right-2 top-[1px] z-10 flex h-10 w-6 items-center'>
+                <QrCodeIcon size={16} />
+            </Link>
+        )}
         <Input
             type='text'
             value={query}
@@ -77,9 +82,11 @@ const SearchBar = ({
 const ParticipantList = ({
     participants,
     poolId,
+    isAdmin,
 }: {
     participants: ReturnType<typeof useParticipants>['data']
     poolId: string
+    isAdmin: boolean
 }) => (
     <>
         {participants && participants.length > 0 ? (
@@ -91,6 +98,7 @@ const ParticipantList = ({
                     displayName={participant.displayName}
                     poolId={poolId}
                     status='Registered'
+                    isAdmin={isAdmin}
                 />
             ))
         ) : (
