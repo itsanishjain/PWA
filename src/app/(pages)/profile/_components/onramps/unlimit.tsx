@@ -2,8 +2,7 @@ import { Button } from '@/app/_components/ui/button'
 import { GateFiDisplayModeEnum, GateFiSDK } from '@gatefi/js-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'
-import { inProduction } from '@/app/pwa/_lib/utils/environment.mjs'
-import { inDevelopment } from '@/app/pwa/_lib/utils/environment.mjs'
+import { inProduction } from '@/app/_lib/utils/environment.mjs'
 
 interface UnlimitProps {
     email?: string

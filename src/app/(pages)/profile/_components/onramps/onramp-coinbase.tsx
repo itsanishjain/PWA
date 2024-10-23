@@ -2,7 +2,7 @@ import { Button } from '@/app/_components/ui/button'
 import { useMutation } from '@tanstack/react-query'
 import { baseSepolia, base } from 'viem/chains'
 import { useAccount } from 'wagmi'
-import { inProduction } from '@/app/pwa/_lib/utils/environment.mjs'
+import { inProduction } from '@/app/_lib/utils/environment.mjs'
 
 const OnRampCoinbaseButton = ({ className }: React.ComponentProps<'form'>) => {
     const account = useAccount()
