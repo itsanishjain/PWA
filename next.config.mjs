@@ -20,7 +20,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.privy.io https://js.stripe.com https://*.stripe.com;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.privy.io https://js.stripe.com https://*.stripe.com blob:;
+    worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline' https://cdn.privy.io;
     img-src 'self' blob: data: https://*.supabase.co https://explorer-api.walletconnect.com https://*.poolparty.cc;
     font-src 'self';
@@ -31,6 +32,7 @@ const cspHeader = `
     frame-src 'self' https://app.privy.io https://auth.privy.io https://js.stripe.com;
     connect-src 'self' https://api.privy.io https://auth.privy.io wss://auth.privy.io https://mainnet.base.org https://explorer-api.walletconnect.com https://*.supabase.co https://*.stripe.com https://*.coinbase.com https://sepolia.base.org https://pulse.walletconnect.org https://chain-proxy.wallet.coinbase.com;
     upgrade-insecure-requests;
+    script-src-elem 'self' 'unsafe-inline' https://cdn.privy.io https://js.stripe.com https://*.stripe.com;
 `
 
 /** @type {import('next').NextConfig} */
@@ -98,7 +100,7 @@ export default withBundleAnalyzer(
                         },
                         {
                             key: 'Permissions-Policy',
-                            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+                            value: 'camera=self',
                         },
                     ],
                 },
