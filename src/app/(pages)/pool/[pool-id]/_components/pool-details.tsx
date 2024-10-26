@@ -22,7 +22,7 @@ export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
                     name={pool.name}
                     imageUrl={pool.imageUrl}
                     buttons={<PoolDetailsBannerButtons isAdmin={isAdmin} />}
-                    status={<PoolDetailsBannerStatus />}
+                    // status={<PoolDetailsBannerStatus />}
                 />
                 <PoolDetailsHeading
                     name={pool.name}
@@ -67,6 +67,7 @@ export default async function PoolDetails({ pool }: { pool: PoolDetailsDTO }) {
                 poolTokenSymbol={pool.tokenSymbol}
                 tokenDecimals={pool.tokenDecimals}
                 requiredAcceptance={pool.requiredAcceptance}
+                termsUrl={pool.termsUrl || ''}
             />
         </div>
     )
