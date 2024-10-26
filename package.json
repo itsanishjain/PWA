@@ -21,7 +21,7 @@
         "prettify": "prettier -w",
         "start": "next start",
         "test": "vitest",
-        "test:e2e": "playwright test"
+        "test:e2e": "bash ./setup-and-test.sh"
     },
     "dependencies": {
         "@coinbase/cbpay-js": "2.2.1",
