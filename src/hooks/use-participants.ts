@@ -44,7 +44,7 @@ const fetchUserDetails = async (address: Address) => {
 }
 
 export const useParticipants = (poolId: string) => {
-    const { poolDetails } = usePoolDetails(BigInt(poolId))
+    const { poolDetails } = usePoolDetails(poolId)
 
     return useQuery({
         queryKey: ['participants', poolId],
