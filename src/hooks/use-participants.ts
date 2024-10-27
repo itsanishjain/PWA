@@ -1,10 +1,22 @@
 import { useQuery } from '@tanstack/react-query'
 import { formatAddress } from '@/app/_lib/utils/addresses'
-import frog from '@/public/app/images/frog.png'
 import type { Address } from 'viem'
 import { usePoolDetails } from '@/app/(pages)/pool/[pool-id]/ticket/_components/use-pool-details'
 import { getSupabaseBrowserClient } from '@/app/(pages)/pool/[pool-id]/participants/_components/db-client'
-import { QueryData } from '@supabase/supabase-js'
+import { PostgrestSingleResponse } from '@supabase/supabase-js'
+import { blo } from 'blo'
+
+interface UserDetails {
+    avatar: string | null
+    displayName: string | null
+    walletAddress: string
+}
+
+interface ParticipantStatus {
+    status: string
+    checked_in_at: string | null
+    users: UserDetails | null
+}
 
 interface Participant {
     address: Address
@@ -14,10 +26,10 @@ interface Participant {
     checkedInAt: string | null
 }
 
-const fetchUserDetails = async (address: Address) => {
+const fetchUserDetails = async (address: Address): Promise<ParticipantStatus | null> => {
     const supabase = getSupabaseBrowserClient()
 
-    const participantsStatusQuery = supabase
+    const { data, error }: PostgrestSingleResponse<ParticipantStatus> = await supabase
         .from('pool_participants')
         .select(
             `
@@ -28,19 +40,18 @@ const fetchUserDetails = async (address: Address) => {
                 displayName,
                 walletAddress
             )
-            `,
+        `,
         )
         .eq('users.walletAddress', address)
+        .limit(1)
         .single()
 
-    type PoolParticipantsWithUsers = QueryData<typeof participantsStatusQuery>
-    const { data, error } = await participantsStatusQuery
     if (error) {
-        throw error
+        console.error(`Error fetching details for address ${address}:`, error)
+        return null
     }
-    const participantsStatus: PoolParticipantsWithUsers = data
 
-    return participantsStatus
+    return data
 }
 
 export const useParticipants = (poolId: string) => {
@@ -50,15 +61,18 @@ export const useParticipants = (poolId: string) => {
         queryKey: ['participants', poolId],
         queryFn: async () => {
             const participants = poolDetails?.poolDetailFromSC?.[5] || []
+
+            console.log('participants', poolId, participants)
+
             const participantDetails: Participant[] = await Promise.all(
                 participants.map(async (address: Address) => {
-                    const { status, checked_in_at, users: userDetails } = await fetchUserDetails(address)
+                    const participantStatus = await fetchUserDetails(address)
                     return {
                         address,
-                        avatar: userDetails?.avatar || frog.src,
-                        displayName: userDetails?.displayName ?? formatAddress(userDetails?.walletAddress || '0x'),
-                        status: status || 'JOINED',
-                        checkedInAt: checked_in_at || null,
+                        avatar: participantStatus?.users?.avatar ?? blo(address || '0x'),
+                        displayName: participantStatus?.users?.displayName ?? formatAddress(address),
+                        status: participantStatus?.status || 'JOINED',
+                        checkedInAt: participantStatus?.checked_in_at || null,
                     }
                 }),
             )

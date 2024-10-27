@@ -5,10 +5,9 @@ import { Button } from '@/app/_components/ui/button'
 import { Input } from '@/app/_components/ui/input'
 import { formatAddress } from '@/app/_lib/utils/addresses'
 import { cn } from '@/lib/utils/tailwind'
-import frog from '@/public/app/images/frog.png'
 import { toast } from 'sonner'
 import type { Address } from 'viem'
-import { getAbiItem } from 'viem'
+import { getAbiItem, parseUnits } from 'viem'
 import { useWriteContract } from 'wagmi'
 import { useTokenDecimals } from '@/app/(pages)/profile/send/_components/use-token-decimals'
 import { usePoolDetails } from '../../ticket/_components/use-pool-details'
@@ -18,10 +17,19 @@ import { currentPoolAddress, currentTokenAddress } from '@/app/_server/blockchai
 import { poolAbi } from '@/types/contracts'
 import useTransactions from '@/app/_client/hooks/use-transactions'
 import { getUserAdminStatusActionWithCookie } from '@/features/users/actions'
+import { blo } from 'blo'
 
-const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participant-id': Address } }) => {
-    const { data: userDetails } = useUserDetails(params['participant-id'])
-    const { poolDetails } = usePoolDetails(BigInt(params?.['pool-id']))
+type Props = {
+    params: {
+        'pool-id': string
+        'participant-id': Address
+    }
+}
+
+const ParticipantPayout = ({ params }: Props) => {
+    const { 'participant-id': participantId, 'pool-id': poolId } = params
+    const { data: userDetails } = useUserDetails(participantId)
+    const { poolDetails } = usePoolDetails(poolId)
 
     const tokenAddress = poolDetails?.poolDetailFromSC?.[4] ?? currentTokenAddress
 
@@ -42,19 +50,19 @@ const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participa
             abi: poolAbi,
             name: 'setWinner',
         })
-        console.log('tokenDecimals', tokenDecimalsData?.tokenDecimals)
-        const winnerAmount = BigInt(inputValue) * BigInt(Math.pow(10, Number(tokenDecimalsData?.tokenDecimals)))
+        console.log('tokenDecimals', tokenDecimalsData.tokenDecimals)
+        const winnerAmount = parseUnits(inputValue, tokenDecimalsData.tokenDecimals)
 
         const args = [
             {
                 address: currentPoolAddress,
                 abi: [SetWinnerFunction],
                 functionName: SetWinnerFunction.name,
-                args: [BigInt(params['pool-id']), params['participant-id'], winnerAmount],
+                args: [BigInt(poolId), participantId, winnerAmount],
             },
         ]
 
-        console.log('executeTransactions', args, params['pool-id'], params['participant-id'], winnerAmount)
+        console.log('executeTransactions', args, poolId, participantId, winnerAmount)
 
         try {
             executeTransactions(args)
@@ -75,8 +83,8 @@ const ParticipantPayout = ({ params }: { params: { 'pool-id': string; 'participa
         }
     }, [isPending, hash, isSuccess])
 
-    const avatar = userDetails?.avatar ?? frog.src
-    const displayName = userDetails?.displayName ?? formatAddress(params['participant-id'])
+    const avatar = userDetails?.avatar ?? blo(participantId)
+    const displayName = userDetails?.displayName ?? formatAddress(participantId)
 
     if (!isAdmin) {
         return <div className={'mt-4 w-full text-center'}>You are not authorized to create a payout.</div>

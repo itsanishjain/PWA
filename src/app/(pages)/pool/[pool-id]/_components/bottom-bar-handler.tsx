@@ -14,6 +14,7 @@ import { useAccount, useReadContract } from 'wagmi'
 import { getAbiItem } from 'viem'
 import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 import HybridRegistration from './terms-acceptance-dialog'
+import { addParticipantToPool } from '../../new/actions'
 
 type ButtonConfig = {
     label: string
@@ -28,7 +29,7 @@ type PoolStatusConfig = {
 interface BottomBarHandlerProps {
     isAdmin: boolean
     poolStatus: POOLSTATUS
-    poolId: bigint
+    poolId: string
     poolPrice: number
     poolTokenSymbol: string
     tokenDecimals: number
@@ -54,7 +55,8 @@ export default function BottomBarHandler({
     const setBottomBarContent = useAppStore(state => state.setBottomBarContent)
     const setTransactionInProgress = useAppStore(state => state.setTransactionInProgress)
 
-    const { address } = useAccount()
+    const { address } = useAccount() as { address: Address | undefined }
+
     const { data: isParticipant, isLoading: isParticipantLoading } = useReadContract({
         abi: [
             getAbiItem({
@@ -64,7 +66,7 @@ export default function BottomBarHandler({
         ],
         address: currentPoolAddress,
         functionName: 'isParticipant',
-        args: [address || '0x', poolId],
+        args: [address || '0x', BigInt(poolId)],
         query: {
             enabled: Boolean(address && poolId),
         },
@@ -87,7 +89,22 @@ export default function BottomBarHandler({
         poolPrice,
         tokenDecimals,
         () => setOpenOnRampDialog(true),
-        () => router.refresh(),
+        async () => {
+            try {
+                if (address === undefined) {
+                    console.log('user address not found')
+                    return
+                }
+                // Asumiendo que tienes acceso a poolId y userAddress
+                const success = await addParticipantToPool(poolId, address)
+                if (success) {
+                    // Manejar el éxito (por ejemplo, actualizar la UI)
+                }
+            } catch (error) {
+                console.error('Error joining pool:', error)
+                // Manejar el error (por ejemplo, mostrar un mensaje al usuario)
+            }
+        },
     )
 
     const handleViewTicket = useCallback(() => {

@@ -8,6 +8,7 @@ import { getUserAddressAction } from '../../pools/actions'
 import { currentTokenAddress } from '@/app/_server/blockchain/server-config'
 import { fromZonedTime } from 'date-fns-tz'
 import { getUserAdminStatusActionWithCookie } from '@/features/users/actions'
+import { verifyParticipantInContract } from '@/app/_server/blockchain/verify-participant'
 
 type FormState = {
     message?: string
@@ -216,4 +217,59 @@ export async function deletePool(poolId: string) {
     }
 
     console.log('Pool with id', poolId, 'and related data deleted successfully')
+}
+
+export async function addParticipantToPool(poolId: string, userAddress: string): Promise<boolean> {
+    const privyUser = await verifyToken()
+    if (!privyUser) {
+        throw new Error('User not authenticated')
+    }
+
+    // Verify if the user is a participant in the smart contract
+    const isParticipant = await verifyParticipantInContract(poolId, userAddress)
+    if (!isParticipant) {
+        throw new Error('User is not a participant in the smart contract')
+    }
+
+    // Get the user's ID from the database
+    const { data: user, error: userError } = await db.from('users').select('id').eq('privyId', privyUser.id).single()
+
+    if (userError) {
+        console.error('Error finding user:', userError)
+        throw userError
+    }
+
+    // Check if the user is already a participant in the database
+    const { data: existingParticipant, error: participantCheckError } = await db
+        .from('pool_participants')
+        .select('*')
+        .eq('pool_id', poolId)
+        .eq('user_id', user.id)
+        .single()
+
+    if (participantCheckError && participantCheckError.code !== 'PGRST116') {
+        console.error('Error checking existing participant:', participantCheckError)
+        throw participantCheckError
+    }
+
+    if (existingParticipant) {
+        console.log('User is already a participant')
+        return true
+    }
+
+    // Insert the new participant
+    const { error: participantError } = await db.from('pool_participants').insert({
+        user_id: Number(user.id),
+        pool_id: Number(poolId),
+        poolRole: 'participant',
+        status: 'JOINED',
+    })
+
+    if (participantError) {
+        console.error('Error adding participant:', participantError)
+        throw participantError
+    }
+
+    console.log('Participant added successfully')
+    return true
 }

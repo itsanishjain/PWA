@@ -7,6 +7,7 @@ import { QrCodeIcon, SearchIcon } from 'lucide-react'
 import { Input } from '@/app/_components/ui/input'
 import ParticipantCard from './participantRow'
 import { useParticipants } from '@/hooks/use-participants'
+import PoolDetailsLoader from '../../loading'
 
 interface PoolParticipantsProps {
     poolId: string
@@ -16,7 +17,7 @@ interface PoolParticipantsProps {
 const Participants = ({ poolId, isAdmin }: PoolParticipantsProps) => {
     const setTopBarTitle = useAppStore(state => state.setTopBarTitle)
     const [query, setQuery] = useState('')
-    const { data: participants, isLoading, error } = useParticipants(poolId)
+    const { data: participants, isPending, error } = useParticipants(poolId)
 
     const filteredParticipants = useMemo(() => {
         return (
@@ -34,11 +35,11 @@ const Participants = ({ poolId, isAdmin }: PoolParticipantsProps) => {
         setQuery(e.target.value)
     }
 
-    if (isLoading) return <div>Loading participants...</div>
+    if (isPending) return <PoolDetailsLoader />
     if (error) return <div>Error loading participants</div>
 
     return (
-        <div className='mx-auto max-w-md overflow-hidden rounded-lg bg-white'>
+        <div className='overflow-hidden rounded-lg bg-white'>
             <div className='p-4'>
                 <SearchBar query={query} onChange={handleChange} poolId={poolId} isAdmin={isAdmin} />
                 <ParticipantList participants={filteredParticipants} poolId={poolId} isAdmin={isAdmin} />
@@ -102,7 +103,9 @@ const ParticipantList = ({
                 />
             ))
         ) : (
-            <p>No participants found.</p>
+            <div className='flex h-[50vh] flex-1 items-center justify-center'>
+                <p>No participants yet.</p>
+            </div>
         )}
     </>
 )

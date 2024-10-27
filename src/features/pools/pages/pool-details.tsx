@@ -39,7 +39,10 @@ export default function PoolDetails({ poolId }: { poolId: string }) {
     if (isPoolError || isUserInfoError) return <div>Error loading pool details</div>
     if (!pool) return <div>Pool not found</div>
 
-    const avatarUrls = pool.participants.map(participant => participant.avatarUrl)
+    const avatarUrls = pool.participants.map(participant => ({
+        url: participant.avatarUrl,
+        address: participant.address,
+    }))
 
     return (
         <div className='space-y-3 bg-white p-2'>
@@ -86,7 +89,7 @@ export default function PoolDetails({ poolId }: { poolId: string }) {
             </PoolDetailsCard>
 
             <BottomBarHandler
-                poolId={BigInt(pool.contractId)}
+                poolId={pool.contractId}
                 isAdmin={isAdmin}
                 poolStatus={pool.status}
                 poolPrice={pool.price}

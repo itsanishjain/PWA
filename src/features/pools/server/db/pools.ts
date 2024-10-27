@@ -4,7 +4,7 @@ import { getUserAddressAction } from '@/app/(pages)/pools/actions'
 import { getPoolInfo, getWinnerDetail } from '@/lib/contract/pool'
 import { getTokenDecimals, getTokenSymbol } from '@/lib/contract/token'
 import { fromUnixTime } from 'date-fns'
-import { formatUnits } from 'viem'
+import { Address, formatUnits } from 'viem'
 
 export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: string[] }) {
     const address = await getUserAddressAction()
@@ -64,6 +64,7 @@ export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: s
         participants: usersInfo.map(user => ({
             name: user.displayName || '',
             avatarUrl: user.avatar || '',
+            address: user.walletAddress as Address,
         })),
         goal: poolInfo.softCap * price || balance,
         // progress: balance,

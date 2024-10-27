@@ -4,15 +4,11 @@ import { Avatar, AvatarImage } from '@/app/_components/ui/avatar'
 import { ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useAccount } from 'wagmi'
-import { getUserInfoAction } from '../../actions'
 import { Skeleton } from '@/app/_components/ui/skeleton'
 import { Tables } from '@/types/db'
-import { useServerActionQuery } from '@/app/_client/hooks/server-action-hooks'
 import { blo } from 'blo'
 import { useUserInfo } from '@/hooks/use-user-info'
 import { explorerUrl } from '@/app/_server/blockchain/server-config'
-
-type UserItem = Pick<Tables<'users'>, 'avatar' | 'displayName'> | null
 
 export default function UserInfo() {
     const { data: userInfo, isLoading } = useUserInfo()

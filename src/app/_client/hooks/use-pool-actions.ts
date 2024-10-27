@@ -13,7 +13,7 @@ import { useWaitForTransactionReceipt } from 'wagmi'
 import { useState, useEffect } from 'react'
 
 export function usePoolActions(
-    poolId: bigint,
+    poolId: string,
     poolPrice: number,
     tokenDecimals: number,
     openOnRampDialog: () => void,
@@ -133,7 +133,7 @@ export function usePoolActions(
 
             void executeTransactions([
                 ...(bigIntPrice > 0 ? [approve({ spender: currentPoolAddress, amount: bigIntPrice })] : []),
-                deposit({ poolId, amount: bigIntPrice }),
+                deposit({ poolId: BigInt(poolId), amount: bigIntPrice }),
             ])
                 .then(() => {
                     onSuccessfulJoin()
