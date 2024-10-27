@@ -8,13 +8,14 @@ import { useAppStore } from '@/app/_client/providers/app-store.provider'
 import { POOLSTATUS } from '@/app/(pages)/pool/[pool-id]/_lib/definitions'
 import { usePoolActions } from '@/app/_client/hooks/use-pool-actions'
 import { useRouter } from 'next/navigation'
-import OnRampDialog from '@/app/(pages)/profile/_components/onramps/onramp.dialog'
+// import OnRampDialog from '@/app/(pages)/profile/_components/onramps/onramp.dialog'
 import { Loader2 } from 'lucide-react'
 import { useAccount, useReadContract } from 'wagmi'
 import { getAbiItem } from 'viem'
 import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 import HybridRegistration from './terms-acceptance-dialog'
 import { addParticipantToPool } from '../../new/actions'
+import { MoonpayConfig, useFundWallet } from '@privy-io/react-auth'
 
 type ButtonConfig = {
     label: string
@@ -47,7 +48,7 @@ export default function BottomBarHandler({
     requiredAcceptance,
     termsUrl,
 }: BottomBarHandlerProps) {
-    const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
+    // const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [transactionProcessed, setTransactionProcessed] = useState(false)
     const updateBottomBarContentRef = useRef<NodeJS.Timeout | null>(null)
@@ -56,6 +57,7 @@ export default function BottomBarHandler({
     const setTransactionInProgress = useAppStore(state => state.setTransactionInProgress)
 
     const { address } = useAccount() as { address: Address | undefined }
+    const { fundWallet } = useFundWallet()
 
     const { data: isParticipant, isLoading: isParticipantLoading } = useReadContract({
         abi: [
@@ -71,6 +73,27 @@ export default function BottomBarHandler({
             enabled: Boolean(address && poolId),
         },
     })
+
+    const handleOnRamp = async () => {
+        if (!address) {
+            console.error('Cannot initiate onramp, user address not found')
+            return
+        }
+
+        // Limited to moonpay for now
+        const fundWalletConfig: MoonpayConfig = {
+            currencyCode: 'USDC_BASE',
+            quoteCurrencyAmount: Number(poolPrice),
+            paymentMethod: 'credit_debit_card',
+            uiConfig: { accentColor: '#5472E9' },
+        }
+        await fundWallet(address, { config: fundWalletConfig })
+
+        resetJoinPoolProcess()
+        setIsLoading(false)
+        updateBottomBarContent()
+        router.refresh()
+    }
 
     const {
         handleEnableDeposits,
@@ -88,7 +111,7 @@ export default function BottomBarHandler({
         poolId,
         poolPrice,
         tokenDecimals,
-        () => setOpenOnRampDialog(true),
+        handleOnRamp, // () => setOpenOnRampDialog(true),
         async () => {
             try {
                 if (address === undefined) {
@@ -266,17 +289,17 @@ export default function BottomBarHandler({
         }
     }, [isCancelled, updateBottomBarContent])
 
-    const handleOnRampDialogClose = useCallback(() => {
-        setOpenOnRampDialog(false)
-        resetJoinPoolProcess()
-        setIsLoading(false)
-        updateBottomBarContent()
-        router.refresh()
-    }, [resetJoinPoolProcess, updateBottomBarContent, router])
+    // const handleOnRampDialogClose = useCallback(() => {
+    //     setOpenOnRampDialog(false)
+    //     resetJoinPoolProcess()
+    //     setIsLoading(false)
+    //     updateBottomBarContent()
+    //     router.refresh()
+    // }, [resetJoinPoolProcess, updateBottomBarContent, router])
 
     return (
         <>
-            <OnRampDialog open={openOnRampDialog} setOpen={handleOnRampDialogClose} amount={poolPrice.toString()} />
+            {/* <OnRampDialog open={openOnRampDialog} setOpen={handleOnRampDialogClose} amount={poolPrice.toString()} /> */}
             {requiredAcceptance && (
                 <HybridRegistration
                     open={showTermsDialog}
