@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useFormState } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { parseEther, Hash, parseEventLogs, ContractFunctionExecutionError, formatUnits } from 'viem'
+import { Hash, parseEventLogs, ContractFunctionExecutionError, parseUnits } from 'viem'
 import { createPoolAction, deletePool, updatePoolStatus } from './actions'
 import { Steps, usePoolCreationStore } from '@/app/_client/stores/pool-creation-store'
 import { useWaitForTransactionReceipt } from 'wagmi'
@@ -72,7 +72,7 @@ export function useCreatePool() {
                 BigInt(startDate / 1000), // is important to convert to seconds
                 BigInt(endDate / 1000),
                 name,
-                formatUnits(BigInt(price), 6),
+                parseUnits(price, 6),
                 1000, // TODO: implement max participants
                 currentTokenAddress,
             ],
