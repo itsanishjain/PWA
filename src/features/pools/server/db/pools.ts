@@ -5,6 +5,7 @@ import { getPoolInfo, getWinnerDetail } from '@/lib/contract/pool'
 import { getTokenDecimals, getTokenSymbol } from '@/lib/contract/token'
 import { fromUnixTime } from 'date-fns'
 import { Address, formatUnits } from 'viem'
+import { getPoolDateOverride } from '@/app/_lib/utils/get-pool-date-override'
 
 export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: string[] }) {
     const address = await getUserAddressAction()
@@ -56,21 +57,23 @@ export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: s
     const price = Number(formatUnits(contractInfo.price, contractInfo.tokenDecimals))
     const balance = Number(formatUnits(contractInfo.balance, contractInfo.tokenDecimals))
 
+    const dateOverride = getPoolDateOverride(poolId)
+    const poolStartDate = fromUnixTime(dateOverride?.startDate ?? contractInfo.startDate)
+    const poolEndDate = fromUnixTime(dateOverride?.endDate ?? contractInfo.endDate)
+
     return {
         hostName: hostInfo.users?.displayName,
         contractId: poolId,
         claimableAmount: formatUnits(claimableAmount, contractInfo.tokenDecimals),
-
         participants: usersInfo.map(user => ({
             name: user.displayName || '',
             avatarUrl: user.avatar || '',
             address: user.walletAddress as Address,
         })),
         goal: poolInfo.softCap * price || balance,
-        // progress: balance,
         name: contractInfo.name,
-        startDate: fromUnixTime(contractInfo.startDate),
-        endDate: fromUnixTime(contractInfo.endDate),
+        startDate: poolStartDate,
+        endDate: poolEndDate,
         numParticipants: usersInfo.length,
         price,
         tokenSymbol: contractInfo.tokenSymbol,
