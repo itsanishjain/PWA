@@ -5,13 +5,14 @@ import { Button } from '@/app/_components/ui/button'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { getUserAdminStatusActionWithCookie } from '@/features/users/actions'
 
 export default function RenderBottomBar() {
     const setBottomBar = useAppStore(state => state.setBottomBarContent)
 
     const { data: isAdmin, isLoading } = useQuery({
         queryKey: ['userAdminStatus'],
-        queryFn: () => getUserAdminStatus(),
+        queryFn: () => getUserAdminStatusActionWithCookie(),
     })
 
     useEffect(() => {
@@ -33,7 +34,4 @@ export default function RenderBottomBar() {
     if (isLoading) return null
 
     return null
-}
-function getUserAdminStatus(): any {
-    throw new Error('Function not implemented.')
 }

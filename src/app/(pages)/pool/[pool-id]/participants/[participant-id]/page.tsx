@@ -18,6 +18,8 @@ import { poolAbi } from '@/types/contracts'
 import useTransactions from '@/app/_client/hooks/use-transactions'
 import { getUserAdminStatusActionWithCookie } from '@/features/users/actions'
 import { blo } from 'blo'
+import PageWrapper from '@/components/page-wrapper'
+import UserMenu from '@/components/user-menu'
 
 type Props = {
     params: {
@@ -91,43 +93,47 @@ const ParticipantPayout = ({ params }: Props) => {
     }
 
     return (
-        <div className='max-w-md overflow-hidden rounded-lg bg-white'>
-            <div className='mt-6 flex flex-col items-center'>
-                <Avatar className='size-[73px]' aria-label='User Avatar'>
-                    <AvatarImage alt='User Avatar' src={avatar} />
-                    <AvatarFallback className='bg-[#d9d9d9]' />
-                </Avatar>
-                <div className='flex flex-row'>
-                    <h3 className='flex h-10 flex-1 flex-row items-center justify-center font-semibold'>
-                        {displayName}
-                    </h3>
-                </div>
-                <div className='mb-4 flex flex-row justify-center'>
-                    <p>Checked in</p>
-                </div>
-                <div className='mt-2 flex h-16 flex-row justify-center'>
-                    <div className='relative flex justify-center'>
-                        <Input
-                            className={cn('h-24 w-auto border-none text-center text-6xl font-bold focus:outline-none')}
-                            placeholder='$'
-                            autoFocus={true}
-                            value={inputValue}
-                            type='number'
-                            onChange={handleInputChange}
-                            ref={inputRef}
-                            inputMode='numeric'
-                        />
+        <PageWrapper topBarProps={{ title: 'Payout', backButton: true }}>
+            <div className='max-w-md overflow-hidden rounded-lg bg-white'>
+                <div className='mt-6 flex flex-col items-center'>
+                    <Avatar className='size-[73px]' aria-label='User Avatar'>
+                        <AvatarImage alt='User Avatar' src={avatar} />
+                        <AvatarFallback className='bg-[#d9d9d9]' />
+                    </Avatar>
+                    <div className='flex flex-row'>
+                        <h3 className='flex h-10 flex-1 flex-row items-center justify-center font-semibold'>
+                            {displayName}
+                        </h3>
+                    </div>
+                    <div className='mb-4 flex flex-row justify-center'>
+                        <p>Checked in</p>
+                    </div>
+                    <div className='mt-2 flex h-16 flex-row justify-center'>
+                        <div className='relative flex justify-center'>
+                            <Input
+                                className={cn(
+                                    'h-24 w-auto border-none text-center text-6xl font-bold focus:outline-none',
+                                )}
+                                placeholder='$'
+                                autoFocus={true}
+                                value={inputValue}
+                                type='number'
+                                onChange={handleInputChange}
+                                ref={inputRef}
+                                inputMode='numeric'
+                            />
+                        </div>
+                    </div>
+                    <div className='mt-8 flex w-full flex-col items-center justify-center space-y-2'>
+                        <Button
+                            onClick={onPayoutButtonClicked}
+                            className='mb-3 h-[46px] w-full flex-1 grow flex-row items-center justify-center rounded-[2rem] bg-cta py-[11px] text-center align-middle font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
+                            Payout
+                        </Button>
                     </div>
                 </div>
-                <div className='mt-8 flex w-full flex-col items-center justify-center space-y-2'>
-                    <Button
-                        onClick={onPayoutButtonClicked}
-                        className='mb-3 h-[46px] w-full flex-1 grow flex-row items-center justify-center rounded-[2rem] bg-cta py-[11px] text-center align-middle font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
-                        Payout
-                    </Button>
-                </div>
             </div>
-        </div>
+        </PageWrapper>
     )
 }
 

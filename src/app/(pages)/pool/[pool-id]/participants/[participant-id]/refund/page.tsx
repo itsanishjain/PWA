@@ -1,8 +1,10 @@
+import PageWrapper from '@/components/page-wrapper'
+
 export default function RefundPage() {
     return (
-        <div>
+        <PageWrapper topBarProps={{ title: 'Refund', backButton: true }}>
             <h1>Refund Page</h1>
-        </div>
+        </PageWrapper>
     )
 }
 

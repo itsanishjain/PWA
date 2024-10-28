@@ -49,10 +49,8 @@ interface ProfilePageProps {
 export default function ProfileForm({ userInfo }: ProfilePageProps) {
     const queryClient = useQueryClient()
     const router = useRouter()
-    const { setBottomBarContent, setTopBarTitle, topBarTitle } = useAppStore(s => ({
+    const { setBottomBarContent } = useAppStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
-        setTopBarTitle: s.setTopBarTitle,
-        topBarTitle: s.topBarTitle,
     }))
     const [avatarChanged, setAvatarChanged] = useState(false)
 

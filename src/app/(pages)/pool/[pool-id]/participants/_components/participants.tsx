@@ -14,8 +14,9 @@ interface PoolParticipantsProps {
     isAdmin: boolean
 }
 
+// TODO: Title: Manage Participants
+
 const Participants = ({ poolId, isAdmin }: PoolParticipantsProps) => {
-    const setTopBarTitle = useAppStore(state => state.setTopBarTitle)
     const [query, setQuery] = useState('')
     const { data: participants, isPending, error } = useParticipants(poolId)
 
@@ -25,11 +26,6 @@ const Participants = ({ poolId, isAdmin }: PoolParticipantsProps) => {
             []
         )
     }, [participants, query])
-
-    useEffect(() => {
-        setTopBarTitle('Manage Participants')
-        return () => setTopBarTitle(null)
-    }, [setTopBarTitle])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(e.target.value)

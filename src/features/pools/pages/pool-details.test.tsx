@@ -1,7 +1,7 @@
 import { getByTestId, queryByTestId, render, screen, waitFor } from '@testing-library/react'
 import { Providers } from '@/app/_client/providers'
 import '@testing-library/jest-dom'
-import MainContentWrapper from '@/app/_components/main-wrapper'
+import MainWrapper from '@/app/_components/main-wrapper'
 
 import BottomBar from '@/app/@bottombar/default'
 import PoolDetails from './pool-details'
@@ -50,9 +50,9 @@ describe('PoolDetailsTest', () => {
 
         const { queryByTestId } = render(
             <Providers cookie={null}>
-                <MainContentWrapper>
+                <MainWrapper>
                     <PoolDetails poolId='1' />
-                </MainContentWrapper>
+                </MainWrapper>
                 <BottomBar />
             </Providers>,
         )
@@ -85,9 +85,9 @@ describe('PoolDetailsTest', () => {
         }
         const { queryByTestId } = render(
             <Providers cookie={null}>
-                <MainContentWrapper>
+                <MainWrapper>
                     <PoolDetails poolId='1' />
-                </MainContentWrapper>
+                </MainWrapper>
                 <BottomBar />
             </Providers>,
         )

@@ -4,13 +4,12 @@ import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import OnRampDialog from '../../(pages)/profile/_components/onramps/onramp.dialog'
 import UserDropdownItem from './user-dropdown.item'
 import type { DropdownItemConfig } from './user-dropdown.list.config'
 import { dropdownItemsConfig } from './user-dropdown.list.config'
-import { useAuth } from '../../_client/hooks/use-auth'
 import { MoonpayConfig, useFundWallet } from '@privy-io/react-auth'
 import { useAccount } from 'wagmi'
+import { useAuth } from '@/app/_client/hooks/use-auth'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.

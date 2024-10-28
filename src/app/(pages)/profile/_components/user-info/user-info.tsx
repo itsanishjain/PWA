@@ -5,7 +5,6 @@ import { ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useAccount } from 'wagmi'
 import { Skeleton } from '@/app/_components/ui/skeleton'
-import { Tables } from '@/types/db'
 import { blo } from 'blo'
 import { useUserInfo } from '@/hooks/use-user-info'
 import { explorerUrl } from '@/app/_server/blockchain/server-config'
@@ -29,7 +28,7 @@ export default function UserInfo() {
                     {isLoading ? <Skeleton className='h-4 w-24' /> : userInfo?.displayName || 'Anon User'}
                 </h1>
                 <h2 className='font-mono text-xs text-[#5472E9]'>
-                    {address ? truncatedAddress : <Skeleton className='h-4 w-16 bg-[#5472E9]/20' />}
+                    {address ? truncatedAddress : isLoading && <Skeleton className='h-4 w-16 bg-[#5472E9]/20' />}
                 </h2>
             </div>
             <Link

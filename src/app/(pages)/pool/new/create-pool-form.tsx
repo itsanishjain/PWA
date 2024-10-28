@@ -25,9 +25,8 @@ export default function CreatePoolForm() {
         poolUpdated,
         hasAttemptedChainCreation,
     } = useCreatePool()
-    const { setBottomBarContent, setTopBarTitle, setTransactionInProgress } = useAppStore(s => ({
+    const { setBottomBarContent, setTransactionInProgress } = useAppStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
-        setTopBarTitle: s.setTopBarTitle,
         setTransactionInProgress: s.setTransactionInProgress,
     }))
     const hasCreatedPool = useRef(false)
@@ -77,7 +76,7 @@ export default function CreatePoolForm() {
 
     useEffect(() => {
         console.log('Effect: Setting up bottom bar content')
-        setTopBarTitle('Create Pool')
+        // TODO: Set top bar title: Create Pool
         setBottomBarContent(
             <Button
                 type='submit'
@@ -100,12 +99,10 @@ export default function CreatePoolForm() {
         setTransactionInProgress(isPending || isConfirming)
 
         return () => {
-            setTopBarTitle(null)
             setBottomBarContent(null)
         }
     }, [
         setBottomBarContent,
-        setTopBarTitle,
         setTransactionInProgress,
         isPending,
         isConfirming,

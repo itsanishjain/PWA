@@ -11,6 +11,7 @@ import { Label } from '@/app/_components/ui/label'
 import { Input } from '@/app/_components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/app/_components/ui/card'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import PageWrapper from '@/components/page-wrapper'
 
 // Hook useQrScanner
 interface UseQrScannerProps {
@@ -184,7 +185,7 @@ const QrScanner = React.forwardRef<HTMLDivElement, QrScannerProps>(
 QrScanner.displayName = 'QrScanner'
 
 // Participant Check-in Preview
-export default function ParticipantCheckInPreview() {
+export default function CheckInPage() {
     const [result, setResult] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [isScanning, setIsScanning] = useState(true)
@@ -236,43 +237,45 @@ export default function ParticipantCheckInPreview() {
     }, [isScanning, stopScanning])
 
     return (
-        <div className='container mx-auto max-w-2xl p-4'>
-            <h1 className='mb-6 text-center text-3xl font-bold'>Participant Check-in Preview</h1>
+        <PageWrapper topBarProps={{ title: 'Check-in', backButton: true }}>
+            <div className='container mx-auto max-w-2xl p-4'>
+                <h1 className='mb-6 text-center text-3xl font-bold'>Participant Check-in Preview</h1>
 
-            <Card className='mb-6'>
-                <CardHeader>
-                    <CardTitle>QR Scanner</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <QrScanner
-                        onDecode={handleDecode}
-                        onError={handleError}
-                        startButtonText={isScanning ? 'Scanning...' : 'Start Scanning'}
-                        stopButtonText='Stop'
-                    />
-                    {isScanning ? (
-                        <p className='mt-2 text-center'>Time left: {timeLeft} seconds</p>
-                    ) : (
-                        <Button onClick={startScanning} className='mt-2 w-full'>
-                            Resume Scanning
-                        </Button>
-                    )}
-                </CardContent>
-                <CardFooter>
-                    {result && (
-                        <div className='flex items-center text-green-600'>
-                            <CheckCircle2 className='mr-2 h-5 w-5' />
-                            <span>Result: {result}</span>
-                        </div>
-                    )}
-                    {error && (
-                        <div className='flex items-center text-red-600'>
-                            <AlertCircle className='mr-2 h-5 w-5' />
-                            <span>Error: {error}</span>
-                        </div>
-                    )}
-                </CardFooter>
-            </Card>
-        </div>
+                <Card className='mb-6'>
+                    <CardHeader>
+                        <CardTitle>QR Scanner</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <QrScanner
+                            onDecode={handleDecode}
+                            onError={handleError}
+                            startButtonText={isScanning ? 'Scanning...' : 'Start Scanning'}
+                            stopButtonText='Stop'
+                        />
+                        {isScanning ? (
+                            <p className='mt-2 text-center'>Time left: {timeLeft} seconds</p>
+                        ) : (
+                            <Button onClick={startScanning} className='mt-2 w-full'>
+                                Resume Scanning
+                            </Button>
+                        )}
+                    </CardContent>
+                    <CardFooter>
+                        {result && (
+                            <div className='flex items-center text-green-600'>
+                                <CheckCircle2 className='mr-2 h-5 w-5' />
+                                <span>Result: {result}</span>
+                            </div>
+                        )}
+                        {error && (
+                            <div className='flex items-center text-red-600'>
+                                <AlertCircle className='mr-2 h-5 w-5' />
+                                <span>Error: {error}</span>
+                            </div>
+                        )}
+                    </CardFooter>
+                </Card>
+            </div>
+        </PageWrapper>
     )
 }

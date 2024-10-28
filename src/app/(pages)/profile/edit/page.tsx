@@ -2,9 +2,9 @@ import { getDbUser } from '@/app/_server/persistence/users/db/get-db-user'
 import ProfileForm from './_components/profile-form'
 import { verifyToken } from '@/app/_server/auth/privy'
 import { Tables } from '@/types/db'
-import MainContentWrapper from '@/app/_components/main-wrapper'
 import { Metadata } from 'next'
-import Title from '@/app/_components/title'
+import PageWrapper from '@/components/page-wrapper'
+import SkipButton from '@/components/skip-button'
 
 type UserInfo = Pick<Tables<'users'>, 'avatar' | 'displayName'> | null
 
@@ -55,8 +55,13 @@ export default async function EditProfilePage({ searchParams }: Props) {
 
     return (
         <>
-            <Title title={title} />
-            <ProfileForm userInfo={userInfo} />
+            <PageWrapper
+                topBarProps={{
+                    title,
+                    actionButton: isNewProfile ? <SkipButton /> : null,
+                }}>
+                <ProfileForm userInfo={userInfo} />
+            </PageWrapper>
         </>
     )
 }
