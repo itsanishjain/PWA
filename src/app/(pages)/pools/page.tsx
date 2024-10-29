@@ -6,7 +6,10 @@ import PageWrapper from '@/components/page-wrapper'
 
 export default async function PoolsPage() {
     return (
-        <PageWrapper>
+        <PageWrapper
+            topBarProps={{
+                backButton: false,
+            }}>
             <div className='flex flex-1 flex-col space-y-6'>
                 <Balance />
                 <NextUserPool />

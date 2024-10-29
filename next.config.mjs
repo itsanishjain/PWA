@@ -18,8 +18,6 @@ const baseConfig = {
     reactStrictMode: true,
     rewrites: config.rewrites,
     webpack: config.webpack,
-    // Ignore development packages
-    ignoredPackages: ['vitest', '@testing-library/*', 'typescript', '@types/*', 'eslint*', 'prettier'],
 
     generateBuildId: () => execSync('git rev-parse HEAD').toString().trim(),
 }
