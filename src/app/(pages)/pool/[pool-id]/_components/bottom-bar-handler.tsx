@@ -16,6 +16,7 @@ import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 import HybridRegistration from './terms-acceptance-dialog'
 import { addParticipantToPool } from '../../new/actions'
 import { MoonpayConfig, useFundWallet } from '@privy-io/react-auth'
+import { useOnRamp } from '@/app/_client/hooks/use-onramp'
 
 type ButtonConfig = {
     label: string
@@ -74,25 +75,16 @@ export default function BottomBarHandler({
         },
     })
 
-    const handleOnRamp = async () => {
-        if (!address) {
-            console.error('Cannot initiate onramp, user address not found')
-            return
-        }
+    const { handleOnRamp, isReady } = useOnRamp()
 
-        // Limited to moonpay for now
-        const fundWalletConfig: MoonpayConfig = {
-            currencyCode: 'USDC_BASE',
-            quoteCurrencyAmount: Number(poolPrice),
-            paymentMethod: 'credit_debit_card',
-            uiConfig: { accentColor: '#5472E9' },
+    const handleOnRampClick = async () => {
+        const success = await handleOnRamp(poolPrice)
+        if (success) {
+            resetJoinPoolProcess()
+            setIsLoading(false)
+            updateBottomBarContent()
+            router.refresh()
         }
-        await fundWallet(address, { config: fundWalletConfig })
-
-        resetJoinPoolProcess()
-        setIsLoading(false)
-        updateBottomBarContent()
-        router.refresh()
     }
 
     const {
@@ -107,28 +99,22 @@ export default function BottomBarHandler({
         isConfirming,
         resetConfirmation,
         isCancelled,
-    } = usePoolActions(
-        poolId,
-        poolPrice,
-        tokenDecimals,
-        handleOnRamp, // () => setOpenOnRampDialog(true),
-        async () => {
-            try {
-                if (address === undefined) {
-                    console.log('user address not found')
-                    return
-                }
-                // Asumiendo que tienes acceso a poolId y userAddress
-                const success = await addParticipantToPool(poolId, address)
-                if (success) {
-                    // Manejar el éxito (por ejemplo, actualizar la UI)
-                }
-            } catch (error) {
-                console.error('Error joining pool:', error)
-                // Manejar el error (por ejemplo, mostrar un mensaje al usuario)
+    } = usePoolActions(poolId, poolPrice, tokenDecimals, handleOnRampClick, async () => {
+        try {
+            if (address === undefined) {
+                console.log('user address not found')
+                return
             }
-        },
-    )
+            // Asumiendo que tienes acceso a poolId y userAddress
+            const success = await addParticipantToPool(poolId, address)
+            if (success) {
+                // Manejar el éxito (por ejemplo, actualizar la UI)
+            }
+        } catch (error) {
+            console.error('Error joining pool:', error)
+            // Manejar el error (por ejemplo, mostrar un mensaje al usuario)
+        }
+    })
 
     const handleViewTicket = useCallback(() => {
         router.push(`/pool/${poolId}/ticket`)

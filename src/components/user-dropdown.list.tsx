@@ -11,6 +11,7 @@ import { MoonpayConfig, useFundWallet } from '@privy-io/react-auth'
 import { useAccount } from 'wagmi'
 import { useAuth } from '@/app/_client/hooks/use-auth'
 import { useRouter } from 'next/navigation'
+import { useOnRamp } from '@/app/_client/hooks/use-onramp'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.
@@ -37,7 +38,7 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
     const { address } = useAccount()
     const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
     const dropdownListRef = useRef<HTMLDivElement | null>(null)
-    // const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
+    const { handleOnRamp, isReady } = useOnRamp()
 
     /**
      * Handles the click event on the 'Disconnect' dropdown item.
@@ -55,21 +56,15 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
     }
 
     const handleDepositClick = async () => {
-        // setOpenOnRampDialog(true)
-
-        if (!address) {
-            console.error('Cannot initiate onramp, user address not found')
+        if (!isReady) {
+            toast.error('Please wait while connecting...')
             return
         }
 
-        // Limited to moonpay for now
-        const fundWalletConfig: MoonpayConfig = {
-            currencyCode: 'USDC_BASE',
-            quoteCurrencyAmount: 10,
-            paymentMethod: 'credit_debit_card',
-            uiConfig: { accentColor: '#5472E9' },
+        const success = await handleOnRamp()
+        if (success) {
+            setOpen(false)
         }
-        await fundWallet(address, { config: fundWalletConfig })
     }
 
     /**
@@ -131,7 +126,6 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
                     <UserDropdownItem {...item} />
                 </motion.div>
             ))}
-            {/* <OnRampDialog open={openOnRampDialog} setOpen={setOpenOnRampDialog} /> */}
         </motion.div>
     )
 }
