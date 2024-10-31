@@ -10,6 +10,7 @@ import { dropdownItemsConfig } from './user-dropdown.list.config'
 import { MoonpayConfig, useFundWallet } from '@privy-io/react-auth'
 import { useAccount } from 'wagmi'
 import { useAuth } from '@/app/_client/hooks/use-auth'
+import { useRouter } from 'next/navigation'
 
 /**
  * Variants for the dropdown menu animation using framer-motion.
@@ -42,11 +43,13 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
      * Handles the click event on the 'Disconnect' dropdown item.
      */
     const handleLogoutClick = async () => {
-        setOpen(false)
         try {
+            console.log('[user-dropdown] logging out')
+            setOpen(false)
             await logout()
             toast.success('Disconnected successfully')
-        } catch {
+        } catch (error) {
+            console.error('[user-dropdown] logout error:', error)
             toast.error('Failed to log out')
         }
     }

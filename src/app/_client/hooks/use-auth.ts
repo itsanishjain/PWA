@@ -37,7 +37,7 @@ export function useAuth() {
         },
     })
 
-    const { logout } = useLogout({
+    const { logout: privyLogout } = useLogout({
         onSuccess: () => {
             console.log('[use-auth] logout success')
             queryClient.invalidateQueries({ queryKey: ['userAdminStatus'] })
@@ -45,9 +45,22 @@ export function useAuth() {
                 console.log('[use-auth] disconnecting connectors', connectors)
                 disconnect()
             }
-            router.replace('/')
         },
     })
+
+    // Create a wrapper function that handles both logout and navigation
+    const handleLogout = async () => {
+        try {
+            await privyLogout()
+            console.log('[use-auth] navigation after logout')
+            router.replace('/')
+            router.refresh()
+            return true
+        } catch (error) {
+            console.error('[use-auth] logout error:', error)
+            throw error
+        }
+    }
 
     const { login } = useLogin({
         async onComplete(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount) {
@@ -115,5 +128,10 @@ export function useAuth() {
 
     const { ready, authenticated } = usePrivy()
 
-    return { login, logout, authenticated: ready && authenticated, ready }
+    return {
+        login,
+        logout: handleLogout,
+        authenticated: ready && authenticated,
+        ready,
+    }
 }
