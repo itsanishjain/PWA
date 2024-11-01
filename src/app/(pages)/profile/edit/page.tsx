@@ -1,6 +1,6 @@
 import { getDbUser } from '@/app/_server/persistence/users/db/get-db-user'
 import ProfileForm from './_components/profile-form'
-import { privy } from '@/app/_server/auth/privy'
+import { privy, verifyToken } from '@/app/_server/auth/privy'
 import { Tables } from '@/types/db'
 import { Metadata } from 'next'
 import PageWrapper from '@/components/page-wrapper'
@@ -11,19 +11,12 @@ import { redirect } from 'next/navigation'
 type UserInfo = Pick<Tables<'users'>, 'avatar' | 'displayName'> | null
 
 export default async function EditProfilePage({ searchParams }: { searchParams: { new?: string } }) {
-    const accessToken = cookies().get('privy-token')?.value
-
-    if (!accessToken) {
-        redirect('/pools')
-    }
-
     try {
-        const user = await privy.getUser({ idToken: accessToken })
+        const user = await verifyToken()
 
-        if (!user?.id) {
+        if (!user) {
             redirect('/pools')
         }
-
         const isNewProfile = searchParams.new !== undefined
         const title = isNewProfile ? 'Create a Profile' : 'Edit Profile'
 
@@ -42,6 +35,7 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
             </PageWrapper>
         )
     } catch (error) {
-        throw new Error('Failed to load profile')
+        console.error('Failed to load profile', error)
+        redirect('/pools')
     }
 }
