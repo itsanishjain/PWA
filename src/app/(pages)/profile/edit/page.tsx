@@ -30,6 +30,7 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
                 topBarProps={{
                     title,
                     actionButton: isNewProfile ? <SkipButton /> : null,
+                    backButton: true,
                 }}>
                 <ProfileForm userInfo={userInfo} />
             </PageWrapper>
