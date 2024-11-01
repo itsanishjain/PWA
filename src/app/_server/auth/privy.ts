@@ -20,19 +20,33 @@ export const getPrivyVerificationKey = async () => {
 }
 
 export const verifyToken = async (): Promise<User | undefined> => {
-    const accessToken = cookies().get('privy-token')?.value
-    if (!accessToken) return undefined
-
-    const privyVerificationKey = await getPrivyVerificationKey()
-    if (!privyVerificationKey) return undefined
-
     try {
-        const verifiedClaims = await privy.verifyAuthToken(accessToken, privyVerificationKey)
-        if (!verifiedClaims?.userId) return undefined
+        // 1. Get the token from the cookies
+        const accessToken = cookies().get('privy-token')?.value
+        if (!accessToken) {
+            console.log('No privy-token cookie found')
+            return undefined
+        }
 
-        const user = await privy.getUser({ idToken: accessToken })
+        // 2. Get the verification key
+        const privyVerificationKey = await getPrivyVerificationKey()
+        if (!privyVerificationKey) {
+            console.log('No verification key available')
+            return undefined
+        }
+
+        // 3. Verify the token with privy.verifyAuthToken
+        const verifiedClaims = await privy.verifyAuthToken(accessToken, privyVerificationKey)
+        if (!verifiedClaims?.userId) {
+            console.log('Invalid token claims')
+            return undefined
+        }
+
+        // 4. Get the user using the verified token
+        const user = await privy.getUser(verifiedClaims.userId)
         return user
-    } catch {
+    } catch (error) {
+        console.error('Token verification failed:', error)
         return undefined
     }
 }
