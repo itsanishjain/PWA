@@ -26,6 +26,7 @@ export const useUserInfo = () => {
             return {
                 avatar: data?.avatar ?? avatarFallback,
                 displayName: data?.displayName,
+                address,
             }
         },
     })
