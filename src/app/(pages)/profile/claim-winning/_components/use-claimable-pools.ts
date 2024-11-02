@@ -1,15 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchClaimablePools } from './fetch-claimable-pools'
 import { getConfig } from '@/app/_client/providers/configs/wagmi.config'
+import { useUserInfo } from '@/hooks/use-user-info'
 
-export const useClaimablePools = (address: string) => {
+export const useClaimablePools = () => {
+    const { data: user } = useUserInfo()
     const {
         data: rawClaimablePools,
-        isLoading,
+        isPending,
         error,
     } = useQuery({
-        queryKey: ['claimablePools', address, getConfig().state.chainId],
+        queryKey: ['claimablePools', user?.address || '0x', getConfig().state.chainId],
         queryFn: fetchClaimablePools,
+        enabled: Boolean(user?.address),
     })
 
     const claimablePools = rawClaimablePools
@@ -19,5 +22,5 @@ export const useClaimablePools = (address: string) => {
           ]
         : undefined
 
-    return { claimablePools, isLoading, error }
+    return { claimablePools, isPending, error }
 }

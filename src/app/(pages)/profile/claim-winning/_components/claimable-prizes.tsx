@@ -4,7 +4,6 @@ import { Button } from '@/app/_components/ui/button'
 import { useEffect } from 'react'
 import type { Address } from 'viem'
 import { getAbiItem } from 'viem'
-import { useAccount } from 'wagmi'
 import Container from './container'
 import PoolCardRow from './pool-card-row'
 import SectionContent from './section-content'
@@ -14,19 +13,24 @@ import { useAppStore } from '@/app/_client/providers/app-store.provider'
 import useTransactions from '@/app/_client/hooks/use-transactions'
 import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 import { poolAbi } from '@/types/contracts'
+import { useUserInfo } from '@/hooks/use-user-info'
+import { Loader2Icon } from 'lucide-react'
 
 export default function ClaimablePrizesList() {
     const setBottomBarContent = useAppStore(state => state.setBottomBarContent)
-    const { address } = useAccount()
-    const { claimablePools, isLoading } = useClaimablePools(address as Address)
+    const { claimablePools, isPending } = useClaimablePools()
     const { executeTransactions } = useTransactions()
+    const { data: user } = useUserInfo()
 
     const poolIdsToClaimFrom = claimablePools?.[0] || []
 
     const onClaimFromPoolsButtonClicked = () => {
         if (!claimablePools || poolIdsToClaimFrom.length === 0) return
 
-        const walletAddresses = Array(poolIdsToClaimFrom.length).fill(address as Address)
+        const userAddress = user?.address as Address | undefined
+        if (!userAddress) return
+
+        const walletAddresses = poolIdsToClaimFrom.map(() => userAddress)
 
         const ClaimWinningsFunction = getAbiItem({
             abi: poolAbi,
@@ -60,8 +64,12 @@ export default function ClaimablePrizesList() {
         }
     }, [claimablePools])
 
-    if (isLoading) {
-        return <div className='flex-center p-6'>Loading...</div>
+    if (isPending) {
+        return (
+            <div className='flex-center p-6'>
+                <Loader2Icon className='mr-2 h-4 w-4 animate-spin' />
+            </div>
+        )
     }
 
     if (!claimablePools || poolIdsToClaimFrom.length === 0) {

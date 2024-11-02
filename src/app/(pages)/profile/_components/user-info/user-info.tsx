@@ -11,7 +11,7 @@ import { explorerUrl } from '@/app/_server/blockchain/server-config'
 
 export default function UserInfo() {
     const { data: userInfo, isLoading } = useUserInfo()
-    const { address } = useAccount()
+    const address = userInfo?.address
     const truncatedAddress = address?.slice(0, 6) + '...' + address?.slice(-4)
 
     return (
