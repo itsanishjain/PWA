@@ -8,14 +8,12 @@ import { useAppStore } from '@/app/_client/providers/app-store.provider'
 import { POOLSTATUS } from '@/app/(pages)/pool/[pool-id]/_lib/definitions'
 import { usePoolActions } from '@/app/_client/hooks/use-pool-actions'
 import { useRouter } from 'next/navigation'
-// import OnRampDialog from '@/app/(pages)/profile/_components/onramps/onramp.dialog'
 import { Loader2 } from 'lucide-react'
 import { useAccount, useReadContract } from 'wagmi'
 import { getAbiItem } from 'viem'
 import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 import HybridRegistration from './terms-acceptance-dialog'
 import { addParticipantToPool } from '../../new/actions'
-import { MoonpayConfig, useFundWallet } from '@privy-io/react-auth'
 import { useOnRamp } from '@/app/_client/hooks/use-onramp'
 
 type ButtonConfig = {
@@ -49,7 +47,6 @@ export default function BottomBarHandler({
     requiredAcceptance,
     termsUrl,
 }: BottomBarHandlerProps) {
-    // const [openOnRampDialog, setOpenOnRampDialog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [transactionProcessed, setTransactionProcessed] = useState(false)
     const updateBottomBarContentRef = useRef<NodeJS.Timeout | null>(null)
@@ -58,7 +55,6 @@ export default function BottomBarHandler({
     const setTransactionInProgress = useAppStore(state => state.setTransactionInProgress)
 
     const { address } = useAccount() as { address: Address | undefined }
-    const { fundWallet } = useFundWallet()
 
     const { data: isParticipant, isLoading: isParticipantLoading } = useReadContract({
         abi: [
@@ -75,7 +71,7 @@ export default function BottomBarHandler({
         },
     })
 
-    const { handleOnRamp, isReady } = useOnRamp()
+    const { handleOnRamp } = useOnRamp()
 
     const handleOnRampClick = async () => {
         const success = await handleOnRamp(poolPrice)
@@ -105,14 +101,13 @@ export default function BottomBarHandler({
                 console.log('user address not found')
                 return
             }
-            // Asumiendo que tienes acceso a poolId y userAddress
             const success = await addParticipantToPool(poolId, address)
             if (success) {
-                // Manejar el éxito (por ejemplo, actualizar la UI)
+                // TODO: handle success, revalidate
             }
         } catch (error) {
             console.error('Error joining pool:', error)
-            // Manejar el error (por ejemplo, mostrar un mensaje al usuario)
+            // TODO: handle error
         }
     })
 
@@ -275,17 +270,8 @@ export default function BottomBarHandler({
         }
     }, [isCancelled, updateBottomBarContent])
 
-    // const handleOnRampDialogClose = useCallback(() => {
-    //     setOpenOnRampDialog(false)
-    //     resetJoinPoolProcess()
-    //     setIsLoading(false)
-    //     updateBottomBarContent()
-    //     router.refresh()
-    // }, [resetJoinPoolProcess, updateBottomBarContent, router])
-
     return (
         <>
-            {/* <OnRampDialog open={openOnRampDialog} setOpen={handleOnRampDialogClose} amount={poolPrice.toString()} /> */}
             {requiredAcceptance && (
                 <HybridRegistration
                     open={showTermsDialog}

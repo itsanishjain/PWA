@@ -38,7 +38,7 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
     const { address } = useAccount()
     const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
     const dropdownListRef = useRef<HTMLDivElement | null>(null)
-    const { handleOnRamp, isReady } = useOnRamp()
+    const { handleOnRamp } = useOnRamp()
 
     /**
      * Handles the click event on the 'Disconnect' dropdown item.
@@ -56,11 +56,6 @@ const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setO
     }
 
     const handleDepositClick = async () => {
-        if (!isReady) {
-            toast.error('Please wait while connecting...')
-            return
-        }
-
         const success = await handleOnRamp()
         if (success) {
             setOpen(false)

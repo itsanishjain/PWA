@@ -70,7 +70,16 @@ export default {
                 // 'rainbow', 'wallet_connect'
             ],
         },
-        // fiatOnRamp: { useSandbox: true },
+        fundingMethodConfig: {
+            moonpay: {
+                paymentMethod: 'credit_debit_card',
+                uiConfig: {
+                    accentColor: '#5472E9',
+                    theme: 'light',
+                },
+                useSandbox: process.env.NODE_ENV === 'development',
+            },
+        },
         // loginMethods: []
     },
 } satisfies Omit<PrivyProviderProps, 'children'>
