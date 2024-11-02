@@ -12,8 +12,8 @@ export function getPoolDateOverride(poolId: string | number): DateOverride | nul
     return poolId?.toString() === '27' ? POOL_27_DATES : null
 }
 
-console.log('Pool 27 override dates:', {
-    ...POOL_27_DATES,
-    startDateReadable: new Date(POOL_27_DATES.startDate * 1000).toISOString(),
-    endDateReadable: new Date(POOL_27_DATES.endDate * 1000).toISOString(),
-})
+// console.log('Pool 27 override dates:', {
+//     ...POOL_27_DATES,
+//     startDateReadable: new Date(POOL_27_DATES.startDate * 1000).toISOString(),
+//     endDateReadable: new Date(POOL_27_DATES.endDate * 1000).toISOString(),
+// })
