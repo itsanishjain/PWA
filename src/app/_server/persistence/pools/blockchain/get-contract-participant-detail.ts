@@ -11,7 +11,7 @@ const GetParticipantDetail = getAbiItem({
 })
 
 export interface ParticipantDetail {
-    deposit: bigint
+    deposit: string
     refunded: boolean
 }
 
@@ -40,7 +40,7 @@ export default async function getContractParticipantDetail(
         const { deposit, refunded } = participantInfo
 
         return {
-            deposit,
+            deposit: deposit.toString(),
             refunded,
         }
     } catch (error) {

@@ -11,8 +11,8 @@ const GetWinnerDetail = getAbiItem({
 })
 
 export interface WinnerDetail {
-    amountWon: bigint
-    amountClaimed: bigint
+    amountWon: string
+    amountClaimed: string
     claimed: boolean
     forfeited: boolean
 }
@@ -36,8 +36,8 @@ export default async function getContractWinnerDetail(
         const { amountWon, amountClaimed, claimed, forfeited } = winnerInfo
 
         return {
-            amountWon,
-            amountClaimed,
+            amountWon: amountWon.toString(),
+            amountClaimed: amountClaimed.toString(),
             claimed,
             forfeited,
         }

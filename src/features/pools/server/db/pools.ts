@@ -84,20 +84,19 @@ export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: s
             }
             const claimableAmountBigInt = winnerDetail?.forfeited
                 ? BigInt(0)
-                : winnerDetail?.amountWon - winnerDetail?.amountClaimed
+                : winnerDetail.amountWon - winnerDetail.amountClaimed
 
             claimableAmount = formatUnits(claimableAmountBigInt, contractInfo.tokenDecimals)
         }
     }
 
-    const price = Number(formatUnits(contractInfo.price, contractInfo.tokenDecimals))
-    const balance = Number(formatUnits(contractInfo.balance, contractInfo.tokenDecimals))
+    const price = Number(formatUnits(BigInt(contractInfo.price), contractInfo.tokenDecimals))
+    const balance = Number(formatUnits(BigInt(contractInfo.balance), contractInfo.tokenDecimals))
 
     const dateOverride = getPoolDateOverride(poolId)
     const poolStartDate = fromUnixTime(dateOverride?.startDate ?? contractInfo.startDate)
     const poolEndDate = fromUnixTime(dateOverride?.endDate ?? contractInfo.endDate)
 
-    // Validar el objeto antes de retornarlo
     const poolDetails = {
         hostName: hostInfo.users?.displayName,
         contractId: poolId,
@@ -154,8 +153,8 @@ export async function getContractPoolInfo(poolId: string) {
         name: poolDetail.poolName,
         startDate: poolDetail.timeStart,
         endDate: poolDetail.timeEnd,
-        price: poolDetail.depositAmountPerPerson,
-        balance: poolBalance.balance,
+        price: poolDetail.depositAmountPerPerson.toString(),
+        balance: poolBalance.balance.toString(),
         status: poolStatus,
         participants,
         tokenSymbol,

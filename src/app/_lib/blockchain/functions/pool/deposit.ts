@@ -9,11 +9,7 @@ const DepositFunction = getAbiItem({
 })
 
 type DepositInputs = {
-    [K in (typeof DepositFunction)['inputs'][number]['name']]: K extends 'poolId'
-        ? bigint
-        : K extends 'amount'
-          ? bigint
-          : never
+    [K in (typeof DepositFunction)['inputs'][number]['name']]: K extends 'poolId' | 'amount' ? string : never
 }
 
 export function deposit({ poolId, amount }: DepositInputs): ContractCall {
@@ -21,6 +17,6 @@ export function deposit({ poolId, amount }: DepositInputs): ContractCall {
         address: currentPoolAddress,
         abi: [DepositFunction],
         functionName: DepositFunction.name,
-        args: [poolId, amount],
+        args: [BigInt(poolId), BigInt(amount)],
     }
 }

@@ -13,7 +13,7 @@ type ApproveInputs = {
     [K in (typeof ApproveFunction)['inputs'][number]['name']]: K extends 'spender'
         ? Address
         : K extends 'amount'
-          ? bigint
+          ? string
           : never
 }
 
@@ -22,6 +22,6 @@ export function approve({ spender, amount }: ApproveInputs): ContractCall {
         address: currentTokenAddress,
         abi: [ApproveFunction],
         functionName: 'approve',
-        args: [spender, amount],
+        args: [spender, BigInt(amount)],
     }
 }

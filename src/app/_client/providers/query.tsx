@@ -2,9 +2,17 @@
 // QueryClientProvider relies on useContext under the hood. It needs to be a client component.
 
 import { isServer, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { hashFn } from '@wagmi/core/query'
 
 function makeQueryClient() {
-    return new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } }) // 1 minute
+    return new QueryClient({
+        defaultOptions: {
+            queries: {
+                staleTime: 60_000, // 1 minute
+                queryKeyHashFn: hashFn,
+            },
+        },
+    })
 }
 
 let browserQueryClient: QueryClient | undefined = undefined

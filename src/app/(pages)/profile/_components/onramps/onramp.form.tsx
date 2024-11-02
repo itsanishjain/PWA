@@ -8,17 +8,12 @@ import { toast } from 'sonner'
 
 interface OnRampFormProps {
     className?: string
-    balance?: bigint
-    decimalPlaces?: bigint
+    balance?: string
+    decimalPlaces?: number
 }
 const OnRampForm = ({ className, balance, decimalPlaces }: OnRampFormProps) => {
     const [, setCopied] = useState(false)
     const [pageUrl, setPageUrl] = useState('')
-
-    // const walletTokenBalance = useBalance({
-    //     address: wallets[0]?.address as HexString,
-    //     token: poolDetails?.poolDetailFromSC?.[4] as HexString,
-    // })
 
     useEffect(() => {
         setPageUrl(window?.location?.href)
@@ -46,7 +41,7 @@ const OnRampForm = ({ className, balance, decimalPlaces }: OnRampFormProps) => {
                 <div className='flex flex-row justify-between text-sm'>
                     <span className='font-medium'>Current Pool balance:</span>
                     <span className='font-medium'>
-                        ${((balance ?? BigInt(0)) / BigInt(Math.pow(10, Number(decimalPlaces ?? 18)))).toString()} USDC
+                        ${(BigInt(balance || '0') / BigInt(Math.pow(10, Number(decimalPlaces ?? 18)))).toString()} USDC
                     </span>
                 </div>
                 <Divider className='my-0 h-0 py-0' />

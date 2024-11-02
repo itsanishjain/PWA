@@ -15,7 +15,7 @@ interface PoolDetailsClaimableWinningsProps {
     title?: string
     description?: string
     tokenSymbol: string
-    poolId: bigint
+    poolId: string
 }
 export default function PoolDetailsClaimableWinnings({
     claimableAmount,

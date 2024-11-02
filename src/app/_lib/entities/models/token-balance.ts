@@ -1,1 +1,1 @@
-export type TokenBalance = { value: bigint; symbol: string; decimals: number; formatted: string }
+export type TokenBalance = { value: string; symbol: string; decimals: number; formatted: string }

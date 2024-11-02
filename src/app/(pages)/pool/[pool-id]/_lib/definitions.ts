@@ -21,7 +21,7 @@ const PoolDetailsDTOSchema = z.object({
     tokenSymbol: z.string(),
     tokenDecimals: z.number().int().nonnegative(),
     status: z.nativeEnum(POOLSTATUS),
-    contractId: z.bigint(),
+    contractId: z.string(),
 
     // Database data
     imageUrl: z.string().url(),

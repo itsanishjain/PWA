@@ -8,7 +8,7 @@ export const isParticipant = async ({
     poolId,
 }: {
     address: Address
-    poolId: bigint
+    poolId: string
 }): Promise<boolean | undefined> => {
     const publicClient = getPublicClient(serverConfig)
 
@@ -16,6 +16,6 @@ export const isParticipant = async ({
         abi: poolAbi,
         functionName: 'isParticipant',
         address: currentPoolAddress,
-        args: [address, poolId],
+        args: [address, BigInt(poolId)],
     })
 }

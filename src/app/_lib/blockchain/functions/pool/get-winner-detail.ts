@@ -4,7 +4,7 @@ import { poolAbi } from '@/types/contracts'
 import { getPublicClient } from '@wagmi/core'
 import { Address } from 'viem'
 
-export const getWinnerDetail = async ({ queryKey }: { queryKey: [string, bigint, string, number] }) => {
+export const getWinnerDetail = async ({ queryKey }: { queryKey: [string, string, string, number] }) => {
     const publicClient = getPublicClient(getConfig())
 
     const [_, poolId, address] = queryKey
@@ -13,7 +13,7 @@ export const getWinnerDetail = async ({ queryKey }: { queryKey: [string, bigint,
         abi: poolAbi,
         functionName: 'getWinnerDetail',
         address: currentPoolAddress,
-        args: [poolId, address as Address],
+        args: [BigInt(poolId), address as Address],
     })
 
     return { winnerDetailFromSC }
