@@ -16,7 +16,7 @@ async function checkAdminStatus(token: string): Promise<boolean> {
         const verifiedClaims = await privy.verifyAuthToken(token, privyVerificationKey)
         if (!verifiedClaims?.userId) return false
 
-        const user = await privy.getUser({ idToken: token })
+        const user = await privy.getUser(verifiedClaims.userId)
         if (!user?.wallet?.address) return false
 
         return (await hasRole(ADMIN_ROLE, user.wallet.address as Address)) ?? false

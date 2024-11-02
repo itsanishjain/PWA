@@ -6,6 +6,38 @@ import { getTokenDecimals, getTokenSymbol } from '@/lib/contract/token'
 import { fromUnixTime } from 'date-fns'
 import { Address, formatUnits } from 'viem'
 import { getPoolDateOverride } from '@/app/_lib/utils/get-pool-date-override'
+import { z } from 'zod'
+
+const PoolDetailsSchema = z.object({
+    hostName: z.string().nullable(),
+    contractId: z.string(),
+    claimableAmount: z.string(),
+    participants: z.array(
+        z.object({
+            name: z.string(),
+            avatarUrl: z.string(),
+            address: z.string(),
+        }),
+    ),
+    goal: z.number(),
+    name: z.string(),
+    startDate: z.date(),
+    endDate: z.date(),
+    numParticipants: z.number(),
+    price: z.number(),
+    tokenSymbol: z.string(),
+    tokenDecimals: z.number(),
+    status: z.number(),
+    imageUrl: z.string().nullable(),
+    winnerTitle: z.string().optional(),
+    softCap: z.number().nullable(),
+    description: z.string().nullable(),
+    termsUrl: z.string().optional(),
+    requiredAcceptance: z.boolean().nullable(),
+    poolBalance: z.number(),
+})
+
+type PoolDetails = z.infer<typeof PoolDetailsSchema>
 
 export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: string[] }) {
     const address = await getUserAddressAction()
@@ -41,7 +73,7 @@ export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: s
         return null
     }
 
-    let claimableAmount: bigint = BigInt(0)
+    let claimableAmount = '0'
 
     if (address && contractInfo.participants.includes(address)) {
         if (contractInfo.status === POOLSTATUS.ENDED) {
@@ -50,7 +82,11 @@ export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: s
                 amountClaimed: BigInt(0),
                 forfeited: false,
             }
-            claimableAmount = winnerDetail?.forfeited ? 0n : winnerDetail?.amountWon - winnerDetail?.amountClaimed
+            const claimableAmountBigInt = winnerDetail?.forfeited
+                ? BigInt(0)
+                : winnerDetail?.amountWon - winnerDetail?.amountClaimed
+
+            claimableAmount = formatUnits(claimableAmountBigInt, contractInfo.tokenDecimals)
         }
     }
 
@@ -61,10 +97,11 @@ export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: s
     const poolStartDate = fromUnixTime(dateOverride?.startDate ?? contractInfo.startDate)
     const poolEndDate = fromUnixTime(dateOverride?.endDate ?? contractInfo.endDate)
 
-    return {
+    // Validar el objeto antes de retornarlo
+    const poolDetails = {
         hostName: hostInfo.users?.displayName,
         contractId: poolId,
-        claimableAmount: formatUnits(claimableAmount, contractInfo.tokenDecimals),
+        claimableAmount,
         participants: usersInfo.map(user => ({
             name: user.displayName || '',
             avatarUrl: user.avatar || '',
@@ -86,6 +123,13 @@ export async function getPoolDetailsById({ queryKey: [, poolId] }: { queryKey: s
         termsUrl: poolInfo.termsURL || undefined,
         requiredAcceptance: poolInfo.required_acceptance,
         poolBalance: balance,
+    }
+
+    try {
+        return PoolDetailsSchema.parse(poolDetails)
+    } catch (error) {
+        console.error('Validation error:', error)
+        throw error
     }
 }
 

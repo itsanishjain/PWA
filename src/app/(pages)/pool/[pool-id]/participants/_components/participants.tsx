@@ -7,7 +7,7 @@ import { QrCodeIcon, SearchIcon } from 'lucide-react'
 import { Input } from '@/app/_components/ui/input'
 import ParticipantCard from './participantRow'
 import { useParticipants } from '@/hooks/use-participants'
-import PoolDetailsLoader from '../../loading'
+// import PoolDetailsLoader from '../../loading'
 
 interface PoolParticipantsProps {
     poolId: string
@@ -31,7 +31,7 @@ const Participants = ({ poolId, isAdmin }: PoolParticipantsProps) => {
         setQuery(e.target.value)
     }
 
-    if (isPending) return <PoolDetailsLoader />
+    // if (isPending) return <PoolDetailsLoader />
     if (error) return <div>Error loading participants</div>
 
     return (

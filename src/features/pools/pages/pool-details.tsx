@@ -7,7 +7,7 @@ import PoolDetailsBannerButtons from '@/features/pools/components/pool-details/b
 import { getPoolDetailsById } from '@/features/pools/server/db/pools'
 import { getUserAdminStatusActionWithCookie } from '@/features/users/actions'
 
-import PoolDetailsLoader from '@/app/(pages)/pool/[pool-id]/loading'
+// import PoolDetailsLoader from '@/app/(pages)/pool/[pool-id]/loading'
 import { POOLSTATUS } from '@/app/(pages)/pool/[pool-id]/_lib/definitions'
 
 import PoolDetailsHeading from '@/app/(pages)/pool/[pool-id]/_components/pool-details-heading'
@@ -35,7 +35,7 @@ export default function PoolDetails({ poolId }: { poolId: string }) {
         queryFn: () => getUserAdminStatusActionWithCookie(),
     })
 
-    if (isPoolPending || isUserInfoPending) return <PoolDetailsLoader />
+    // if (isPoolPending || isUserInfoPending) return <PoolDetailsLoader />
     if (isPoolError || isUserInfoError) return <div>Error loading pool details</div>
     if (!pool) return <div>Pool not found</div>
 
@@ -49,7 +49,7 @@ export default function PoolDetails({ poolId }: { poolId: string }) {
             <PoolDetailsCard>
                 <PoolDetailsBanner
                     name={pool.name}
-                    imageUrl={pool.imageUrl}
+                    imageUrl={pool.imageUrl || ''}
                     buttons={<PoolDetailsBannerButtons isAdmin={isAdmin} />}
                     // status={<PoolDetailsBannerStatus />}
                 />
@@ -75,13 +75,13 @@ export default function PoolDetails({ poolId }: { poolId: string }) {
                     <PoolDetailsParticipants
                         poolId={pool.contractId}
                         numParticipants={pool.numParticipants}
-                        avatarUrls={avatarUrls}
+                        avatarUrls={avatarUrls as { url?: string; address: `0x${string}` }[]}
                     />
                 </div>
             </PoolDetailsCard>
             <PoolDetailsCard className='space-y-6 py-6'>
                 <PoolDetailsInfo
-                    description={pool.description}
+                    description={pool.description || ''}
                     price={pool.price}
                     tokenSymbol={pool.tokenSymbol}
                     termsUrl={pool.termsUrl || ''}
@@ -90,12 +90,12 @@ export default function PoolDetails({ poolId }: { poolId: string }) {
 
             <BottomBarHandler
                 poolId={pool.contractId}
-                isAdmin={isAdmin}
+                isAdmin={isAdmin || false}
                 poolStatus={pool.status}
                 poolPrice={pool.price}
                 poolTokenSymbol={pool.tokenSymbol}
                 tokenDecimals={pool.tokenDecimals}
-                requiredAcceptance={pool.requiredAcceptance}
+                requiredAcceptance={pool.requiredAcceptance || false}
                 termsUrl={pool.termsUrl || ''}
             />
         </div>
