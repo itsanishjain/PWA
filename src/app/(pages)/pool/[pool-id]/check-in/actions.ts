@@ -26,7 +26,7 @@ export async function checkInAction(poolId: string, address: Address) {
         console.log('caller is admin')
 
         // Ensure the user with the given address is registered in the pool
-        const isParticipant = await isParticipantUseCase(address, BigInt(poolId))
+        const isParticipant = await isParticipantUseCase(address, poolId)
 
         if (!isParticipant) {
             throw new Error('User is not a participant')

@@ -132,8 +132,8 @@ export function usePoolActions(
             toast('Joining pool...')
 
             void executeTransactions([
-                ...(bigIntPrice > 0 ? [approve({ spender: currentPoolAddress, amount: bigIntPrice })] : []),
-                deposit({ poolId: BigInt(poolId), amount: bigIntPrice }),
+                ...(bigIntPrice > 0 ? [approve({ spender: currentPoolAddress, amount: bigIntPrice.toString() })] : []),
+                deposit({ poolId, amount: bigIntPrice.toString() }),
             ])
                 .then(() => {
                     onSuccessfulJoin()

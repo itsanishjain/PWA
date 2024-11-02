@@ -1,7 +1,6 @@
 import 'server-only'
 
 import { getBalance } from '@wagmi/core'
-import { baseSepolia } from '@wagmi/core/chains'
 import type { Address } from 'viem'
 import { currentPoolAddress, serverConfig } from '../../../blockchain/server-config'
 import { TokenBalance } from '@/app/_lib/entities/models/token-balance'
@@ -14,7 +13,7 @@ export async function getAddressBalance(address: string): Promise<TokenBalance |
         })
 
         return {
-            value: result.value,
+            value: result.value.toString(),
             symbol: result.symbol,
             decimals: result.decimals,
             formatted: result.formatted,

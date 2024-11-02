@@ -11,10 +11,12 @@ import { getAbiItem } from 'viem'
 import { useConfetti } from '@/hooks/use-confetti'
 import { poolAbi } from '@/types/contracts'
 import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
+import { useUserInfo } from '@/hooks/use-user-info'
 
 export default function ClaimablePrizes() {
-    const { address } = useAccount()
-    const { claimablePools, isLoading } = useClaimablePools(address as string)
+    const { data: user } = useUserInfo()
+    const address = user?.address
+    const { claimablePools, isPending } = useClaimablePools()
     const { executeTransactions } = useTransactions()
     const { startConfetti, ConfettiComponent } = useConfetti()
 
@@ -46,7 +48,7 @@ export default function ClaimablePrizes() {
         }
     }
 
-    if (isLoading) {
+    if (isPending) {
         return <div className='text-xs'>Loading claimable prizes...</div>
     }
 
@@ -60,7 +62,7 @@ export default function ClaimablePrizes() {
             <section className='detail_card flex w-full flex-col gap-[0.69rem] rounded-3xl p-6'>
                 <h1 className='w-full border-b pb-2 text-[0.6875rem] font-semibold'>Claimable Winnings</h1>
                 <div className='flex flex-col gap-4'>
-                    {claimablePools[0].map((poolId, index) => (
+                    {claimablePools[0].map((poolId, _index) => (
                         <PoolCardRow key={poolId.toString()} poolId={poolId.toString()} />
                     ))}
                 </div>
