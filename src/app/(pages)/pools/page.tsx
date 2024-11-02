@@ -4,7 +4,7 @@ import UpcomingPools from './_components/upcoming-pools'
 import RenderBottomBar from './_components/render-bottom-bar'
 import PageWrapper from '@/components/page-wrapper'
 
-export default async function PoolsPage() {
+export default function PoolsPage() {
     return (
         <PageWrapper
             topBarProps={{

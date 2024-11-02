@@ -8,7 +8,7 @@ type Props = {
     params: { 'pool-id': string }
 }
 
-export default async function PoolDetailsPage({ params: { 'pool-id': poolId } }: Props) {
+export default function PoolDetailsPage({ params: { 'pool-id': poolId } }: Props) {
     const queryClient = new QueryClient()
 
     queryClient.prefetchQuery({
