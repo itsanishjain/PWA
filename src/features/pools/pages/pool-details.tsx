@@ -15,6 +15,7 @@ import PoolDetailsProgress from '@/app/(pages)/pool/[pool-id]/_components/pool-d
 import PoolDetailsParticipants from '@/app/(pages)/pool/[pool-id]/_components/pool-details-participants'
 import PoolDetailsInfo from '@/app/(pages)/pool/[pool-id]/_components/pool-details-info'
 import BottomBarHandler from '@/app/(pages)/pool/[pool-id]/_components/bottom-bar-handler'
+import { Skeleton } from '@/app/_components/ui/skeleton'
 
 export default function PoolDetails({ poolId }: { poolId: string }) {
     const {
@@ -35,7 +36,31 @@ export default function PoolDetails({ poolId }: { poolId: string }) {
         queryFn: () => getUserAdminStatusActionWithCookie(),
     })
 
-    // if (isPoolPending || isUserInfoPending) return <PoolDetailsLoader />
+    if (isPoolPending || isUserInfoPending)
+        return (
+            <div className='flex flex-col space-y-3 bg-white p-2'>
+                <div className='detail_card rounded-[2.875rem] p-[1.12rem]'>
+                    <Skeleton className='detail_card_banner relative overflow-hidden' />
+                    <div className='mb-[1.81rem] mt-[0.81rem] flex flex-col gap-[0.38rem]'>
+                        <Skeleton className='h-12' />
+                        <Skeleton className='h-8' />
+                        <Skeleton className='h-4' />
+                    </div>
+                    <div className='detail_card rounded-[2.875rem] p-[1.12rem]'>
+                        <Skeleton className='h-16 rounded-full' />
+                    </div>
+                </div>
+                <div className='detail_card flex flex-1 rounded-[2.875rem] p-[1.12rem]'>
+                    <div className='grow space-y-3 rounded-[2.875rem]'>
+                        <div className='h-32 space-y-4'>
+                            <Skeleton className='h-4 w-full border-b-[0.5px] pb-2 text-xs font-semibold' />
+                            <Skeleton className='h-4 w-full border-b-[0.5px] pb-2 text-xs font-semibold' />
+                            <Skeleton className='h-4 w-full border-b-[0.5px] pb-2 text-xs font-semibold' />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
     if (isPoolError || isUserInfoError) return <div>Error loading pool details</div>
     if (!pool) return <div>Pool not found</div>
 
