@@ -6,7 +6,7 @@ export const getCspDirectives = () => ({
     'default-src': ["'self'"],
     'base-uri': ["'self'"],
     'frame-ancestors': ["'none'"],
-    'object-src': ["'none'"],
+    'object-src': ["'self'", 'data:'],
 
     // Script controls
     'script-src': [
@@ -35,6 +35,7 @@ export const getCspDirectives = () => ({
         'https://explorer-api.walletconnect.com',
         'https://pulse.walletconnect.org',
         'https://chain-proxy.wallet.coinbase.com',
+        'https://*.moonpay.com',
     ],
 
     // Content restrictions
