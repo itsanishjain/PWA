@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import TopBar, { TopBarProps } from './top-bar'
 
 type PageWrapperProps = {
