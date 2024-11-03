@@ -93,7 +93,7 @@ export default function useTransactions() {
 
     const executeCoinbaseTransactions = useCallback(
         async (contractCalls: ContractCall[]) => {
-            console.log('🔄 [useTransactions] Executing Coinbase transaction')
+            console.log('🔄 [useTransactions] Executing Coinbase transaction with calls:', contractCalls)
 
             if (transactionInProgressRef.current) {
                 console.log('⚠️ [useTransactions] Transaction already in progress')
@@ -104,6 +104,7 @@ export default function useTransactions() {
                 console.log('🔍 [useTransactions] Checking wallet state:', {
                     walletsReady,
                     hasWallet: Boolean(wallets[0]),
+                    walletAddress: wallets[0]?.address,
                 })
 
                 transactionInProgressRef.current = true
@@ -114,8 +115,13 @@ export default function useTransactions() {
                     throw new Error('Wallet not connected')
                 }
 
-                console.log('📝 [useTransactions] Submitting transaction to Coinbase')
-                await writeContractsAsync({
+                console.log('📝 [useTransactions] Submitting transaction to Coinbase with payload:', {
+                    contracts: contractCalls,
+                    chainId: base.id,
+                    paymasterUrl: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL,
+                })
+
+                const response = await writeContractsAsync({
                     contracts: contractCalls,
                     capabilities: {
                         paymasterService: {
@@ -124,7 +130,8 @@ export default function useTransactions() {
                     },
                     chainId: base.id,
                 })
-                console.log('✅ [useTransactions] Transaction submitted successfully')
+                console.log('✅ [useTransactions] Coinbase transaction response:', response)
+                setResult(prev => ({ ...prev, hash: response as `0x${string}` }))
             } catch (error) {
                 console.error('❌ [useTransactions] Coinbase transaction error:', error)
                 setResult(prev => ({
@@ -134,7 +141,7 @@ export default function useTransactions() {
                 }))
                 throw error
             } finally {
-                console.log('🔄 [useTransactions] Cleaning up transaction state')
+                console.log('🔄 [useTransactions] Cleaning up Coinbase transaction state')
                 transactionInProgressRef.current = false
                 setResult(prev => ({ ...prev, isLoading: false }))
             }

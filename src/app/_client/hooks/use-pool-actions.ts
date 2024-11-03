@@ -155,16 +155,23 @@ export function usePoolActions(
 
             await executeTransactions(transactions)
 
-            console.log('⏳ [usePoolActions] Waiting before calling onSuccessfulJoin')
-            setTimeout(() => {
-                console.log('✅ [usePoolActions] Calling onSuccessfulJoin')
-                onSuccessfulJoin()
-            }, 1000)
+            if (result.hash) {
+                console.log('⏳ [usePoolActions] Transaction submitted, waiting for confirmation')
+                toast.loading('Confirming transaction...')
+            }
         } catch (error) {
             console.error('❌ [usePoolActions] Transaction failed:', error)
             toast.error('Failed to join pool. Please try again.')
         }
     }
+
+    useEffect(() => {
+        if (isConfirmed) {
+            console.log('✅ [usePoolActions] Transaction confirmed, calling onSuccessfulJoin')
+            toast.success('Successfully joined pool!')
+            onSuccessfulJoin()
+        }
+    }, [isConfirmed, onSuccessfulJoin])
 
     const resetJoinPoolProcess = () => {
         console.log('🔄 [usePoolActions] Resetting join pool process')

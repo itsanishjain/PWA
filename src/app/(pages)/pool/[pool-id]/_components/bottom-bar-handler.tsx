@@ -61,13 +61,12 @@ export default function BottomBarHandler({
     const { data: user } = useUserInfo()
     const address = user?.address
 
-    const { data: isParticipant, isLoading: isParticipantLoading } = useReadContract({
-        abi: [
-            getAbiItem({
-                abi: poolAbi,
-                name: 'isParticipant',
-            }),
-        ],
+    const {
+        data: isParticipant,
+        isLoading: isParticipantLoading,
+        refetch: refetchParticipantStatus,
+    } = useReadContract({
+        abi: [getAbiItem({ abi: poolAbi, name: 'isParticipant' })],
         address: currentPoolAddress,
         functionName: 'isParticipant',
         args: [address || '0x', BigInt(poolId)],
@@ -76,13 +75,6 @@ export default function BottomBarHandler({
             refetchInterval: 5_000,
         },
     })
-
-    useEffect(() => {
-        console.log('👤 [BottomBarHandler] Participant status:', { isParticipant, isParticipantLoading })
-        if (isParticipant !== undefined) {
-            setLocalIsParticipant(isParticipant)
-        }
-    }, [isParticipant, isParticipantLoading])
 
     const { handleOnRamp } = useOnRamp()
 
@@ -109,18 +101,30 @@ export default function BottomBarHandler({
         resetConfirmation,
         isCancelled,
     } = usePoolActions(poolId, poolPrice, tokenDecimals, handleOnRampClick, async () => {
+        console.log('🎯 [BottomBarHandler] Executing onSuccessfulJoin callback')
         try {
             if (address === undefined) {
-                console.log('user address not found')
-                return
+                console.error('❌ [BottomBarHandler] User address not found')
+                throw new Error('User address not found')
             }
+            console.log('📝 [BottomBarHandler] Adding participant to pool:', { poolId, address })
             const success = await addParticipantToPool(poolId, address)
+            console.log('✅ [BottomBarHandler] Add participant result:', success)
+
             if (success) {
-                // TODO: handle success, revalidate
+                console.log('🔄 [BottomBarHandler] Participant added successfully, updating UI')
+                setLocalIsParticipant(true)
+                updateBottomBarContent()
+                router.refresh()
+            } else {
+                console.error('❌ [BottomBarHandler] Failed to add participant')
+                throw new Error('Failed to add participant')
             }
         } catch (error) {
-            console.error('Error joining pool:', error)
-            // TODO: handle error
+            console.error('❌ [BottomBarHandler] Error joining pool:', error)
+            setIsLoading(false)
+            setTransactionProcessed(false)
+            throw error
         }
     })
 
@@ -206,6 +210,7 @@ export default function BottomBarHandler({
         console.log('🔄 [BottomBarHandler] Updating bottom bar content:', {
             isParticipantLoading,
             isParticipant,
+            localIsParticipant,
             isAdmin,
             poolStatus,
         })
@@ -215,7 +220,7 @@ export default function BottomBarHandler({
         if (isParticipantLoading) {
             console.log('⏳ [BottomBarHandler] Loading participant status')
             content = <Button disabled>Loading...</Button>
-        } else if (isParticipant && !isAdmin && poolStatus !== POOLSTATUS.ENDED) {
+        } else if ((isParticipant || localIsParticipant) && !isAdmin && poolStatus !== POOLSTATUS.ENDED) {
             console.log('🎫 [BottomBarHandler] Showing view ticket button')
             content = renderButton({ label: 'View My Ticket', action: handleViewTicket }, 'view-ticket')
         } else {
@@ -229,18 +234,44 @@ export default function BottomBarHandler({
             }
         }
 
-        console.log('✅ [BottomBarHandler] Setting bottom bar content')
+        console.log('✅ [BottomBarHandler] Setting bottom bar content:', content)
         setBottomBarContent(content)
     }, [
         isParticipant,
         isParticipantLoading,
+        localIsParticipant,
         isAdmin,
         poolStatus,
         buttonConfig,
-        renderButton,
-        handleViewTicket,
         setBottomBarContent,
     ])
+
+    useEffect(() => {
+        console.log('👤 [BottomBarHandler] Participant status changed:', {
+            isParticipant,
+            isParticipantLoading,
+            localIsParticipant,
+        })
+        if (!isParticipantLoading && isParticipant !== undefined) {
+            setLocalIsParticipant(isParticipant)
+        }
+    }, [isParticipant, isParticipantLoading])
+
+    useEffect(() => {
+        console.log('✨ [BottomBarHandler] Confirmation status:', {
+            isConfirmed,
+            transactionProcessed,
+        })
+        if (isConfirmed && !transactionProcessed) {
+            console.log('🔄 [BottomBarHandler] Processing confirmed transaction')
+            setIsLoading(false)
+            setTransactionProcessed(true)
+            router.refresh()
+            resetConfirmation()
+            void refetchParticipantStatus()
+            updateBottomBarContent()
+        }
+    }, [isConfirmed, transactionProcessed, router, resetConfirmation, refetchParticipantStatus, updateBottomBarContent])
 
     useEffect(() => {
         console.log('🔄 [BottomBarHandler] Transaction status effect:', {
@@ -266,34 +297,18 @@ export default function BottomBarHandler({
     }, [ready, isParticipantLoading, updateBottomBarContent, setBottomBarContent, transactionProcessed])
 
     useEffect(() => {
-        console.log('✨ [BottomBarHandler] Confirmation status:', {
-            isConfirmed,
-            transactionProcessed,
-        })
-        if (isConfirmed && !transactionProcessed) {
-            router.refresh()
-            updateBottomBarContent()
-            resetConfirmation()
-            setIsLoading(false)
-            setTransactionProcessed(true)
-        }
-    }, [isConfirmed, updateBottomBarContent, router, resetConfirmation, transactionProcessed])
-
-    useEffect(() => {
         setTransactionInProgress(isPending || isConfirming)
     }, [setTransactionInProgress, isPending, isConfirming])
 
     useEffect(() => {
-        if (!isPending && !isConfirmed) {
+        console.log('🔄 [BottomBarHandler] Transaction status changed:', { isPending, isConfirming, isConfirmed })
+        if (!isPending && !isConfirming && !isConfirmed) {
+            console.log('🧹 [BottomBarHandler] Cleaning up transaction state')
             setIsLoading(false)
-        }
-    }, [isPending, isConfirmed])
-
-    useEffect(() => {
-        if (!isPending && !isConfirming) {
             setTransactionProcessed(false)
+            updateBottomBarContent()
         }
-    }, [isPending, isConfirming])
+    }, [isPending, isConfirming, isConfirmed])
 
     useEffect(() => {
         if (isCancelled) {
