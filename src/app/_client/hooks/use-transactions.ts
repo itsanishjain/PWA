@@ -15,6 +15,8 @@ interface SmartTransactionResult {
 }
 
 export default function useTransactions() {
+    console.log('🔄 [useTransactions] Initializing hook')
+
     const {
         data: id,
         writeContractsAsync,
@@ -28,9 +30,7 @@ export default function useTransactions() {
         },
     })
     const { data: hash, writeContractAsync } = useWriteContract()
-
     const { wallets, ready: walletsReady } = useWallets()
-    const walletType = walletsReady ? wallets[0]?.connectorType : null
 
     const [result, setResult] = useState<SmartTransactionResult>({
         hash: null,
@@ -63,9 +63,11 @@ export default function useTransactions() {
     useEffect(() => {
         if (callsStatus?.status === 'CONFIRMED' && callsStatus.receipts && callsStatus.receipts.length > 0) {
             const paymasterReceipt = callsStatus.receipts[0]
-            console.log('Transaction confirmed. Hash:', paymasterReceipt.transactionHash)
-            console.log('Full receipt:', paymasterReceipt)
-            console.log('Transaction logs:', paymasterReceipt.logs)
+            console.log('✅ [useTransactions] Paymaster transaction confirmed:', {
+                hash: paymasterReceipt.transactionHash,
+                blockNumber: paymasterReceipt.blockNumber,
+                gasUsed: paymasterReceipt.gasUsed.toString(),
+            })
             setResult(prev => ({ ...prev, hash: paymasterReceipt.transactionHash }))
             setIsConfirmed(true)
         }
@@ -91,48 +93,88 @@ export default function useTransactions() {
 
     const executeCoinbaseTransactions = useCallback(
         async (contractCalls: ContractCall[]) => {
-            if (transactionInProgressRef.current) return
-            transactionInProgressRef.current = true
+            console.log('🔄 [useTransactions] Executing Coinbase transaction')
 
-            console.log('Executing smart transactions', contractCalls)
+            if (transactionInProgressRef.current) {
+                console.log('⚠️ [useTransactions] Transaction already in progress')
+                return
+            }
+
             try {
-                await writeContractsAsync(
-                    {
-                        contracts: contractCalls,
-                        capabilities: {
-                            paymasterService: {
-                                url: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL,
-                            },
+                console.log('🔍 [useTransactions] Checking wallet state:', {
+                    walletsReady,
+                    hasWallet: Boolean(wallets[0]),
+                })
+
+                transactionInProgressRef.current = true
+                setResult(prev => ({ ...prev, isLoading: true, isError: false, error: null }))
+
+                if (!walletsReady || !wallets[0]) {
+                    console.error('❌ [useTransactions] Wallet not connected')
+                    throw new Error('Wallet not connected')
+                }
+
+                console.log('📝 [useTransactions] Submitting transaction to Coinbase')
+                await writeContractsAsync({
+                    contracts: contractCalls,
+                    capabilities: {
+                        paymasterService: {
+                            url: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL,
                         },
-                        chainId: base.id,
                     },
-                    {
-                        onSettled(data, error, variables, context) {
-                            console.log('Transaction settled', data, error, variables, context)
-                            transactionInProgressRef.current = false
-                        },
-                    },
-                )
+                    chainId: base.id,
+                })
+                console.log('✅ [useTransactions] Transaction submitted successfully')
             } catch (error) {
-                console.error('Error executing Coinbase transaction:', error)
+                console.error('❌ [useTransactions] Coinbase transaction error:', error)
+                setResult(prev => ({
+                    ...prev,
+                    isError: true,
+                    error: error as Error,
+                }))
+                throw error
+            } finally {
+                console.log('🔄 [useTransactions] Cleaning up transaction state')
                 transactionInProgressRef.current = false
+                setResult(prev => ({ ...prev, isLoading: false }))
             }
         },
-        [writeContractsAsync],
+        [writeContractsAsync, walletsReady, wallets],
     )
 
     const executeEoaTransactions = useCallback(
         async (contractCalls: ContractCall[]) => {
-            if (transactionInProgressRef.current) return
-            transactionInProgressRef.current = true
+            console.log('🔄 [useTransactions] Executing EOA transaction')
 
-            console.log('Executing EOA transactions', contractCalls)
+            if (transactionInProgressRef.current) {
+                console.log('⚠️ [useTransactions] Transaction already in progress')
+                return
+            }
+
             try {
+                transactionInProgressRef.current = true
+                setResult(prev => ({ ...prev, isLoading: true, isError: false, error: null }))
+
+                if (!writeContractAsync) {
+                    console.error('❌ [useTransactions] Contract write not available')
+                    throw new Error('Contract write not available')
+                }
+
+                console.log('📝 [useTransactions] Submitting EOA transaction')
                 await writeContractAsync(contractCalls[0])
+                console.log('✅ [useTransactions] EOA transaction submitted')
             } catch (error) {
-                console.error('Error executing EOA transaction:', error)
+                console.error('❌ [useTransactions] EOA transaction error:', error)
+                setResult(prev => ({
+                    ...prev,
+                    isError: true,
+                    error: error as Error,
+                }))
+                throw error
             } finally {
+                console.log('🔄 [useTransactions] Cleaning up transaction state')
                 transactionInProgressRef.current = false
+                setResult(prev => ({ ...prev, isLoading: false }))
             }
         },
         [writeContractAsync],
@@ -140,16 +182,31 @@ export default function useTransactions() {
 
     const executeTransactions = useCallback(
         async (contractCalls: ContractCall[]) => {
-            console.log('Executing transactions', contractCalls)
-            if (walletType === 'coinbase_wallet') {
-                console.log('Coinbase wallet detected', wallets[0].connectorType)
-                await executeCoinbaseTransactions(contractCalls)
-            } else {
-                console.log('Non-Coinbase wallet detected')
-                await executeEoaTransactions(contractCalls)
+            console.log('🔄 [useTransactions] Execute transactions initiated', {
+                walletsReady,
+                walletType: wallets[0]?.connectorType,
+            })
+
+            try {
+                if (!walletsReady) {
+                    console.error('❌ [useTransactions] Wallets not ready')
+                    throw new Error('Wallets not ready')
+                }
+
+                const walletType = wallets[0]?.connectorType
+                console.log('🔍 [useTransactions] Using wallet type:', walletType)
+
+                if (walletType === 'coinbase_wallet') {
+                    await executeCoinbaseTransactions(contractCalls)
+                } else {
+                    await executeEoaTransactions(contractCalls)
+                }
+            } catch (error) {
+                console.error('❌ [useTransactions] Transaction execution failed:', error)
+                throw error
             }
         },
-        [walletType, wallets, executeCoinbaseTransactions, executeEoaTransactions],
+        [walletsReady, wallets, executeCoinbaseTransactions, executeEoaTransactions],
     )
 
     return {

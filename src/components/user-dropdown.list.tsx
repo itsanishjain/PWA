@@ -7,10 +7,7 @@ import { toast } from 'sonner'
 import UserDropdownItem from './user-dropdown.item'
 import type { DropdownItemConfig } from './user-dropdown.list.config'
 import { dropdownItemsConfig } from './user-dropdown.list.config'
-import { MoonpayConfig, useFundWallet } from '@privy-io/react-auth'
-import { useAccount } from 'wagmi'
 import { useAuth } from '@/app/_client/hooks/use-auth'
-import { useRouter } from 'next/navigation'
 import { useOnRamp } from '@/app/_client/hooks/use-onramp'
 
 /**
@@ -34,8 +31,6 @@ const itemVariants: Variants = {
 
 const UserDropdownList: React.FC<{ setOpen: (open: boolean) => void }> = ({ setOpen }): JSX.Element => {
     const { logout } = useAuth()
-    const { fundWallet } = useFundWallet()
-    const { address } = useAccount()
     const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
     const dropdownListRef = useRef<HTMLDivElement | null>(null)
     const { handleOnRamp } = useOnRamp()

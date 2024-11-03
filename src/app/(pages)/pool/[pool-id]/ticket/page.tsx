@@ -1,15 +1,19 @@
 'use client'
 
-import { useWallets } from '@privy-io/react-auth'
 import QRCode from 'react-qr-code'
-import type { Address } from 'viem'
 import { usePoolDetails } from './_components/use-pool-details'
-import { useAccount } from 'wagmi'
 import PageWrapper from '@/components/page-wrapper'
+import { useUserInfo } from '@/hooks/use-user-info'
 
 const TicketPage = ({ params: { 'pool-id': poolId } }: { params: { 'pool-id': string } }) => {
     const { poolDetails } = usePoolDetails(poolId)
-    const { address } = useAccount() as { address: Address }
+    const { data: user } = useUserInfo()
+    const address = user?.address
+
+    if (!address) {
+        window.history.back()
+        return null
+    }
 
     const hasJoined = poolDetails?.poolDetailFromSC?.[5]?.includes(address) ?? false
     return (

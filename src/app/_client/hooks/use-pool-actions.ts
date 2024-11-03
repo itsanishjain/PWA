@@ -19,6 +19,8 @@ export function usePoolActions(
     openOnRampDialog: () => void,
     onSuccessfulJoin: () => void,
 ) {
+    console.log('🔄 [usePoolActions] Initializing with poolId:', poolId)
+
     const { login, authenticated } = useAuth()
     const { executeTransactions, isReady, resetConfirmation, result } = useTransactions()
     const { wallets } = useWallets()
@@ -29,7 +31,7 @@ export function usePoolActions(
         args: [(wallets[0]?.address as Address) || '0x'],
         query: {
             enabled: Boolean(wallets[0]?.address),
-            refetchInterval: 20_000, // 10 seconds
+            refetchInterval: 5_000,
         },
     })
 
@@ -41,9 +43,18 @@ export function usePoolActions(
         hash: result.hash as Hash | undefined,
     })
 
+    useEffect(() => {
+        console.log('📝 [usePoolActions] Transaction receipt updated:', receipt)
+    }, [receipt])
+
+    useEffect(() => {
+        console.log('🔄 [usePoolActions] Transaction status:', { isConfirming, isConfirmed })
+    }, [isConfirming, isConfirmed])
+
     const [isCancelled, setIsCancelled] = useState(false)
 
     const handleEnableDeposits = () => {
+        console.log('🔓 [usePoolActions] Enabling deposits for pool:', poolId)
         toast('Enabling deposits...')
 
         void executeTransactions([
@@ -57,6 +68,7 @@ export function usePoolActions(
     }
 
     const handleStartPool = () => {
+        console.log('▶️ [usePoolActions] Starting pool:', poolId)
         toast('Starting pool...')
 
         void executeTransactions([
@@ -70,6 +82,7 @@ export function usePoolActions(
     }
 
     const handleEndPool = () => {
+        console.log('⏹️ [usePoolActions] Ending pool:', poolId)
         toast('Ending pool...')
 
         void executeTransactions([
@@ -84,8 +97,9 @@ export function usePoolActions(
 
     useEffect(() => {
         if (result.error) {
-            // Check if the error is due to user rejection
+            console.log('❌ [usePoolActions] Transaction error:', result.error)
             if (result.error.message.includes('user rejected transaction')) {
+                console.log('🚫 [usePoolActions] User rejected transaction')
                 setIsCancelled(true)
             }
         } else {
@@ -93,64 +107,70 @@ export function usePoolActions(
         }
     }, [result.error])
 
-    const handleJoinPool = () => {
-        console.log('Join pool button clicked')
+    const handleJoinPool = async () => {
+        console.log('🎯 [usePoolActions] Join pool button clicked')
 
         if (!isReady) {
-            console.log('[use-pool-actions] Wallet not ready')
+            console.log('⚠️ [usePoolActions] Wallet not ready')
             return
         }
 
         if (isReady && !authenticated) {
-            console.log('Login first')
+            console.log('🔑 [usePoolActions] Not authenticated, initiating login')
             login()
+            return
         }
 
-        if (isReady && authenticated) {
-            console.log('Checking funds...')
+        if (!wallets[0]?.address) {
+            console.error('❌ [usePoolActions] No wallet address available')
+            return
+        }
 
-            const bigIntPrice = parseUnits(poolPrice.toString(), tokenDecimals)
-            console.log('Big int price:', bigIntPrice.toString())
+        console.log('💰 [usePoolActions] Checking funds...')
+        const bigIntPrice = parseUnits(poolPrice.toString(), tokenDecimals)
+        console.log('💵 [usePoolActions] Required amount:', bigIntPrice.toString())
+        console.log('💵 [usePoolActions] User balance:', userBalance?.toString())
 
-            if (balanceError) {
-                console.error('Error reading balance', balanceError)
-                return
-            }
+        if (balanceError) {
+            console.error('❌ [usePoolActions] Balance check error:', balanceError)
+            return
+        }
 
-            console.log('User balance number:', Number(userBalance || 0))
-            console.log('Big int price:', bigIntPrice.toString())
-            console.log('Is onramp needed?', Number(userBalance || 0) < bigIntPrice)
+        if (Number(userBalance || 0) < bigIntPrice) {
+            console.log('⚠️ [usePoolActions] Insufficient funds')
+            toast('Insufficient funds, please top up your account.')
+            openOnRampDialog()
+            return
+        }
 
-            if (Number(userBalance || 0) < bigIntPrice) {
-                console.log('Onramp funds if needed')
-                toast('Insufficient funds, please top up your account.')
-                openOnRampDialog() // Call the openOnRampDialog function
-                return
-            }
-
-            console.log('Join pool')
+        try {
+            console.log('🚀 [usePoolActions] Join pool')
             toast('Joining pool...')
 
-            void executeTransactions([
+            const transactions = [
                 ...(bigIntPrice > 0 ? [approve({ spender: currentPoolAddress, amount: bigIntPrice.toString() })] : []),
                 deposit({ poolId, amount: bigIntPrice.toString() }),
-            ])
-                .then(() => {
-                    onSuccessfulJoin()
-                })
-                .catch(error => {
-                    console.error('Transaction failed:', error)
-                    // You might want to handle other types of errors here
-                })
+            ]
+            console.log('📝 [usePoolActions] Transaction payload:', transactions)
+
+            await executeTransactions(transactions)
+
+            console.log('⏳ [usePoolActions] Waiting before calling onSuccessfulJoin')
+            setTimeout(() => {
+                console.log('✅ [usePoolActions] Calling onSuccessfulJoin')
+                onSuccessfulJoin()
+            }, 1000)
+        } catch (error) {
+            console.error('❌ [usePoolActions] Transaction failed:', error)
+            toast.error('Failed to join pool. Please try again.')
         }
     }
 
     const resetJoinPoolProcess = () => {
+        console.log('🔄 [usePoolActions] Resetting join pool process')
         resetConfirmation()
         setIsCancelled(false)
     }
-
-    const ready = isReady
 
     return {
         handleEnableDeposits,
@@ -158,7 +178,7 @@ export function usePoolActions(
         handleEndPool,
         handleJoinPool,
         resetJoinPoolProcess,
-        ready,
+        ready: isReady,
         isPending: result.isLoading,
         isConfirmed,
         resetConfirmation,

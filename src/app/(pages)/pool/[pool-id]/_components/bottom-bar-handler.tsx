@@ -9,12 +9,13 @@ import { POOLSTATUS } from '@/app/(pages)/pool/[pool-id]/_lib/definitions'
 import { usePoolActions } from '@/app/_client/hooks/use-pool-actions'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import { useAccount, useReadContract } from 'wagmi'
+import { useReadContract } from 'wagmi'
 import { getAbiItem } from 'viem'
 import { currentPoolAddress } from '@/app/_server/blockchain/server-config'
 import HybridRegistration from './terms-acceptance-dialog'
 import { addParticipantToPool } from '../../new/actions'
 import { useOnRamp } from '@/app/_client/hooks/use-onramp'
+import { useUserInfo } from '@/hooks/use-user-info'
 
 type ButtonConfig = {
     label: string
@@ -47,14 +48,18 @@ export default function BottomBarHandler({
     requiredAcceptance,
     termsUrl,
 }: BottomBarHandlerProps) {
+    console.log('🔄 [BottomBarHandler] Rendering with:', { poolId, poolStatus, isAdmin })
+
     const [isLoading, setIsLoading] = useState(false)
     const [transactionProcessed, setTransactionProcessed] = useState(false)
+    const [localIsParticipant, setLocalIsParticipant] = useState(false)
     const updateBottomBarContentRef = useRef<NodeJS.Timeout | null>(null)
     const router = useRouter()
     const setBottomBarContent = useAppStore(state => state.setBottomBarContent)
     const setTransactionInProgress = useAppStore(state => state.setTransactionInProgress)
 
-    const { address } = useAccount() as { address: Address | undefined }
+    const { data: user } = useUserInfo()
+    const address = user?.address
 
     const { data: isParticipant, isLoading: isParticipantLoading } = useReadContract({
         abi: [
@@ -68,8 +73,16 @@ export default function BottomBarHandler({
         args: [address || '0x', BigInt(poolId)],
         query: {
             enabled: Boolean(address && poolId),
+            refetchInterval: 5_000,
         },
     })
+
+    useEffect(() => {
+        console.log('👤 [BottomBarHandler] Participant status:', { isParticipant, isParticipantLoading })
+        if (isParticipant !== undefined) {
+            setLocalIsParticipant(isParticipant)
+        }
+    }, [isParticipant, isParticipantLoading])
 
     const { handleOnRamp } = useOnRamp()
 
@@ -133,13 +146,13 @@ export default function BottomBarHandler({
             },
             [POOLSTATUS.DEPOSIT_ENABLED]: {
                 admin: { label: 'Start Pool', action: handleStartPool },
-                user: isParticipant
+                user: localIsParticipant
                     ? { label: 'View My Ticket', action: handleViewTicket }
                     : { label: `Register for ${poolPrice} ${poolTokenSymbol}`, action: handleJoinPoolWithTerms },
             },
             [POOLSTATUS.STARTED]: {
                 admin: { label: 'End pool', action: handleEndPool },
-                user: isParticipant ? { label: 'View My Ticket', action: handleViewTicket } : null,
+                user: localIsParticipant ? { label: 'View My Ticket', action: handleViewTicket } : null,
             },
             [POOLSTATUS.ENDED]: {
                 admin: null,
@@ -157,7 +170,7 @@ export default function BottomBarHandler({
             handleStartPool,
             handleJoinPool,
             handleEndPool,
-            isParticipant,
+            localIsParticipant,
             handleViewTicket,
             handleJoinPoolWithTerms,
         ],
@@ -190,15 +203,25 @@ export default function BottomBarHandler({
     )
 
     const updateBottomBarContent = useCallback(() => {
+        console.log('🔄 [BottomBarHandler] Updating bottom bar content:', {
+            isParticipantLoading,
+            isParticipant,
+            isAdmin,
+            poolStatus,
+        })
+
         let content: React.ReactNode = null
 
         if (isParticipantLoading) {
+            console.log('⏳ [BottomBarHandler] Loading participant status')
             content = <Button disabled>Loading...</Button>
         } else if (isParticipant && !isAdmin && poolStatus !== POOLSTATUS.ENDED) {
+            console.log('🎫 [BottomBarHandler] Showing view ticket button')
             content = renderButton({ label: 'View My Ticket', action: handleViewTicket }, 'view-ticket')
         } else {
             const statusConfig = buttonConfig[poolStatus]
             const role = isAdmin ? 'admin' : 'user'
+            console.log('🔍 [BottomBarHandler] Determining button config:', { role, poolStatus })
             const config = statusConfig[role]
 
             if (config && (!isParticipant || isAdmin)) {
@@ -206,6 +229,7 @@ export default function BottomBarHandler({
             }
         }
 
+        console.log('✅ [BottomBarHandler] Setting bottom bar content')
         setBottomBarContent(content)
     }, [
         isParticipant,
@@ -219,6 +243,11 @@ export default function BottomBarHandler({
     ])
 
     useEffect(() => {
+        console.log('🔄 [BottomBarHandler] Transaction status effect:', {
+            ready,
+            isParticipantLoading,
+            transactionProcessed,
+        })
         if (ready && !isParticipantLoading && !transactionProcessed) {
             if (updateBottomBarContentRef.current) {
                 clearTimeout(updateBottomBarContentRef.current)
@@ -237,6 +266,10 @@ export default function BottomBarHandler({
     }, [ready, isParticipantLoading, updateBottomBarContent, setBottomBarContent, transactionProcessed])
 
     useEffect(() => {
+        console.log('✨ [BottomBarHandler] Confirmation status:', {
+            isConfirmed,
+            transactionProcessed,
+        })
         if (isConfirmed && !transactionProcessed) {
             router.refresh()
             updateBottomBarContent()

@@ -3,7 +3,6 @@
 import { Avatar, AvatarImage } from '@/app/_components/ui/avatar'
 import { ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useAccount } from 'wagmi'
 import { Skeleton } from '@/app/_components/ui/skeleton'
 import { blo } from 'blo'
 import { useUserInfo } from '@/hooks/use-user-info'
