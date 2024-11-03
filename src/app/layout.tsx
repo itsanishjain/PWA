@@ -14,9 +14,9 @@ export default function RootLayout({ children, bottombar, modal, transactionprog
     const wagmiCookie = headers().get('cookie')
 
     return (
-        <html lang='en'>
+        <html lang='en' className={inter.variable}>
             <head />
-            <body className={`${inter.variable} flex min-h-dvh flex-col`}>
+            <body className='flex min-h-dvh flex-col antialiased'>
                 <Providers cookie={wagmiCookie}>
                     <MainWrapper>{children}</MainWrapper>
                     {modal}
