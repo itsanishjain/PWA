@@ -4,7 +4,7 @@ import type { Hash, TransactionReceipt } from 'viem'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { useCallsStatus, useWriteContracts } from 'wagmi/experimental'
 import { ContractCall } from '@/app/_lib/entities/models/contract-call'
-import { base } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 
 interface SmartTransactionResult {
     hash: Hash | null
