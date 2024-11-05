@@ -12,6 +12,7 @@ import Text from '@/app/_components/forms-controls/text.control'
 import AvatarUploader from './avatar-uploader'
 import { validateProfileAction } from '../actions'
 import { useQueryClient } from '@tanstack/react-query'
+import { usePrivy } from '@privy-io/react-auth'
 
 const formFields = [
     {
@@ -49,40 +50,47 @@ interface ProfilePageProps {
 export default function ProfileForm({ userInfo }: ProfilePageProps) {
     const queryClient = useQueryClient()
     const router = useRouter()
-    const { setBottomBarContent } = useAppStore(s => ({
+    const { user, ready } = usePrivy()
+
+    const { setBottomBarContent, isRouting } = useAppStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
+        isRouting: s.isRouting,
     }))
     const [avatarChanged, setAvatarChanged] = useState(false)
 
     const [state, formAction] = useFormState(validateProfileAction, initialState)
 
-    useLayoutEffect(() => {
-        setBottomBarContent(
-            <Button
-                type='submit'
-                form='profile-form'
-                className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
-                Save
-            </Button>,
-        )
+    useEffect(() => {
+        if (!isRouting) {
+            setBottomBarContent(
+                <Button
+                    type='submit'
+                    form='profile-form'
+                    className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
+                    Save
+                </Button>,
+            )
+        }
 
         return () => {
             setBottomBarContent(null)
         }
-    }, [setBottomBarContent])
+    }, [setBottomBarContent, isRouting])
 
     useEffect(() => {
         if (state?.message) {
             toast(state.message)
         }
-
+        if (!ready || user?.id == null) {
+            return
+        }
         if (state?.message === 'Profile updated successfully') {
             queryClient.invalidateQueries({
-                queryKey: ['userInfo'],
+                queryKey: ['user-info', user.id],
             })
             router.back()
         }
-    }, [state?.message, router])
+    }, [state?.message, router, ready])
 
     const handleChange = (value: string) => {
         if (value === 'avatar') {

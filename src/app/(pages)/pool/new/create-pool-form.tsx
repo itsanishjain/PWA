@@ -25,9 +25,10 @@ export default function CreatePoolForm() {
         poolUpdated,
         hasAttemptedChainCreation,
     } = useCreatePool()
-    const { setBottomBarContent, setTransactionInProgress } = useAppStore(s => ({
+    const { setBottomBarContent, setTransactionInProgress, isRouting } = useAppStore(s => ({
         setBottomBarContent: s.setBottomBarContent,
         setTransactionInProgress: s.setTransactionInProgress,
+        isRouting: s.isRouting,
     }))
     const hasCreatedPool = useRef(false)
 
@@ -76,26 +77,26 @@ export default function CreatePoolForm() {
 
     useEffect(() => {
         console.log('Effect: Setting up bottom bar content')
-        // TODO: Set top bar title: Create Pool
-        setBottomBarContent(
-            <Button
-                type='submit'
-                form='pool-form'
-                disabled={isButtonDisabled}
-                className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
-                {isProcessing ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : null}
-                {isProcessing
-                    ? isPending
-                        ? 'Creating in DB...'
-                        : isConfirming
-                          ? 'Confirming on-chain...'
-                          : 'Processing...'
-                    : hasErrors
-                      ? 'Fix form errors'
-                      : 'Create Pool'}
-            </Button>,
-        )
-
+        if (!isRouting) {
+            setBottomBarContent(
+                <Button
+                    type='submit'
+                    form='pool-form'
+                    disabled={isButtonDisabled}
+                    className='mb-3 h-[46px] w-full rounded-[2rem] bg-cta px-6 py-[11px] text-center text-base font-semibold leading-normal text-white shadow-button active:shadow-button-push'>
+                    {isProcessing ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : null}
+                    {isProcessing
+                        ? isPending
+                            ? 'Creating in DB...'
+                            : isConfirming
+                              ? 'Confirming on-chain...'
+                              : 'Processing...'
+                        : hasErrors
+                          ? 'Fix form errors'
+                          : 'Create Pool'}
+                </Button>,
+            )
+        }
         setTransactionInProgress(isPending || isConfirming)
 
         return () => {
@@ -109,6 +110,7 @@ export default function CreatePoolForm() {
         isButtonDisabled,
         isProcessing,
         hasErrors,
+        isRouting,
     ])
 
     useEffect(() => {

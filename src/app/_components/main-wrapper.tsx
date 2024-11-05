@@ -23,12 +23,14 @@ const ClientFrozenRouter = dynamic(() => Promise.resolve(FrozenRouter), {
 
 export default function MainWrapper({ children }: { children: React.ReactNode }) {
     const router = useRouter()
-    const { isBottomBarVisible } = useAppStore(state => ({
+    const { isBottomBarVisible, isRouting, setIsRouting } = useAppStore(state => ({
         isBottomBarVisible: Boolean(state.bottomBarContent),
+        setIsRouting: state.setIsRouting,
+        isRouting: state.isRouting,
     }))
 
     const pathname = usePathname()
-    const [isRouting, setIsRouting] = useState(false)
+
     const [currentPath, setCurrentPath] = useState(pathname)
 
     useEffect(() => {
@@ -36,7 +38,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
             setIsRouting(true)
             setCurrentPath(pathname)
         }
-    }, [pathname, currentPath, isRouting])
+    }, [pathname, currentPath, isRouting, setIsRouting])
 
     const handleDragEnd = (_event: any, info: any) => {
         if (info.offset.x > 100) {
@@ -55,7 +57,12 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
                 'pb-safe-offset',
                 isBottomBarVisible ? 'mb-safe-or-24' : 'mb-safe',
             )}>
-            <AnimatePresence mode='popLayout' initial={false} onExitComplete={() => setIsRouting(false)}>
+            <AnimatePresence
+                mode='popLayout'
+                initial={false}
+                onExitComplete={() => {
+                    setIsRouting(false)
+                }}>
                 <motion.div
                     key={currentPath}
                     className='flex flex-1 flex-col pt-safe'
