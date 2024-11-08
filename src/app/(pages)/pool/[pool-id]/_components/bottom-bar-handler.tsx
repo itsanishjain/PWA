@@ -48,7 +48,7 @@ export default function BottomBarHandler({
     requiredAcceptance,
     termsUrl,
 }: BottomBarHandlerProps) {
-    console.log('🔄 [BottomBarHandler] Rendering with:', { poolId, poolStatus, isAdmin })
+    // console.log('🔄 [BottomBarHandler] Rendering with:', { poolId, poolStatus, isAdmin })
 
     const [isLoading, setIsLoading] = useState(false)
     const [transactionProcessed, setTransactionProcessed] = useState(false)
@@ -102,7 +102,7 @@ export default function BottomBarHandler({
         resetConfirmation,
         isCancelled,
     } = usePoolActions(poolId, poolPrice, tokenDecimals, handleOnRampClick, async () => {
-        console.log('🎯 [BottomBarHandler] Executing onSuccessfulJoin callback')
+        // console.log('🎯 [BottomBarHandler] Executing onSuccessfulJoin callback')
         try {
             if (address === undefined) {
                 console.error('❌ [BottomBarHandler] User address not found')
@@ -208,13 +208,13 @@ export default function BottomBarHandler({
     )
 
     const updateBottomBarContent = useCallback(() => {
-        console.log('🔄 [BottomBarHandler] Updating bottom bar content:', {
-            isParticipantLoading,
-            isParticipant,
-            localIsParticipant,
-            isAdmin,
-            poolStatus,
-        })
+        // console.log('🔄 [BottomBarHandler] Updating bottom bar content:', {
+        //     isParticipantLoading,
+        //     isParticipant,
+        //     localIsParticipant,
+        //     isAdmin,
+        //     poolStatus,
+        // })
 
         let content: React.ReactNode = null
 
@@ -227,7 +227,7 @@ export default function BottomBarHandler({
         } else {
             const statusConfig = buttonConfig[poolStatus]
             const role = isAdmin ? 'admin' : 'user'
-            console.log('🔍 [BottomBarHandler] Determining button config:', { role, poolStatus })
+            // console.log('🔍 [BottomBarHandler] Determining button config:', { role, poolStatus })
             const config = statusConfig[role]
 
             if (config && (!isParticipant || isAdmin)) {
@@ -235,7 +235,7 @@ export default function BottomBarHandler({
             }
         }
 
-        console.log('✅ [BottomBarHandler] Setting bottom bar content:', content)
+        // console.log('✅ [BottomBarHandler] Setting bottom bar content:', content)
         if (!isRouting) {
             setBottomBarContent(content)
         }
@@ -262,10 +262,10 @@ export default function BottomBarHandler({
     }, [isParticipant, isParticipantLoading])
 
     useEffect(() => {
-        console.log('✨ [BottomBarHandler] Confirmation status:', {
-            isConfirmed,
-            transactionProcessed,
-        })
+        // console.log('✨ [BottomBarHandler] Confirmation status:', {
+        //     isConfirmed,
+        //     transactionProcessed,
+        // })
         if (isConfirmed && !transactionProcessed) {
             console.log('🔄 [BottomBarHandler] Processing confirmed transaction')
             setIsLoading(false)
@@ -278,11 +278,11 @@ export default function BottomBarHandler({
     }, [isConfirmed, transactionProcessed, router, resetConfirmation, refetchParticipantStatus, updateBottomBarContent])
 
     useEffect(() => {
-        console.log('🔄 [BottomBarHandler] Transaction status effect:', {
-            ready,
-            isParticipantLoading,
-            transactionProcessed,
-        })
+        // console.log('🔄 [BottomBarHandler] Transaction status effect:', {
+        //     ready,
+        //     isParticipantLoading,
+        //     transactionProcessed,
+        // })
         if (ready && !isParticipantLoading && !transactionProcessed) {
             if (updateBottomBarContentRef.current) {
                 clearTimeout(updateBottomBarContentRef.current)

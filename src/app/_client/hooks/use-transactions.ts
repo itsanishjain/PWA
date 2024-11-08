@@ -4,7 +4,6 @@ import type { Hash, TransactionReceipt } from 'viem'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { useCallsStatus, useWriteContracts } from 'wagmi/experimental'
 import { ContractCall } from '@/app/_lib/entities/models/contract-call'
-import { base, baseSepolia } from 'viem/chains'
 
 interface SmartTransactionResult {
     hash: Hash | null
@@ -14,8 +13,21 @@ interface SmartTransactionResult {
     error: Error | null
 }
 
+interface TransactionConfig {
+    type: 'JOIN_POOL' | 'ENABLE_DEPOSITS' | 'START_POOL' | 'END_POOL'
+    onSuccess?: () => void
+}
+
 export default function useTransactions() {
-    console.log('🔄 [useTransactions] Initializing hook')
+    const transactionInProgressRef = useRef(false)
+    const [isInitialized, setIsInitialized] = useState(false)
+
+    useEffect(() => {
+        if (!isInitialized) {
+            console.log('🔄 [useTransactions] Initializing hook')
+            setIsInitialized(true)
+        }
+    }, [isInitialized])
 
     const {
         data: id,
@@ -58,8 +70,6 @@ export default function useTransactions() {
 
     const [isConfirmed, setIsConfirmed] = useState(false)
 
-    const transactionInProgressRef = useRef(false)
-
     useEffect(() => {
         if (callsStatus?.status === 'CONFIRMED' && callsStatus.receipts && callsStatus.receipts.length > 0) {
             const paymasterReceipt = callsStatus.receipts[0]
@@ -95,11 +105,6 @@ export default function useTransactions() {
         async (contractCalls: ContractCall[]) => {
             console.log('🔄 [useTransactions] Executing Coinbase transaction with calls:', contractCalls)
 
-            if (transactionInProgressRef.current) {
-                console.log('⚠️ [useTransactions] Transaction already in progress')
-                return
-            }
-
             try {
                 console.log('🔍 [useTransactions] Checking wallet state:', {
                     walletsReady,
@@ -107,7 +112,6 @@ export default function useTransactions() {
                     walletAddress: wallets[0]?.address,
                 })
 
-                transactionInProgressRef.current = true
                 setResult(prev => ({ ...prev, isLoading: true, isError: false, error: null }))
 
                 if (!walletsReady || !wallets[0]) {
@@ -117,7 +121,6 @@ export default function useTransactions() {
 
                 console.log('📝 [useTransactions] Submitting transaction to Coinbase with payload:', {
                     contracts: contractCalls,
-                    chainId: base.id,
                     paymasterUrl: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL,
                 })
 
@@ -128,7 +131,6 @@ export default function useTransactions() {
                             url: process.env.NEXT_PUBLIC_COINBASE_PAYMASTER_URL,
                         },
                     },
-                    chainId: base.id,
                 })
                 console.log('✅ [useTransactions] Coinbase transaction response:', response)
                 setResult(prev => ({ ...prev, hash: response as `0x${string}` }))
@@ -142,63 +144,60 @@ export default function useTransactions() {
                 throw error
             } finally {
                 console.log('🔄 [useTransactions] Cleaning up Coinbase transaction state')
-                transactionInProgressRef.current = false
                 setResult(prev => ({ ...prev, isLoading: false }))
             }
         },
         [writeContractsAsync, walletsReady, wallets],
     )
 
-    const executeEoaTransactions = useCallback(
-        async (contractCalls: ContractCall[]) => {
-            console.log('🔄 [useTransactions] Executing EOA transaction')
+    const executeEoaTransactions = async (contractCalls: ContractCall[]) => {
+        console.log('🔄 [useTransactions] Executing EOA transaction')
 
-            if (transactionInProgressRef.current) {
-                console.log('⚠️ [useTransactions] Transaction already in progress')
-                return
-            }
+        try {
+            setResult(prev => ({ ...prev, isLoading: true, isError: false, error: null }))
 
-            try {
-                transactionInProgressRef.current = true
-                setResult(prev => ({ ...prev, isLoading: true, isError: false, error: null }))
+            console.log('📝 [useTransactions] Submitting EOA transaction')
+            const result = await writeContractAsync(contractCalls[0])
+            console.log('✅ [useTransactions] EOA transaction submitted', result)
+        } catch (error) {
+            console.error('❌ [useTransactions] EOA transaction error:', error)
+            setResult(prev => ({
+                ...prev,
+                isError: true,
+                error: error as Error,
+            }))
+            throw error
+        }
+    }
 
-                if (!writeContractAsync) {
-                    console.error('❌ [useTransactions] Contract write not available')
-                    throw new Error('Contract write not available')
-                }
-
-                console.log('📝 [useTransactions] Submitting EOA transaction')
-                await writeContractAsync(contractCalls[0])
-                console.log('✅ [useTransactions] EOA transaction submitted')
-            } catch (error) {
-                console.error('❌ [useTransactions] EOA transaction error:', error)
-                setResult(prev => ({
-                    ...prev,
-                    isError: true,
-                    error: error as Error,
-                }))
-                throw error
-            } finally {
-                console.log('🔄 [useTransactions] Cleaning up transaction state')
-                transactionInProgressRef.current = false
-                setResult(prev => ({ ...prev, isLoading: false }))
-            }
-        },
-        [writeContractAsync],
-    )
+    const [currentTransaction, setCurrentTransaction] = useState<TransactionConfig | null>(null)
 
     const executeTransactions = useCallback(
-        async (contractCalls: ContractCall[]) => {
-            console.log('🔄 [useTransactions] Execute transactions initiated', {
+        async (contractCalls: ContractCall[], config: TransactionConfig) => {
+            console.log('🔄 [useTransactions] Executing transactions:', {
+                calls: contractCalls,
+                type: config.type,
                 walletsReady,
+                walletConnected: Boolean(wallets[0]),
                 walletType: wallets[0]?.connectorType,
             })
 
+            if (transactionInProgressRef.current) {
+                console.log('⚠️ [useTransactions] Transaction already in progress, skipping')
+                return
+            }
+
+            if (!walletsReady || !wallets[0]) {
+                console.error('❌ [useTransactions] Wallet not ready or not connected')
+                throw new Error('Wallet not ready or not connected')
+            }
+
             try {
-                if (!walletsReady) {
-                    console.error('❌ [useTransactions] Wallets not ready')
-                    throw new Error('Wallets not ready')
-                }
+                setCurrentTransaction(config)
+                transactionInProgressRef.current = true
+
+                // Esperar un momento para asegurar que el conector esté listo
+                await new Promise(resolve => setTimeout(resolve, 500))
 
                 const walletType = wallets[0]?.connectorType
                 console.log('🔍 [useTransactions] Using wallet type:', walletType)
@@ -211,6 +210,8 @@ export default function useTransactions() {
             } catch (error) {
                 console.error('❌ [useTransactions] Transaction execution failed:', error)
                 throw error
+            } finally {
+                transactionInProgressRef.current = false
             }
         },
         [walletsReady, wallets, executeCoinbaseTransactions, executeEoaTransactions],
@@ -227,6 +228,7 @@ export default function useTransactions() {
             receipt,
             isConfirming,
             callsStatus,
+            transactionType: currentTransaction?.type,
         },
     }
 }

@@ -4,13 +4,14 @@ import useTransactions from '@/app/_client/hooks/use-transactions'
 import { poolAbi, tokenAbi } from '@/types/contracts'
 import { useWallets } from '@privy-io/react-auth'
 import type { Address, Hash } from 'viem'
-import { parseUnits } from 'viem'
+import { getAbiItem, parseUnits } from 'viem'
 import { toast } from 'sonner'
 import { approve } from '@/app/_lib/blockchain/functions/token/approve'
 import { deposit } from '@/app/_lib/blockchain/functions/pool/deposit'
 import { useReadContract } from 'wagmi'
 import { useWaitForTransactionReceipt } from 'wagmi'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export function usePoolActions(
     poolId: string,
@@ -19,7 +20,7 @@ export function usePoolActions(
     openOnRampDialog: () => void,
     onSuccessfulJoin: () => void,
 ) {
-    console.log('🔄 [usePoolActions] Initializing with poolId:', poolId)
+    // console.log('🔄 [usePoolActions] Initializing with poolId:', poolId)
 
     const { login, authenticated } = useAuth()
     const { executeTransactions, isReady, resetConfirmation, result } = useTransactions()
@@ -53,46 +54,87 @@ export function usePoolActions(
 
     const [isCancelled, setIsCancelled] = useState(false)
 
+    const router = useRouter()
+
     const handleEnableDeposits = () => {
         console.log('🔓 [usePoolActions] Enabling deposits for pool:', poolId)
         toast('Enabling deposits...')
 
-        void executeTransactions([
+        executeTransactions(
+            [
+                {
+                    address: currentPoolAddress,
+                    abi: poolAbi,
+                    functionName: 'enableDeposit',
+                    args: [BigInt(poolId)],
+                },
+            ],
             {
-                address: currentPoolAddress,
-                abi: poolAbi,
-                functionName: 'enableDeposit',
-                args: [poolId],
+                type: 'ENABLE_DEPOSITS',
+                onSuccess: () => {
+                    toast.success('Deposits enabled successfully!')
+                    router.refresh()
+                },
             },
-        ])
+        )
     }
 
     const handleStartPool = () => {
         console.log('▶️ [usePoolActions] Starting pool:', poolId)
         toast('Starting pool...')
 
-        void executeTransactions([
+        executeTransactions(
+            [
+                {
+                    address: currentPoolAddress,
+                    abi: poolAbi,
+                    functionName: 'startPool',
+                    args: [poolId],
+                },
+            ],
             {
-                address: currentPoolAddress,
-                abi: poolAbi,
-                functionName: 'startPool',
-                args: [poolId],
+                type: 'START_POOL',
+                onSuccess: () => {
+                    toast.success('Pool started successfully!')
+                    router.refresh()
+                },
             },
-        ])
+        )
     }
 
     const handleEndPool = () => {
-        console.log('⏹️ [usePoolActions] Ending pool:', poolId)
+        console.log('⏹️ [usePoolActions] Ending pool:', {
+            poolId,
+            isReady,
+            authenticated,
+            walletConnected: Boolean(wallets[0]),
+        })
+
+        if (!isReady || !authenticated || !wallets[0]) {
+            console.error('❌ [usePoolActions] Wallet not ready or not authenticated')
+            toast.error('Please ensure your wallet is connected')
+            return
+        }
+
         toast('Ending pool...')
 
-        void executeTransactions([
+        executeTransactions(
+            [
+                {
+                    address: currentPoolAddress,
+                    abi: poolAbi,
+                    functionName: 'endPool',
+                    args: [BigInt(poolId)],
+                },
+            ],
             {
-                address: currentPoolAddress,
-                abi: poolAbi,
-                functionName: 'endPool',
-                args: [poolId],
+                type: 'END_POOL',
+                onSuccess: () => {
+                    toast.success('Pool ended successfully!')
+                    router.refresh()
+                },
             },
-        ])
+        )
     }
 
     useEffect(() => {
@@ -153,7 +195,10 @@ export function usePoolActions(
             ]
             console.log('📝 [usePoolActions] Transaction payload:', transactions)
 
-            await executeTransactions(transactions)
+            await executeTransactions(transactions, {
+                type: 'JOIN_POOL',
+                onSuccess: onSuccessfulJoin,
+            })
 
             if (result.hash) {
                 console.log('⏳ [usePoolActions] Transaction submitted, waiting for confirmation')
@@ -166,12 +211,19 @@ export function usePoolActions(
     }
 
     useEffect(() => {
-        if (isConfirmed) {
-            console.log('✅ [usePoolActions] Transaction confirmed, calling onSuccessfulJoin')
-            toast.success('Successfully joined pool!')
-            onSuccessfulJoin()
+        if (isConfirmed && result.transactionType) {
+            console.log('✅ [usePoolActions] Transaction confirmed:', result.transactionType)
+
+            if (result.transactionType === 'JOIN_POOL') {
+                console.log('🎯 [usePoolActions] Join pool confirmed, calling onSuccessfulJoin')
+                toast.success('Successfully joined pool!')
+                onSuccessfulJoin()
+            }
+
+            // Handle other transaction types if needed
+            router.refresh()
         }
-    }, [isConfirmed, onSuccessfulJoin])
+    }, [isConfirmed, result.transactionType, onSuccessfulJoin, router])
 
     const resetJoinPoolProcess = () => {
         console.log('🔄 [usePoolActions] Resetting join pool process')
