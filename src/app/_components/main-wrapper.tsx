@@ -33,12 +33,14 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
 
     const [currentPath, setCurrentPath] = useState(pathname)
 
+    const [isTransitioning, setIsTransitioning] = useState(false)
+
     useEffect(() => {
-        if (pathname !== currentPath && !isRouting) {
+        if (pathname !== currentPath && !isRouting && !isTransitioning) {
             setIsRouting(true)
             setCurrentPath(pathname)
         }
-    }, [pathname, currentPath, isRouting, setIsRouting])
+    }, [pathname, currentPath, isRouting, setIsRouting, isTransitioning])
 
     const handleDragEnd = (_event: any, info: any) => {
         if (info.offset.x > 100) {
@@ -62,6 +64,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
                 initial={false}
                 onExitComplete={() => {
                     setIsRouting(false)
+                    setIsTransitioning(false)
                 }}>
                 <motion.div
                     key={currentPath}
@@ -70,6 +73,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
                     dragConstraints={pathname === '/profile' ? { left: 0, right: 0 } : undefined}
                     dragElastic={0.2}
                     onDragEnd={pathname === '/profile' ? handleDragEnd : undefined}
+                    onAnimationStart={() => setIsTransitioning(true)}
                     variants={pageTransition.variants}
                     initial='initial'
                     animate='animate'
