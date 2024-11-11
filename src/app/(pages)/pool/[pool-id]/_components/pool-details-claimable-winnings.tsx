@@ -45,9 +45,13 @@ export default function PoolDetailsClaimableWinnings({
         ]
 
         try {
-            await executeTransactions(args)
-            toast.success('Successfully claimed winnings')
-            startConfetti()
+            await executeTransactions(args, {
+                type: 'CLAIM_WINNING',
+                onSuccess: () => {
+                    toast.success('Successfully claimed winnings')
+                    startConfetti()
+                },
+            })
         } catch (error) {
             console.log('claimWinning Error', error)
             toast.error('Failed to claim winnings')

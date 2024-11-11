@@ -14,7 +14,7 @@ interface SmartTransactionResult {
 }
 
 interface TransactionConfig {
-    type: 'JOIN_POOL' | 'ENABLE_DEPOSITS' | 'START_POOL' | 'END_POOL'
+    type: 'JOIN_POOL' | 'ENABLE_DEPOSITS' | 'START_POOL' | 'END_POOL' | 'CLAIM_WINNING'
     onSuccess?: () => void
 }
 
